@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnLoop – Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<button class="hamburger" aria-label="Menu">☰</button>
+
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span>🎓</span> LearnLoop</div>
+    <nav>
+      <a href="index.html" class="active"><span class="icon">🏠</span> Dashboard</a>
+      <a href="tracker.html"><span class="icon">⏱️</span> Study Tracker</a>
+      <a href="goals.html"><span class="icon">🎯</span> Goals</a>
+      <a href="analytics.html"><span class="icon">📊</span> Analytics</a>
+      <a href="focus-room.html"><span class="icon">🧑‍🤝‍🧑</span> Focus Rooms</a>
+      <a href="profile.html"><span class="icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-header flex-between">
+      <div>
+        <h1 id="greeting">Good morning! 👋</h1>
+        <p class="text-muted">Here's your study overview for today.</p>
+      </div>
+      <a href="tracker.html" class="btn btn-primary">▶ Start Studying</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-value" id="stat-today">0h</div>
+        <div class="stat-label">Today's Study Time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="stat-week">0h</div>
+        <div class="stat-label">This Week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value" id="stat-streak">0</div>
+        <div class="stat-label">Day Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value" id="stat-goals">0</div>
+        <div class="stat-label">Active Goals</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Recent Sessions -->
+      <div class="card">
+        <div class="flex-between mb-2">
+          <div class="card-title">Recent Sessions</div>
+          <a href="tracker.html" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div id="recent-sessions">
+          <p class="text-muted text-center" style="padding:20px 0;">No sessions yet. Start studying!</p>
+        </div>
+      </div>
+
+      <!-- Active Goals -->
+      <div class="card">
+        <div class="flex-between mb-2">
+          <div class="card-title">Active Goals</div>
+          <a href="goals.html" class="btn btn-sm btn-secondary">Manage</a>
+        </div>
+        <div id="active-goals-list">
+          <p class="text-muted text-center" style="padding:20px 0;">No goals set yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streak Calendar -->
+    <div class="card mt-3">
+      <div class="card-title">Study Streak – Last 14 Days</div>
+      <div class="streak-row" id="streak-calendar"></div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mt-3">
+      <div class="card-title">Quick Actions</div>
+      <div class="flex gap-3 mt-1" style="flex-wrap:wrap;">
+        <a href="tracker.html" class="btn btn-primary">⏱️ Start Timer</a>
+        <a href="goals.html" class="btn btn-secondary">🎯 Add Goal</a>
+        <a href="focus-room.html" class="btn btn-secondary">🧑‍🤝‍🧑 Join Focus Room</a>
+        <a href="analytics.html" class="btn btn-secondary">📊 View Analytics</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  const user = await requireAuth();
+
+  // Greeting
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  document.getElementById("greeting").textContent = `${greet}, ${user.displayName || "Learner"}! 👋`;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const allSessions = await db.collection("sessions").where("userId","==",user.uid).get();
+  let todayMins = 0, weekMins = 0;
+  allSessions.forEach(d => {
+    const s = d.data();
+    const dt = new Date(s.startTime || 0);
+    if (dt >= today) todayMins += (s.duration || 0);
+    if (dt >= weekAgo) weekMins += (s.duration || 0);
+  });
+  document.getElementById("stat-today").textContent = formatDuration(todayMins);
+  document.getElementById("stat-week").textContent = formatDuration(weekMins);
+
+  // Recent sessions (last 5)
+  const recentEl = document.getElementById("recent-sessions");
+  const recentDocs = allSessions.docs.slice(0, 5);
+  if (recentDocs.length > 0) {
+    recentEl.innerHTML = recentDocs.map(d => {
+      const s = d.data();
+      return `
+        <div class="list-item">
+          <div class="list-item-icon">📚</div>
+          <div class="list-item-body">
+            <div class="list-item-title">${s.subject || "General"}</div>
+            <div class="list-item-sub">${formatDate(s.startTime)} · ${formatDuration(s.duration || 0)}</div>
+          </div>
+          <span class="badge badge-primary">${formatDuration(s.duration || 0)}</span>
+        </div>`;
+    }).join("");
+  }
+
+  // Active goals
+  const goalsSnap = await db.collection("goals").where("userId","==",user.uid).where("status","==","active").get();
+  document.getElementById("stat-goals").textContent = goalsSnap.size;
+  const goalsEl = document.getElementById("active-goals-list");
+  const goalDocs = goalsSnap.docs.slice(0, 4);
+  if (goalDocs.length > 0) {
+    goalsEl.innerHTML = goalDocs.map(d => {
+      const g = d.data();
+      const pct = Math.min(100, Math.round(((g.currentHours||0) / (g.targetHours||1)) * 100));
+      return `
+        <div style="margin-bottom:14px;">
+          <div class="flex-between">
+            <span style="font-weight:600;font-size:.9rem;">${g.title}</span>
+            <span class="text-muted" style="font-size:.8rem;">${pct}%</span>
+          </div>
+          <div class="progress-bar mt-1">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="text-muted mt-1" style="font-size:.78rem;">Deadline: ${g.deadline || "—"}</div>
+        </div>`;
+    }).join("");
+  }
+
+  // Streak
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  const userData = userDoc.data() || {};
+  document.getElementById("stat-streak").textContent = userData.streak || 0;
+
+  // Streak calendar (last 14 days)
+  const calEl = document.getElementById("streak-calendar");
+  const studyDays = new Set();
+  allSessions.forEach(d => {
+    const dt = new Date(d.data().startTime || 0);
+    studyDays.add(dt.toDateString());
+  });
+  const days = ["S","M","T","W","T","F","S"];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const isActive = studyDays.has(d.toDateString());
+    calEl.innerHTML += `
+      <div class="streak-day ${isActive ? "active" : ""} ${i === 0 ? "today" : ""}" title="${d.toDateString()}">
+        ${days[d.getDay()]}
+      </div>`;
+  }
+})();
+</script>
+</body>
+</html>

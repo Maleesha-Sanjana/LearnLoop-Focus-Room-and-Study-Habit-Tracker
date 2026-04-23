@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnLoop – Profile</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<button class="hamburger">☰</button>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span>🎓</span> LearnLoop</div>
+    <nav>
+      <a href="index.html"><span class="icon">🏠</span> Dashboard</a>
+      <a href="tracker.html"><span class="icon">⏱️</span> Study Tracker</a>
+      <a href="goals.html"><span class="icon">🎯</span> Goals</a>
+      <a href="analytics.html"><span class="icon">📊</span> Analytics</a>
+      <a href="focus-room.html"><span class="icon">🧑‍🤝‍🧑</span> Focus Rooms</a>
+      <a href="profile.html" class="active"><span class="icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-footer"><button onclick="logout()">🚪 Logout</button></div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>👤 Profile</h1>
+      <p class="text-muted">Manage your account and study preferences.</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Profile Card -->
+      <div class="card">
+        <div style="text-align:center;margin-bottom:20px;">
+          <div id="profile-avatar" style="width:80px;height:80px;border-radius:50%;background:var(--primary);
+            display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;
+            color:#fff;margin:0 auto 12px;">?</div>
+          <div id="profile-name" style="font-size:1.3rem;font-weight:700;">Loading…</div>
+          <div id="profile-email" class="text-muted" style="font-size:.9rem;"></div>
+          <span id="profile-goal-badge" class="badge badge-primary mt-1"></span>
+        </div>
+
+        <form onsubmit="updateProfile(event)">
+          <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" id="edit-name" placeholder="Your name" required />
+          </div>
+          <div class="form-group">
+            <label>Study Goal</label>
+            <select id="edit-goal">
+              <option value="school">School Student</option>
+              <option value="university">University Student</option>
+              <option value="self">Self-Learner</option>
+              <option value="exam">Competitive Exam</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Daily Study Target (hours)</label>
+            <input type="number" id="edit-target" min="0.5" max="16" step="0.5" placeholder="e.g. 4" />
+          </div>
+          <button type="submit" class="btn btn-primary w-full">💾 Save Changes</button>
+        </form>
+      </div>
+
+      <!-- Stats Summary -->
+      <div>
+        <div class="card mb-2">
+          <div class="card-title">All-Time Stats</div>
+          <div class="stats-grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+            <div class="stat-card">
+              <div class="stat-icon">⏱️</div>
+              <div class="stat-value" id="p-total">0h</div>
+              <div class="stat-label">Total Studied</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-value" id="p-streak">0</div>
+              <div class="stat-label">Current Streak</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📋</div>
+              <div class="stat-value" id="p-sessions">0</div>
+              <div class="stat-label">Sessions</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🎯</div>
+              <div class="stat-value" id="p-goals">0</div>
+              <div class="stat-label">Goals Done</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="card">
+          <div class="card-title">Security</div>
+          <form onsubmit="changePassword(event)" class="mt-2">
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="new-password" placeholder="Min 6 characters" minlength="6" required />
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <input type="password" id="confirm-password" placeholder="Repeat password" required />
+            </div>
+            <button type="submit" class="btn btn-secondary w-full">🔒 Update Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card mt-3" style="border-color:var(--danger);">
+      <div class="card-title" style="color:var(--danger);">Danger Zone</div>
+      <p class="text-muted mt-1" style="font-size:.9rem;">These actions are irreversible. Please be careful.</p>
+      <div class="flex gap-2 mt-2">
+        <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑 Clear All Study Data</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAccount()">❌ Delete Account</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>
