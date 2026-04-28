@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LearnLoop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#111;-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+
+    /* NAVBAR */
+    .navbar{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border:1px solid #e8e8e8;border-radius:999px;padding:10px 20px;display:flex;align-items:center;gap:28px;box-shadow:0 4px 20px rgba(0,0,0,.08);white-space:nowrap}
+    .nav-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.95rem;letter-spacing:-.02em}
+    .nav-brand .icon{width:28px;height:28px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff}
+    .nav-links{display:flex;gap:4px}
+    .nav-links a{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s}
+    .nav-links a:hover{color:#111;background:#f5f5f5}
+    .nav-actions{display:flex;gap:8px;align-items:center}
+    .btn-ghost{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s}
+    .btn-ghost:hover{color:#111;background:#f5f5f5}
+    .btn-solid{padding:8px 18px;border-radius:999px;background:#111;color:#fff;font-size:.88rem;font-weight:600;transition:.15s}
+    .btn-solid:hover{background:#333}
+
+    /* SECTION 1 - HERO */
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px}
+    .hero-img{width:72px;height:72px;border-radius:18px;overflow:hidden;margin-bottom:28px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+    .hero h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:900;letter-spacing:-.04em;line-height:1.08;max-width:700px;margin-bottom:20px}
+    .hero p{font-size:1rem;color:#888;max-width:420px;line-height:1.6;margin-bottom:32px}
+    .hero-btns{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+    .btn-hero-solid{padding:13px 28px;border-radius:999px;background:#111;color:#fff;font-size:.95rem;font-weight:700;transition:.15s}
+    .btn-hero-solid:hover{background:#333;transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+    .btn-hero-outline{padding:12px 24px;border-radius:999px;border:1.5px solid #d0d0d0;color:#111;font-size:.95rem;font-weight:600;display:flex;align-items:center;gap:6px;transition:.15s}
+    .btn-hero-outline:hover{border-color:#111;background:#f5f5f5}
+    .trust-row{display:flex;flex-direction:column;align-items:center;gap:14px}
+    .trust-label{font-size:.82rem;color:#aaa;font-weight:500}
+    .trust-logos{display:flex;gap:28px;align-items:center;flex-wrap:wrap;justify-content:center}
+    .trust-logos span{font-size:.88rem;color:#bbb;font-weight:600;letter-spacing:.02em}
+
+    /* SECTION 2 - APP PREVIEW */
+    .preview-section{background:#f5f5f5;padding:80px 24px;display:flex;justify-content:center}
+    .preview-wrap{width:100%;max-width:900px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.1);border:1px solid #e8e8e8}
+    .preview-wrap img{width:100%;height:auto;object-fit:cover;display:block}
+
+    /* SECTION 3 - STATS */
+    .stats-section{padding:100px 24px;text-align:center;position:relative;overflow:hidden}
+    .stats-eyebrow{font-size:.9rem;color:#888;font-weight:500;margin-bottom:16px}
+    .stats-big{font-size:clamp(2.4rem,5vw,4.2rem);font-weight:900;letter-spacing:-.04em;line-height:1.15;color:#111}
+    .stats-big span{display:block}
+    .floating-icons{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+    .fi{position:absolute;font-size:2.2rem;opacity:.18;animation:float 6s ease-in-out infinite}
+    .fi-1{top:15%;left:8%;animation-delay:0s}
+    .fi-2{top:20%;right:10%;animation-delay:1s}
+    .fi-3{top:55%;left:5%;animation-delay:2s}
+    .fi-4{bottom:20%;right:8%;animation-delay:.5s}
+    .fi-5{bottom:15%;left:15%;animation-delay:1.5s}
+    .fi-6{top:40%;right:5%;animation-delay:2.5s}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+    /* SECTION 4 - FLOWS */
+    .flows-section{padding:80px 24px;max-width:1100px;margin:0 auto}
+    .section-title{font-size:clamp(2rem,4vw,3rem);font-weight:900;letter-spacing:-.04em;line-height:1.1;text-align:center;margin-bottom:56px}
+    .flows-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .flow-card{border-radius:20px;overflow:hidden;background:#f5f5f5;aspect-ratio:4/3;position:relative}
+    .flow-card img{width:100%;height:100%;object-fit:cover}
+    .flow-card.large{grid-column:span 2;aspect-ratio:16/7}
+
+    /* SECTION 5 - FEATURES */
+    .features-section{padding:80px 24px;max-width:1100px;margin:0 auto}
+    .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .feat-card{background:#f5f5f5;border-radius:20px;overflow:hidden;border:1px solid #e8e8e8}
+    .feat-img{aspect-ratio:4/3;overflow:hidden}
+    .feat-img img{width:100%;height:100%;object-fit:cover}
+    .feat-body{padding:20px}
+    .feat-body h3{font-size:1rem;font-weight:700;margin-bottom:6px}
+    .feat-body p{font-size:.85rem;color:#888;line-height:1.55}
+
+    /* SECTION 6 - TESTIMONIALS */
+    .testimonials-section{padding:80px 24px;max-width:1100px;margin:0 auto}
+    .tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .tcard{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px}
+    .tcard-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .tcard-av{width:36px;height:36px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+    .tcard-name{font-size:.88rem;font-weight:700}
+    .tcard-role{font-size:.75rem;color:#888}
+    .tcard p{font-size:.83rem;color:#444;line-height:1.6}
+
+    /* SECTION 7 - CTA */
+    .cta-section{padding:100px 24px;text-align:center}
+    .cta-section h2{font-size:clamp(2.4rem,5vw,4rem);font-weight:900;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px}
+    .cta-section p{font-size:.95rem;color:#888;margin-bottom:32px}
+    .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+    /* SECTION 8 - MARQUEE */
+    .marquee-wrap{background:#f5f5f5;padding:28px 0;overflow:hidden;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8}
+    .marquee-track{display:flex;gap:0;animation:marquee 28s linear infinite;width:max-content}
+    .marquee-item{display:flex;align-items:center;gap:10px;padding:0 28px;font-size:.9rem;font-weight:600;color:#555;white-space:nowrap}
+    .marquee-item img{width:28px;height:28px;border-radius:7px;object-fit:cover;flex-shrink:0}
+    @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* SECTION 9 - EXTRA PREVIEW */
+    .extra-section{padding:80px 24px;max-width:1100px;margin:0 auto}
+    .extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .extra-card{border-radius:20px;overflow:hidden;background:#f5f5f5;aspect-ratio:4/3}
+    .extra-card img{width:100%;height:100%;object-fit:cover}
+
+    /* SECTION 10 - FOOTER */
+    footer{background:#111;color:#fff;padding:60px 24px 32px}
+    .footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:48px;margin-bottom:48px}
+    .footer-brand .logo{font-size:1.4rem;font-weight:900;letter-spacing:-.03em;margin-bottom:10px}
+    .footer-brand p{font-size:.85rem;color:#888;line-height:1.6}
+    .footer-links{display:flex;gap:48px}
+    .footer-col h5{font-size:.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+    .footer-col a{display:block;font-size:.88rem;color:#aaa;margin-bottom:8px;transition:.15s}
+    .footer-col a:hover{color:#fff}
+    .footer-bottom{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid #222;font-size:.8rem;color:#555}
+    .footer-bottom a{color:#555;margin-left:20px;transition:.15s}
+    .footer-bottom a:hover{color:#fff}
+
+    @media(max-width:900px){
+      .navbar{min-width:unset;width:calc(100% - 32px);gap:12px}
+      .nav-links{display:none}
+      .flows-grid,.extra-grid{grid-template-columns:1fr}
+      .flow-card.large{grid-column:span 1;aspect-ratio:4/3}
+      .features-grid{grid-template-columns:1fr}
+      .tgrid{grid-template-columns:1fr 1fr}
+      .footer-inner{grid-template-columns:1fr}
+      .footer-links{flex-wrap:wrap;gap:24px}
+    }
+    @media(max-width:600px){
+      .tgrid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <a href="home.html" class="nav-brand">
+    <div class="icon">&#127891;</div>
+    <span>LearnLoop</span>
+  </a>
+  <nav class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#stats">Stats</a>
+    <a href="#reviews">Reviews</a>
+  </nav>
+  <div class="nav-actions">
+    <a href="login.html" class="btn-ghost">Log in</a>
+    <a href="login.html" class="btn-solid">Join for free</a>
+  </div>
+</header>
+
+<!-- SECTION 1: HERO -->
+<section class="hero" id="hero">
+  <div class="hero-img">
+    <img src="images/1.png" alt="LearnLoop App"/>
+  </div>
+  <h1>Study smarter,<br/>achieve more.</h1>
+  <p>Track sessions, set goals, join focus rooms, and build consistent study habits &mdash; all in one place.</p>
+  <div class="hero-btns">
+    <a href="login.html" class="btn-hero-solid">Join for free</a>
+    <a href="#features" class="btn-hero-outline">See features &rarr;</a>
+  </div>
+  <div class="trust-row">
+    <span class="trust-label">Trusted by students at</span>
+    <div class="trust-logos">
+      <span>Harvard</span>
+      <span>MIT</span>
+      <span>Stanford</span>
+      <span>Oxford</span>
+      <span>IIT</span>
+      <span>NUS</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: APP PREVIEW -->
+<section class="preview-section">
+  <div class="preview-wrap">
+    <img src="images/2.png" alt="App Preview"/>
+  </div>
+</section>
+
+<!-- SECTION 3: STATS -->
+<section class="stats-section" id="stats">
+  <div class="floating-icons">
+    <div class="fi fi-1">&#128218;</div>
+    <div class="fi fi-2">&#127919;</div>
+    <div class="fi fi-3">&#9200;</div>
+    <div class="fi fi-4">&#128293;</div>
+    <div class="fi fi-5">&#128202;</div>
+    <div class="fi fi-6">&#129309;</div>
+  </div>
+  <p class="stats-eyebrow">A growing community of</p>
+  <div class="stats-big">
+    <span>12,400 students</span>
+    <span>890,000 study sessions</span>
+    <span>34,000 goals completed</span>
+  </div>
+</section>
+
+<!-- SECTION 4: FLOWS -->
+<section class="flows-section" id="features">
+  <h2 class="section-title">Explore entire study<br/>journeys with flows.</h2>
+  <div class="flows-grid">
+    <div class="flow-card large">
+      <img src="images/4.png" alt="Study Flows"/>
+    </div>
+    <div class="flow-card">
+      <img src="images/3.png" alt="Feature"/>
+    </div>
+    <div class="flow-card">
+      <img src="images/5.png" alt="Feature"/>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: FEATURES GRID -->
+<section class="features-section">
+  <h2 class="section-title">From tracking to insights.</h2>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-img"><img src="images/6.png" alt="Analytics"/></div>
+      <div class="feat-body">
+        <h3>Analytics Dashboard</h3>
+        <p>Visual charts showing daily hours, subject distribution, and weekly trends.</p>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-img"><img src="images/7.png" alt="Goals"/></div>
+      <div class="feat-body">
+        <h3>Goal Tracking</h3>
+        <p>Set daily, weekly, or long-term goals and watch your progress update automatically.</p>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-img"><img src="images/8.png" alt="Focus Rooms"/></div>
+      <div class="feat-body">
+        <h3>Focus Rooms</h3>
+        <p>Study together in real-time virtual rooms with a shared timer and live chat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6: TESTIMONIALS -->
+<section class="testimonials-section" id="reviews">
+  <h2 class="section-title">What our students are saying.</h2>
+  <div class="tgrid">
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av">A</div><div><div class="tcard-name">Aisha Rahman</div><div class="tcard-role">University Student</div></div></div>
+      <p>LearnLoop completely changed how I study. The streak feature keeps me consistent and focus rooms make studying with friends so much easier.</p>
+    </div>
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av" style="background:#6c63ff">M</div><div><div class="tcard-name">Marcus Chen</div><div class="tcard-role">Exam Prep</div></div></div>
+      <p>The analytics are incredible. I can see exactly which subjects I am neglecting and the Pomodoro timer keeps me focused during long sessions.</p>
+    </div>
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av" style="background:#f59e0b">S</div><div><div class="tcard-name">Sofia Patel</div><div class="tcard-role">Self-Learner</div></div></div>
+      <p>I love how everything is in one place. Goals, timer, analytics &mdash; it is the only study app I need. The focus rooms are a game changer.</p>
+    </div>
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av" style="background:#16a34a">J</div><div><div class="tcard-name">James Okafor</div><div class="tcard-role">School Student</div></div></div>
+      <p>Setting daily goals and watching the progress bar fill up is so satisfying. My grades have improved since I started using LearnLoop.</p>
+    </div>
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av" style="background:#e53e3e">L</div><div><div class="tcard-name">Lena Muller</div><div class="tcard-role">University Student</div></div></div>
+      <p>The streak calendar is my favourite feature. Seeing all those active days motivates me to never break the chain. Highly recommend!</p>
+    </div>
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av" style="background:#0891b2">R</div><div><div class="tcard-name">Ravi Kumar</div><div class="tcard-role">IIT Aspirant</div></div></div>
+      <p>LearnLoop is one of those apps I cannot live without. The subject-wise analytics help me balance my preparation perfectly.</p>
+    </div>
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av" style="background:#7c3aed">T</div><div><div class="tcard-name">Tara Nguyen</div><div class="tcard-role">Med Student</div></div></div>
+      <p>I finally deleted that folder of 2,000 unorganized screenshots. LearnLoop keeps everything structured and I have not looked back since.</p>
+    </div>
+    <div class="tcard">
+      <div class="tcard-head"><div class="tcard-av" style="background:#db2777">H</div><div><div class="tcard-name">Hana Yilmaz</div><div class="tcard-role">Design Student</div></div></div>
+      <p>Designing my study schedule around LearnLoop has been a game changer. It is the most intuitive study tracker I have used.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 7: CTA -->
+<section class="cta-section">
+  <h2>Never fall behind<br/>on your studies again.</h2>
+  <p>Use LearnLoop for free as long as you like.</p>
+  <div class="cta-btns">
+    <a href="login.html" class="btn-hero-solid">Join for free</a>
+    <a href="login.html" class="btn-hero-outline">Log in &rarr;</a>
+  </div>
+</section>
+
+<!-- SECTION 8: MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Mathematics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Physics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Programming</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>English</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Chemistry</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Geometry</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>History</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Music Theory</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Economics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Biology</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Statistics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Languages</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Mathematics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Physics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Programming</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>English</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Chemistry</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Geometry</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>History</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Music Theory</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Economics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Biology</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Statistics</span>
+    <span class="marquee-item"><img src="images/9.png" alt=""/>Languages</span>
+  </div>
+</div>
+
+<!-- SECTION 9: EXTRA PREVIEW -->
+<section class="extra-section">
+  <div class="extra-grid">
+    <div class="extra-card"><img src="images/10.png" alt="Extra Preview"/></div>
+    <div class="extra-card"><img src="images/9.png" alt="Extra Preview"/></div>
+  </div>
+</section>
+
+<!-- SECTION 10: FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">&#127891; LearnLoop</div>
+      <p>Study better digital experiences<br/>with LearnLoop.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Explore</h5>
+        <a href="#features">Features</a>
+        <a href="#stats">Stats</a>
+        <a href="login.html">Dashboard</a>
+        <a href="login.html">Focus Rooms</a>
+        <a href="login.html">Analytics</a>
+      </div>
+      <div class="footer-col">
+        <h5>Account</h5>
+        <a href="login.html">Log in</a>
+        <a href="login.html">Sign up</a>
+        <a href="login.html">Profile</a>
+        <a href="login.html">Goals</a>
+      </div>
+      <div class="footer-col">
+        <h5>More</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+        <a href="#">Blog</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; LearnLoop 2024 &ndash; 2026. All rights reserved</span>
+    <div>
+      <a href="#">Privacy policy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
