@@ -5,29 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LearnLoop – Login</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .auth-page {
+      background: #f5f5f5;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-page::before {
+      content: '';
+      position: absolute;
+      top: -120px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(108,99,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .auth-card {
+      position: relative;
+      z-index: 1;
+    }
+    .auth-logo-icon {
+      width: 52px; height: 52px;
+      background: #111;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin: 0 auto 14px;
+    }
+    .auth-logo { font-size: 1.4rem; letter-spacing: -0.04em; }
+    .hint-text {
+      font-size: 0.78rem;
+      color: #aaa;
+      text-align: center;
+      margin-top: -8px;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
 <div class="auth-page">
   <div class="auth-card">
-    <div class="auth-logo">🎓 LearnLoop</div>
+    <div class="auth-logo-icon">🎓</div>
+    <div class="auth-logo">LearnLoop</div>
     <p class="auth-subtitle">Your personalized study companion</p>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</button>
-      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Log in</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Sign up</button>
     </div>
 
     <!-- Login Form -->
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="form-group">
         <label>Email</label>
-        <input type="email" id="login-email" placeholder="you@example.com" value="test@gmail.com" required />
+        <input type="email" id="login-email" placeholder="you@example.com" required />
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="login-password" placeholder="••••••••" value="test123" required />
+        <input type="password" id="login-password" placeholder="••••••••" required />
       </div>
-      <button type="submit" class="btn btn-primary w-full btn-lg">Login</button>
+      <button type="submit" class="btn btn-primary w-full btn-lg" style="border-radius:10px;margin-top:4px;">Log in</button>
     </form>
 
     <!-- Register Form -->
@@ -53,11 +90,11 @@
           <option value="exam">Competitive Exam</option>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary w-full btn-lg">Create Account</button>
+      <button type="submit" class="btn btn-primary w-full btn-lg" style="border-radius:10px;margin-top:4px;">Create Account</button>
     </form>
 
-    <p class="text-center text-muted mt-2" style="font-size:0.85rem;">
-      By continuing you agree to our <a href="#">Terms of Service</a>
+    <p class="text-center text-muted mt-2" style="font-size:0.8rem;">
+      By continuing you agree to our <a href="#" style="color:#111;text-decoration:underline;">Terms of Service</a>
     </p>
   </div>
 </div>
