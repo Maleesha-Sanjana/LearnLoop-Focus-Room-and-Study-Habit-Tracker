@@ -7,8 +7,8 @@ let dailyChart = null;
 let subjectChart = null;
 let trendChart = null;
 
-Chart.defaults.color = "#8888aa";
-Chart.defaults.borderColor = "#2a2a4a";
+Chart.defaults.color = "#888888";
+Chart.defaults.borderColor = "#e8e8e8";
 
 (async () => {
   currentUser = await requireAuth();
@@ -101,9 +101,9 @@ function renderDailyChart(labels, values) {
       datasets: [{
         label: "Hours",
         data: values,
-        backgroundColor: "rgba(108,99,255,0.7)",
-        borderColor: "#6c63ff",
-        borderWidth: 1,
+        backgroundColor: "rgba(17,17,17,0.08)",
+        borderColor: "#111111",
+        borderWidth: 1.5,
         borderRadius: 6
       }]
     },
@@ -155,12 +155,12 @@ function renderTrendChart(labels, values) {
       datasets: [{
         label: "Hours per Week",
         data: values,
-        borderColor: "#43e97b",
-        backgroundColor: "rgba(67,233,123,0.1)",
+        borderColor: "#111111",
+        backgroundColor: "rgba(17,17,17,0.05)",
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: "#43e97b",
-        pointRadius: 5
+        pointBackgroundColor: "#111111",
+        pointRadius: 4
       }]
     },
     options: {
