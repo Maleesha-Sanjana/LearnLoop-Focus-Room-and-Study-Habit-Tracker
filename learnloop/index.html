@@ -116,6 +116,13 @@
     .footer-bottom a{color:#555;margin-left:20px;transition:.15s}
     .footer-bottom a:hover{color:#fff}
 
+
+    /* STICKY FOOTER REVEAL EFFECT */
+    body{display:flex;flex-direction:column}
+    .main-wrap{background:#fff;border-radius:0 0 40px 40px;position:relative;z-index:1;flex-shrink:0}
+    body.dark .main-wrap{background:#0a0a0a}
+    footer{position:sticky;bottom:0;z-index:0}
+
     @media(max-width:900px){
       .navbar{min-width:unset;width:calc(100% - 32px);gap:12px}
       .nav-links{display:none}
@@ -191,6 +198,8 @@
   </style>
 </head>
 <body>
+
+<div class="main-wrap">
 
 <!-- NAVBAR -->
 <header class="navbar">
@@ -379,6 +388,8 @@
     <div class="extra-card"><img src="images/9.png" alt="Extra Preview"/></div>
   </div>
 </section>
+
+</div><!-- /.main-wrap -->
 
 <!-- SECTION 10: FOOTER -->
 <footer>
