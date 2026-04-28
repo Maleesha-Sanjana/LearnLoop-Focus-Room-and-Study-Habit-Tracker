@@ -2,16 +2,20 @@
 // main.js – LearnLoop One-Page Landing Site
 // =============================================
 
-// ── Navbar: shrink on scroll ──
+// ── Navbar: glass effect stays consistent on scroll ──
 const navbar = document.querySelector('.navbar');
 window.addEventListener('scroll', () => {
   const dark = document.body.classList.contains('dark');
   if (window.scrollY > 40) {
-    navbar.style.boxShadow = '0 6px 32px rgba(0,0,0,0.18)';
-    navbar.style.background = dark ? 'rgba(18,18,18,0.98)' : 'rgba(255,255,255,0.98)';
+    navbar.style.boxShadow = dark
+      ? '0 4px 24px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.06)'
+      : '0 4px 24px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.05)';
+    navbar.style.background = dark ? 'rgba(20,20,20,0.80)' : 'rgba(255,255,255,0.85)';
   } else {
-    navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
-    navbar.style.background = dark ? 'rgba(18,18,18,0.92)' : 'rgba(255,255,255,0.92)';
+    navbar.style.boxShadow = dark
+      ? '0 2px 16px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.04)'
+      : '0 2px 16px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.04)';
+    navbar.style.background = dark ? 'rgba(20,20,20,0.65)' : 'rgba(255,255,255,0.75)';
   }
 });
 
