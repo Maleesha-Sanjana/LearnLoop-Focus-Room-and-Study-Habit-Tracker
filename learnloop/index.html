@@ -117,11 +117,12 @@
     .footer-bottom a:hover{color:#fff}
 
 
-    /* STICKY FOOTER REVEAL EFFECT */
-    body{display:flex;flex-direction:column}
-    .main-wrap{background:#fff;border-radius:0 0 40px 40px;position:relative;z-index:1;flex-shrink:0}
+    /* FOOTER REVEAL EFFECT */
+    body{position:relative}
+    footer{position:fixed;bottom:0;left:0;right:0;z-index:0}
+    .main-wrap{background:#fff;border-radius:0 0 48px 48px;position:relative;z-index:1;margin-bottom:0}
     body.dark .main-wrap{background:#0a0a0a}
-    footer{position:sticky;bottom:0;z-index:0}
+    .footer-spacer{height:0}
 
     @media(max-width:900px){
       .navbar{min-width:unset;width:calc(100% - 32px);gap:12px}
@@ -390,6 +391,7 @@
 </section>
 
 </div><!-- /.main-wrap -->
+<div class="footer-spacer" id="footer-spacer"></div>
 
 <!-- SECTION 10: FOOTER -->
 <footer>
