@@ -134,6 +134,68 @@
     @media(max-width:600px){
       .tgrid{grid-template-columns:1fr}
     }
+
+    /* THEME TOGGLE BUTTON */
+    .theme-toggle{width:36px;height:36px;border-radius:50%;border:1.5px solid #e8e8e8;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;flex-shrink:0;color:#888}
+    .theme-toggle:hover{background:#f5f5f5;border-color:#ccc}
+
+    /* DARK MODE */
+    body.dark{background:#0a0a0a;color:#f0f0f0}
+    body.dark .navbar{background:rgba(18,18,18,.92);border-color:#2a2a2a}
+    body.dark .nav-brand{color:#f0f0f0}
+    body.dark .nav-brand .icon{background:#f0f0f0;color:#111}
+    body.dark .nav-links a{color:#888}
+    body.dark .nav-links a:hover{color:#f0f0f0;background:#1e1e1e}
+    body.dark .btn-ghost{color:#888}
+    body.dark .btn-ghost:hover{color:#f0f0f0;background:#1e1e1e}
+    body.dark .btn-solid{background:#f0f0f0;color:#111}
+    body.dark .btn-solid:hover{background:#ccc}
+    body.dark .theme-toggle{border-color:#2a2a2a;color:#888}
+    body.dark .theme-toggle:hover{background:#1e1e1e;border-color:#444}
+
+    body.dark .hero h1{color:#f0f0f0}
+    body.dark .hero p{color:#888}
+    body.dark .btn-hero-solid{background:#f0f0f0;color:#111}
+    body.dark .btn-hero-solid:hover{background:#ccc}
+    body.dark .btn-hero-outline{border-color:#333;color:#f0f0f0}
+    body.dark .btn-hero-outline:hover{border-color:#888;background:#1e1e1e}
+    body.dark .trust-label{color:#555}
+    body.dark .trust-logos span{color:#444}
+
+    body.dark .preview-section{background:#111}
+    body.dark .preview-wrap{background:#1a1a1a;border-color:#2a2a2a;box-shadow:0 8px 40px rgba(0,0,0,.4)}
+
+    body.dark .stats-section{background:#0a0a0a}
+    body.dark .stats-eyebrow{color:#555}
+    body.dark .stats-big{color:#f0f0f0}
+
+    body.dark .flows-section{background:#0a0a0a}
+    body.dark .section-title{color:#f0f0f0}
+    body.dark .flow-card{background:#1a1a1a}
+
+    body.dark .features-section{background:#0a0a0a}
+    body.dark .feat-card{background:#141414;border-color:#2a2a2a}
+    body.dark .feat-body h3{color:#f0f0f0}
+    body.dark .feat-body p{color:#666}
+
+    body.dark .testimonials-section{background:#0a0a0a}
+    body.dark .tcard{background:#141414;border-color:#2a2a2a}
+    body.dark .tcard-name{color:#f0f0f0}
+    body.dark .tcard-role{color:#555}
+    body.dark .tcard p{color:#777}
+
+    body.dark .cta-section{background:#0a0a0a}
+    body.dark .cta-section h2{color:#f0f0f0}
+    body.dark .cta-section p{color:#666}
+
+    body.dark .marquee-wrap{background:#111;border-color:#1e1e1e}
+    body.dark .marquee-item{color:#555}
+
+    body.dark .extra-section{background:#0a0a0a}
+    body.dark .extra-card{background:#1a1a1a}
+
+    body.dark footer{background:#000}
+    body.dark .footer-bottom{border-color:#1a1a1a}
   </style>
 </head>
 <body>
@@ -150,6 +212,7 @@
     <a href="#reviews">Reviews</a>
   </nav>
   <div class="nav-actions">
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle light/dark mode">&#9790;</button>
     <a href="login.html" class="btn-ghost">Log in</a>
     <a href="login.html" class="btn-solid">Join for free</a>
   </div>
@@ -376,5 +439,6 @@
   </div>
 </footer>
 
+<script src="js/main.js"></script>
 </body>
 </html>
