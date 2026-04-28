@@ -5,12 +5,13 @@
 // ── Navbar: shrink on scroll ──
 const navbar = document.querySelector('.navbar');
 window.addEventListener('scroll', () => {
+  const dark = document.body.classList.contains('dark');
   if (window.scrollY > 40) {
-    navbar.style.boxShadow = '0 6px 32px rgba(0,0,0,0.13)';
-    navbar.style.background = 'rgba(255,255,255,0.98)';
+    navbar.style.boxShadow = '0 6px 32px rgba(0,0,0,0.18)';
+    navbar.style.background = dark ? 'rgba(18,18,18,0.98)' : 'rgba(255,255,255,0.98)';
   } else {
     navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)';
-    navbar.style.background = 'rgba(255,255,255,0.92)';
+    navbar.style.background = dark ? 'rgba(18,18,18,0.92)' : 'rgba(255,255,255,0.92)';
   }
 });
 
@@ -151,3 +152,16 @@ themeToggle.addEventListener('click', () => {
 prefersDark.addEventListener('change', (e) => {
   if (!localStorage.getItem('ll_theme')) applyTheme(e.matches);
 });
+
+
+// ── Footer reveal effect: set spacer height ──
+function setFooterSpacer() {
+  const footer = document.querySelector('footer');
+  const spacer = document.getElementById('footer-spacer');
+  if (footer && spacer) {
+    spacer.style.height = footer.offsetHeight + 'px';
+  }
+}
+
+setFooterSpacer();
+window.addEventListener('resize', setFooterSpacer);
