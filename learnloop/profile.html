@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile Settings - LearnLoop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    /* ==========================================================================
+       BASE & INHERITED STYLES (From your LearnLoop Theme)
+       ========================================================================== */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#111;-webkit-font-smoothing:antialiased; min-height: 100vh;}
+    a{text-decoration:none;color:inherit}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+
+    /* NAVBAR */
+    .navbar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(255,255,255,.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.9);border-radius:999px;padding:8px 16px 8px 16px;display:flex;align-items:center;gap:24px;box-shadow:0 2px 16px rgba(0,0,0,.06),0 0 0 0.5px rgba(0,0,0,.04);white-space:nowrap; width: max-content; max-width: calc(100% - 32px);}
+    .nav-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.95rem;letter-spacing:-.02em}
+    .nav-brand .icon{width:28px;height:28px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff}
+    .nav-links{display:flex;gap:4px}
+    .nav-links a{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s}
+    .nav-links a:hover, .nav-links a.active{color:#111;background:#f5f5f5}
+    .nav-actions{display:flex;gap:8px;align-items:center}
+    
+    /* BUTTONS */
+    .btn-ghost{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s; border:none; background:transparent; cursor:pointer; font-family: inherit;}
+    .btn-ghost:hover{color:#111;background:#f5f5f5}
+    .btn-solid{padding:8px 18px;border-radius:999px;background:#111;color:#fff;font-size:.88rem;font-weight:600;transition:.15s; border:none; cursor:pointer; font-family: inherit;}
+    .btn-solid:hover{background:#333}
+    .btn-outline{padding:8px 18px;border-radius:999px;border:1.5px solid #e8e8e8;color:#111;background: transparent; font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:6px;transition:.15s; cursor:pointer;}
+    .btn-outline:hover{border-color:#111;background:#f5f5f5}
+
+    /* THEME TOGGLE */
+    .theme-toggle{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;color:#888;padding:0}
+    .theme-toggle:hover{color:#111;transform:scale(1.15)}
+
+    /* ==========================================================================
+       SETTINGS PAGE SPECIFIC STYLES
+       ========================================================================== */
+    .page-wrapper {
+        padding: 120px 24px 80px; /* Accounts for fixed navbar */
+        min-height: calc(100vh - 100px); /* Keeps footer at bottom */
+    }
+
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .settings-header {
+        margin-bottom: 40px;
+    }
+
+    .settings-header h1 {
+        font-size: clamp(2rem, 4vw, 2.5rem);
+        font-weight: 900;
+        letter-spacing: -.04em;
+        line-height: 1.1;
+        margin-bottom: 8px;
+    }
+
+    .settings-header p {
+        color: #888;
+        font-size: 0.95rem;
+    }
+
+    .settings-card {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,.03);
+    }
+
+    .settings-card-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: -.02em;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e8e8e8;
+    }
+
+    /* Avatar Upload Section */
+    .avatar-upload-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .avatar-preview {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: #f5f5f5;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+        border: 2px solid #e8e8e8;
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-upload-info h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .avatar-upload-info p {
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 12px;
+    }
+    
+    .file-input {
+        display: none;
+    }
+
+    /* Form Styles */
+    .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1.5px solid #e8e8e8;
+        background: #fafafa;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: #111;
+        transition: 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #111;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.05);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 16px;
+    }
+
+    /* Toast Notification */
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #111;
+        color: #fff;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,.2);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 2000;
+    }
+    
+    .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .toast-icon {
+        width: 20px;
+        height: 20px;
+        background: #10b981; /* Green success */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+    }
+
+    /* ==========================================================================
+       FOOTER (From Theme)
+       ========================================================================== */
+    footer{background:#111;color:#fff;padding:60px 24px 32px}
+    .footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:48px;margin-bottom:48px}
+    .footer-brand .logo{font-size:1.4rem;font-weight:900;letter-spacing:-.03em;margin-bottom:10px}
+    .footer-brand p{font-size:.85rem;color:#888;line-height:1.6}
+    .footer-links{display:flex;gap:48px}
+    .footer-col h5{font-size:.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+    .footer-col a{display:block;font-size:.88rem;color:#aaa;margin-bottom:8px;transition:.15s}
+    .footer-col a:hover{color:#fff}
+    .footer-bottom{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid #222;font-size:.8rem;color:#555}
+    .footer-bottom a{color:#555;margin-left:20px;transition:.15s}
+    .footer-bottom a:hover{color:#fff}
+
+    body{position:relative}
+    footer{position:fixed;bottom:0;left:0;right:0;z-index:0}
+    .main-wrap{background:#fff;border-radius:0 0 48px 48px;position:relative;z-index:1;margin-bottom:0;box-shadow: 0 10px 40px rgba(0,0,0,0.1);}
+    
+    /* Spacer to push footer down correctly */
+    .footer-spacer{height:350px;} 
+
+    /* ==========================================================================
+       RESPONSIVE
+       ========================================================================== */
+    @media(max-width:900px){
+      .nav-links{display:none}
+      .footer-inner{grid-template-columns:1fr}
+      .footer-links{flex-wrap:wrap;gap:24px}
+    }
+    @media(max-width:600px){
+      .form-row { flex-direction: column; gap: 20px; }
+      .settings-card { padding: 24px 16px; }
+      .avatar-upload-wrapper { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .footer-spacer{height:600px;} /* Taller on mobile for stacked footer */
+    }
+
+    /* ==========================================================================
+       DARK MODE
+       ========================================================================== */
+    body.dark{background:#0a0a0a;color:#f0f0f0}
+    body.dark .main-wrap{background:#0a0a0a; box-shadow: 0 10px 40px rgba(0,0,0,0.8);}
+    body.dark .navbar{background:rgba(20,20,20,.65);border-color:rgba(255,255,255,.08);box-shadow:0 2px 16px rgba(0,0,0,.3),0 0 0 0.5px rgba(255,255,255,.04)}
+    body.dark .nav-brand{color:#f0f0f0}
+    body.dark .nav-brand .icon{background:#f0f0f0;color:#111}
+    body.dark .nav-links a{color:#888}
+    body.dark .nav-links a:hover, body.dark .nav-links a.active{color:#f0f0f0;background:#1e1e1e}
+    body.dark .btn-ghost{color:#888}
+    body.dark .btn-ghost:hover{color:#f0f0f0;background:#1e1e1e}
+    body.dark .btn-solid{background:#f0f0f0;color:#111}
+    body.dark .btn-solid:hover{background:#ccc}
+    body.dark .btn-outline{border-color:#333;color:#f0f0f0}
+    body.dark .btn-outline:hover{border-color:#888;background:#1e1e1e}
+    body.dark .theme-toggle{color:#888}
+    body.dark .theme-toggle:hover{color:#f0f0f0}
+
+    body.dark .settings-card {background: #141414; border-color: #2a2a2a;}
+    body.dark .settings-card-title {border-color: #2a2a2a;}
+    body.dark .avatar-preview {border-color: #2a2a2a; background: #1a1a1a;}
+    body.dark .form-group label {color: #aaa;}
+    body.dark .form-control {background: #1a1a1a; border-color: #2a2a2a; color: #f0f0f0;}
+    body.dark .form-control:focus {border-color: #888; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);}
+    
+    body.dark footer{background:#000}
+    body.dark .footer-bottom{border-color:#1a1a1a}
+  </style>
+</head>
+<body>
+
+<div class="main-wrap">
+
+  <!-- NAVBAR (Logged-in state) -->
+  <header class="navbar">
+    <a href="#" class="nav-brand">
+      <div class="icon">&#127891;</div>
+      <span>LearnLoop</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#">Dashboard</a>
+      <a href="#">Focus Rooms</a>
+      <a href="#" class="active">Settings</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <!-- Replaced Join/Login with User actions -->
+      <a href="#" class="btn-ghost" style="display: flex; align-items: center; gap: 8px;">
+        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=f5f5f5" style="width: 20px; height: 20px; border-radius: 50%;" alt="Avatar"/>
+        Profile
+      </a>
+      <a href="#" class="btn-outline" style="padding: 6px 14px; font-size: 0.8rem;">Log out</a>
+    </div>
+  </header>
+
+  <!-- SETTINGS CONTENT -->
+  <main class="page-wrapper">
+    <div class="settings-container">
+      
+      <div class="settings-header">
+        <h1>Profile Settings</h1>
+        <p>Manage your account details, profile picture, and security preferences.</p>
+      </div>
+
+      <!-- CARD 1: PROFILE / NAME & PICTURE -->
+      <div class="settings-card">
+        <h2 class="settings-card-title">Personal Information</h2>
+        
+        <!-- Avatar Upload -->
+        <div class="avatar-upload-wrapper">
+          <div class="avatar-preview">
+            <img id="profile-img-preview" src="https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=f5f5f5" alt="Profile Picture">
+          </div>
+          <div class="avatar-upload-info">
+            <h3>Profile Picture</h3>
+            <p>JPG, GIF or PNG. Max size of 5MB.</p>
+            <div style="display: flex; gap: 10px;">
+              <!-- Label acts as a button for the hidden file input -->
+              <label for="avatar-upload" class="btn-solid" style="display: inline-block; cursor: pointer; padding: 8px 16px; font-size: 0.85rem;">
+                Upload New
+              </label>
+              <input type="file" id="avatar-upload" class="file-input" accept="image/png, image/jpeg, image/gif">
+              <button type="button" class="btn-ghost" id="remove-avatar-btn">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Name Change Form -->
+        <form id="profile-form" class="settings-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" class="form-control" value="Aisha" required>
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" class="form-control" value="Rahman" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" class="form-control" value="aisha.rahman@example.com" disabled title="Contact support to change email">
+            <small style="color:#888; font-size:0.75rem; margin-top:4px;">Email cannot be changed directly. Contact support.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Short Bio</label>
+            <textarea id="bio" class="form-control" rows="3" placeholder="Tell us a bit about yourself...">Computer Science student passionate about UI/UX and web development.</textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-solid">Save Profile Changes</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- CARD 2: SECURITY / PASSWORD -->
+      <div class="settings-card">
+        <h2 class="settings-card-title">Security & Password</h2>
+        
+        <form id="password-form" class="settings-form">
+          <div class="form-group">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" class="form-control" placeholder="Enter current password" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="new-password">New Password</label>
+              <input type="password" id="new-password" class="form-control" placeholder="Must be at least 8 characters" minlength="8" required>
+            </div>
+            <div class="form-group">
+              <label for="confirm-password">Confirm New Password</label>
+              <input type="password" id="confirm-password" class="form-control" placeholder="Repeat new password" minlength="8" required>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-solid">Update Password</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+</div><!-- /.main-wrap -->
+
+<!-- Invisible spacer to manage the fixed footer reveal -->
+<div class="footer-spacer"></div>
+
+<!-- SECTION: FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">&#127891; LearnLoop</div>
+      <p>Study better digital experiences<br/>with LearnLoop.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Explore</h5>
+        <a href="#">Features</a>
+        <a href="#">Stats</a>
+        <a href="#">Dashboard</a>
+        <a href="#">Focus Rooms</a>
+        <a href="#">Analytics</a>
+      </div>
+      <div class="footer-col">
+        <h5>Account</h5>
+        <a href="#">Log in</a>
+        <a href="#">Sign up</a>
+        <a href="#">Profile</a>
+        <a href="#">Goals</a>
+      </div>
+      <div class="footer-col">
+        <h5>More</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+        <a href="#">Blog</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; LearnLoop 2024 &ndash; 2026. All rights reserved</span>
+    <div>
+      <a href="#">Privacy policy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Toast Message Container -->
+<div class="toast" id="toastBox">
+  <div class="toast-icon">&#10003;</div>
+  <span id="toastMessage">Changes saved successfully!</span>
+</div>
+
+<script>
+  // --- Dark Mode Toggle ---
+  const themeToggle = document.getElementById('theme-toggle');
+  
+  // Check system preference or localStorage to set initial state (Optional enhancement)
+  // For now, simple toggle logic.
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+  });
+
+  // --- Avatar Upload Preview Logic ---
+  const fileInput = document.getElementById('avatar-upload');
+  const previewImg = document.getElementById('profile-img-preview');
+  const removeBtn = document.getElementById('remove-avatar-btn');
+  const defaultAvatar = "https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=f5f5f5";
+
+  fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      // Create a temporary URL to show the selected image
+      const objectUrl = URL.createObjectURL(file);
+      previewImg.src = objectUrl;
+    }
+  });
+
+  removeBtn.addEventListener('click', () => {
+    previewImg.src = defaultAvatar;
+    fileInput.value = ''; // Clear the input
+  });
+
+  // --- Form Submission & Toast Notifications ---
+  const profileForm = document.getElementById('profile-form');
+  const passwordForm = document.getElementById('password-form');
+  const toastBox = document.getElementById('toastBox');
+  const toastMessage = document.getElementById('toastMessage');
+  let toastTimeout;
+
+  function showToast(message) {
+    toastMessage.textContent = message;
+    toastBox.classList.add('show');
+    
+    // Reset timeout if called rapidly
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      toastBox.classList.remove('show');
+    }, 3000);
+  }
+
+  profileForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Simulate API Call
+    showToast("Profile details updated successfully.");
+  });
+
+  passwordForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newPass = document.getElementById('new-password').value;
+    const confPass = document.getElementById('confirm-password').value;
+
+    if (newPass !== confPass) {
+      // Change toast to error style briefly (inline hack for demo)
+      document.querySelector('.toast-icon').innerHTML = '&#33;';
+      document.querySelector('.toast-icon').style.background = '#e53e3e';
+      showToast("New passwords do not match.");
+      
+      // Reset icon back to success after toast hides
+      setTimeout(() => {
+        document.querySelector('.toast-icon').innerHTML = '&#10003;';
+        document.querySelector('.toast-icon').style.background = '#10b981';
+      }, 3500);
+      return;
+    }
+
+    // Simulate API Call
+    showToast("Password changed successfully.");
+    passwordForm.reset();
+  });
+</script>
+</body>
+</html>
