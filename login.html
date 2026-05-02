@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join LearnLoop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Shared Styles from main template */
+        :root { --bg: #ffffff; --text: #111; --border: #e8e8e8; --muted: #888; --accent: #111; }
+        body.dark { --bg: #0a0a0a; --text: #f0f0f0; --border: #2a2a2a; --muted: #666; --accent: #f0f0f0; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: background 0.3s; }
+
+        .auth-container { width: 100%; max-width: 400px; padding: 40px 24px; text-align: center; }
+        .logo { font-size: 1.5rem; font-weight: 900; margin-bottom: 32px; display: block; text-decoration: none; color: var(--text); }
+        h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+        p.subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+
+        /* Forms */
+        form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        input { padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: inherit; font-size: 0.95rem; outline: none; }
+        input:focus { border-color: var(--text); }
+
+        /* Buttons */
+        .btn-primary { padding: 14px; border-radius: 999px; background: var(--accent); color: var(--bg); border: none; font-weight: 700; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        
+        .divider { margin: 24px 0; position: relative; text-align: center; }
+        .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); z-index: 1; }
+        .divider span { position: relative; z-index: 2; background: var(--bg); padding: 0 12px; color: var(--muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+
+        /* Social Auth */
+        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .btn-social { padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-social:hover { background: rgba(0,0,0,0.05); }
+        body.dark .btn-social:hover { background: rgba(255,255,255,0.05); }
+
+        /* Utility */
+        .toggle-link { margin-top: 24px; font-size: 0.9rem; color: var(--muted); }
+        .toggle-link span { color: var(--text); font-weight: 600; cursor: pointer; }
+        .forgot-pass { font-size: 0.8rem; color: var(--muted); text-align: right; cursor: pointer; }
+        .hidden { display: none !important; }
+
+        /* OTP/Phone specifics */
+        #phone-section, #otp-section { display: flex; flex-direction: column; gap: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <a href="home.html" class="logo">🎓 LearnLoop</a>
+
+    <!-- Header Text -->
+    <div id="auth-header">
+        <h2 id="auth-title">Welcome back</h2>
+        <p class="subtitle" id="auth-subtitle">Log in to continue your study journey.</p>
+    </div>
+
+    <!-- Social Logins -->
+    <div class="social-grid">
+        <!-- Google Button Updated with Chrome/Google Logo -->
+        <button class="btn-social">
+            <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" width="18" height="18" alt="Google"> Go Google
+        </button>
+        <button class="btn-social">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Facebook
+        </button>
+    </div>
+
+    <div class="divider"><span>Or use email</span></div>
+
+    <!-- Main Auth Form -->
+    <form id="main-auth-form">
+        <div class="input-group" id="name-group" class="hidden">
+            <label>Full Name</label>
+            <input type="text" placeholder="Aisha Rahman" id="user-name">
+        </div>
+        
+        <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="name@example.com" id="user-email" required>
+        </div>
+
+        <div class="input-group" id="pass-group">
+            <label>Password</label>
+            <input type="password" placeholder="••••••••" id="user-password">
+            <div class="forgot-pass" onclick="showForgetPassword()">Forgot password?</div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn">Sign In</button>
+    </form>
+
+    <!-- Phone Authentication Section (Optional/Alternative) -->
+    <div class="divider"><span>Or Mobile</span></div>
+    <div id="phone-section">
+        <input type="tel" placeholder="+1 (555) 000-0000" id="phone-number">
+        <button class="btn-social" onclick="sendOTP()" style="width:100%">Send OTP via SMS</button>
+    </div>
+
+    <div id="otp-section" class="hidden">
+        <p class="subtitle">Enter the 6-digit code sent to your phone.</p>
+        <input type="text" placeholder="000000" maxlength="6">
+        <button class="btn-primary">Verify & Login</button>
+    </div>
+
+    <!-- Toggle between Login/Signup -->
+    <div class="toggle-link" id="toggle-text">
+        Don't have an account? <span onclick="toggleAuth(true)">Sign up</span>
+    </div>
+</div>
+
+<script>
+    // Theme logic to match main site
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+    let isSignUp = false;
+
+    function toggleAuth(signUp) {
+        isSignUp = signUp;
+        const title = document.getElementById('auth-title');
+        const subtitle = document.getElementById('auth-subtitle');
+        const submitBtn = document.getElementById('submit-btn');
+        const nameGroup = document.getElementById('name-group');
+        const toggleText = document.getElementById('toggle-text');
+
+        if (isSignUp) {
+            title.innerText = "Create an account";
+            subtitle.innerText = "Start tracking your study sessions today.";
+            submitBtn.innerText = "Create Account";
+            nameGroup.style.display = "flex";
+            toggleText.innerHTML = 'Already have an account? <span onclick="toggleAuth(false)">Log in</span>';
+        } else {
+            title.innerText = "Welcome back";
+            subtitle.innerText = "Log in to continue your study journey.";
+            submitBtn.innerText = "Sign In";
+            nameGroup.style.display = "none";
+            toggleText.innerHTML = 'Don\'t have an account? <span onclick="toggleAuth(true)">Sign up</span>';
+        }
+    }
+
+    function showForgetPassword() {
+        const email = document.getElementById('user-email').value;
+        if(!email) {
+            alert("Please enter your email address first.");
+            return;
+        }
+        const choice = confirm("Reset Password?\nOK to receive an Email Link\nCancel to receive an OTP via Phone (if linked)");
+        
+        if(choice) {
+            alert("Password reset link sent to: " + email);
+        } else {
+            alert("OTP sent to your registered mobile number.");
+        }
+    }
+
+    function sendOTP() {
+        const phone = document.getElementById('phone-number').value;
+        if(!phone) return alert("Enter phone number");
+        document.getElementById('phone-section').classList.add('hidden');
+        document.getElementById('otp-section').classList.remove('hidden');
+    }
+
+    // Initialize hidden state
+    document.getElementById('name-group').style.display = "none";
+</script>
+
+</body>
+</html>
