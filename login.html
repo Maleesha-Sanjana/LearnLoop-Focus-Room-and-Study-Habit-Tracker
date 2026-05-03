@@ -74,11 +74,11 @@
         <form id="login-form" onsubmit="event.preventDefault(); sendLoginOTP();">
             <div class="input-group">
                 <label>Phone Number</label>
-                <input type="tel" id="login-phone" placeholder="+1 (555) 000-0000" required>
+                <input type="tel" id="login-phone" placeholder="0763110219" required>
             </div>
             <div class="input-group">
                 <label>Password</label>
-                <input type="password" placeholder="••••••••">
+                <input type="password" placeholder="0763110219">
                 <div class="forgot-pass" onclick="showScreen('forgot-screen')">Forgot password?</div>
             </div>
             <button type="submit" class="btn-primary">Send OTP</button>
@@ -112,7 +112,7 @@
         <form onsubmit="event.preventDefault(); handleForgotRequest();">
             <div class="input-group">
                 <label>Email or Mobile Number</label>
-                <input type="text" id="forgot-id" placeholder="name@email.com or +1..." required>
+                <input type="text" id="forgot-id" placeholder="0763110219" required>
             </div>
             <button type="submit" class="btn-primary">Send OTP</button>
         </form>
@@ -153,7 +153,7 @@
         
         if (otp.length === 6) {
             alert("Login Successful!");
-            window.location.href = "home.html"; // Redirect to main app
+            window.location.href = "index.html"; // Redirect to main app
         } else {
             alert("Please enter a 6-digit code.");
         }
