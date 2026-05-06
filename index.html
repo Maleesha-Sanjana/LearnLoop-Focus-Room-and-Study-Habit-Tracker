@@ -155,6 +155,8 @@
     body.dark .btn-solid:hover{background:#ccc}
     body.dark .theme-toggle{color:#888}
     body.dark .theme-toggle:hover{color:#f0f0f0;transform:scale(1.15)}
+    body.dark #nav-profile-btn{border-color:#333;color:#f0f0f0}
+    body.dark #nav-profile-btn:hover{border-color:#888;background:#1e1e1e}
 
     body.dark .hero h1{color:#f0f0f0}
     body.dark .hero p{color:#888}
@@ -217,8 +219,14 @@
   </nav>
   <div class="nav-actions">
     <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-    <a href="login.html" class="btn-ghost">Log in</a>
-    <a href="login.html" class="btn-solid">Join for free</a>
+    <!-- Logged-out state -->
+    <a href="login.html" class="btn-ghost" id="nav-login-btn">Log in</a>
+    <a href="login.html" class="btn-solid" id="nav-join-btn">Join for free</a>
+    <!-- Logged-in state (hidden by default) -->
+    <a href="profile.html" id="nav-profile-btn" style="display:none;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;border:1.5px solid #e8e8e8;font-size:.88rem;font-weight:600;color:#111;transition:.15s;text-decoration:none;">
+      <img id="nav-avatar" src="" alt="Profile" style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:#f5f5f5;flex-shrink:0;"/>
+      <span id="nav-username">Profile</span>
+    </a>
   </div>
 </header>
 
@@ -437,5 +445,52 @@
 </footer>
 
 <script src="js/main.js"></script>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
+    authDomain: "learnloop-f89c2.firebaseapp.com",
+    projectId: "learnloop-f89c2",
+    storageBucket: "learnloop-f89c2.firebasestorage.app",
+    messagingSenderId: "777914976314",
+    appId: "1:777914976314:web:2cd051169684c24caf8d03",
+    measurementId: "G-3SBVP21TE7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const loginBtn   = document.getElementById('nav-login-btn');
+  const joinBtn    = document.getElementById('nav-join-btn');
+  const profileBtn = document.getElementById('nav-profile-btn');
+  const navAvatar  = document.getElementById('nav-avatar');
+  const navUsername = document.getElementById('nav-username');
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is logged in — show profile icon, hide login/join
+      loginBtn.style.display  = 'none';
+      joinBtn.style.display   = 'none';
+      profileBtn.style.display = 'flex';
+
+      // Set avatar: use Google/Facebook photo or fallback to initials avatar
+      const photoURL = user.photoURL
+        || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
+      navAvatar.src = photoURL;
+
+      // Show first name only
+      const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
+      navUsername.textContent = firstName;
+    } else {
+      // Not logged in — show login/join, hide profile
+      loginBtn.style.display  = '';
+      joinBtn.style.display   = '';
+      profileBtn.style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>
