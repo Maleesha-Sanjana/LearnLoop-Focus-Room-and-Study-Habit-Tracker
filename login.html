@@ -79,7 +79,7 @@
 </button>
 
 <div class="auth-container">
-    <a href="home.html" class="logo">🎓 LearnLoop</a>
+    <a href="index.html" class="logo">🎓 LearnLoop</a>
 
     <!-- Header Text -->
     <div id="auth-header">
@@ -147,6 +147,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { 
         getAuth, 
+        onAuthStateChanged,
         signInWithPopup, 
         GoogleAuthProvider, 
         FacebookAuthProvider,
@@ -171,6 +172,24 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+
+    // If already logged in, skip the login page entirely
+    onAuthStateChanged(auth, (user) => {
+        if (user) window.location.href = "index.html";
+    });
+
+    // ── Error display (replaces alert) ──
+    function showError(msg) {
+        let el = document.getElementById('auth-error');
+        if (!el) {
+            el = document.createElement('p');
+            el.id = 'auth-error';
+            el.style.cssText = 'color:#e53e3e;font-size:.85rem;margin-top:8px;text-align:center;';
+            document.querySelector('.auth-container').appendChild(el);
+        }
+        el.textContent = msg;
+        setTimeout(() => { el.textContent = ''; }, 4000);
+    }
 
     // ── Theme: read from localStorage (shared with index.html / profile.html) ──
     const SUN  = document.getElementById('theme-icon-sun');
@@ -244,11 +263,10 @@
         try {
             const result = await signInWithPopup(auth, provider);
             console.log("Google login successful:", result.user);
-            alert("Welcome " + result.user.displayName + "!");
-            window.location.href = "index.html"; // Redirect to home page
+            window.location.href = "index.html";
         } catch (error) {
             console.error("Google login error:", error);
-            alert("Google login failed: " + error.message);
+            showError("Google login failed: " + error.message);
         }
     });
 
@@ -258,11 +276,10 @@
         try {
             const result = await signInWithPopup(auth, provider);
             console.log("Facebook login successful:", result.user);
-            alert("Welcome " + result.user.displayName + "!");
-            window.location.href = "index.html"; // Redirect to home page
+            window.location.href = "index.html";
         } catch (error) {
             console.error("Facebook login error:", error);
-            alert("Facebook login failed: " + error.message);
+            showError("Facebook login failed: " + error.message);
         }
     });
 
@@ -275,21 +292,17 @@
 
         try {
             if (isSignUp) {
-                // Sign up
                 const result = await createUserWithEmailAndPassword(auth, email, password);
                 console.log("Sign up successful:", result.user);
-                alert("Account created successfully! Welcome " + (name || email) + "!");
                 window.location.href = "index.html";
             } else {
-                // Sign in
                 const result = await signInWithEmailAndPassword(auth, email, password);
                 console.log("Sign in successful:", result.user);
-                alert("Welcome back!");
                 window.location.href = "index.html";
             }
         } catch (error) {
             console.error("Authentication error:", error);
-            alert("Authentication failed: " + error.message);
+            showError(error.message);
         }
     });
 
@@ -297,28 +310,23 @@
     document.getElementById('send-otp-btn').addEventListener('click', async () => {
         const phoneNumber = document.getElementById('phone-number').value;
         if (!phoneNumber) {
-            alert("Please enter a phone number");
+            showError("Please enter a phone number");
             return;
         }
 
         try {
-            // Initialize reCAPTCHA
             if (!recaptchaVerifier) {
                 recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                     'size': 'invisible',
-                    'callback': (response) => {
-                        console.log("reCAPTCHA solved");
-                    }
+                    'callback': (response) => { console.log("reCAPTCHA solved"); }
                 });
             }
-
             confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-            console.log("OTP sent successfully");
             document.getElementById('phone-section').classList.add('hidden');
             document.getElementById('otp-section').classList.remove('hidden');
         } catch (error) {
             console.error("Error sending OTP:", error);
-            alert("Failed to send OTP: " + error.message);
+            showError("Failed to send OTP: " + error.message);
         }
     });
 
@@ -326,18 +334,17 @@
     document.getElementById('verify-otp-btn').addEventListener('click', async () => {
         const code = document.getElementById('otp-code').value;
         if (!code) {
-            alert("Please enter the OTP code");
+            showError("Please enter the OTP code");
             return;
         }
 
         try {
             const result = await confirmationResult.confirm(code);
             console.log("Phone authentication successful:", result.user);
-            alert("Phone verification successful! Welcome!");
             window.location.href = "index.html";
         } catch (error) {
             console.error("Error verifying OTP:", error);
-            alert("Invalid OTP code: " + error.message);
+            showError("Invalid OTP code: " + error.message);
         }
     });
 
