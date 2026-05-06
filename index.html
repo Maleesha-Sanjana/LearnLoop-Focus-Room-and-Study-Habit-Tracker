@@ -483,12 +483,11 @@
       const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
       navUsername.textContent = firstName;
 
-      // Hero button → "Go to Dashboard"
+      // Hero button → "Go to Focus Room"
       const heroCta = document.getElementById('hero-cta-btn');
       if (heroCta) {
-        heroCta.textContent = 'Go to Dashboard';
-        heroCta.href = '#';
-        heroCta.scrollIntoView = false;
+        heroCta.textContent = 'Go to Focus Room';
+        heroCta.href = 'focusroom.html';
       }
 
       // CTA section → replace both buttons with a single "Go to Dashboard"
