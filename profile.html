@@ -300,12 +300,12 @@
       <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <!-- Replaced Join/Login with User actions -->
-      <a href="#" class="btn-ghost" style="display: flex; align-items: center; gap: 8px;">
-        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=f5f5f5" style="width: 20px; height: 20px; border-radius: 50%;" alt="Avatar"/>
-        Profile
+      <!-- Profile chip -->
+      <a href="profile.html" id="nav-profile-btn" style="display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;border:1.5px solid #e8e8e8;font-size:.88rem;font-weight:600;color:#111;transition:.15s;text-decoration:none;">
+        <img id="nav-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=U&backgroundColor=111111&textColor=ffffff" alt="Avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"/>
+        <span id="nav-username">Profile</span>
       </a>
-      <a href="#" class="btn-outline" style="padding: 6px 14px; font-size: 0.8rem;">Log out</a>
+      <button id="logout-btn" class="btn-outline" style="padding:6px 14px;font-size:.85rem;">Log out</button>
     </div>
   </header>
 
@@ -453,82 +453,117 @@
   <span id="toastMessage">Changes saved successfully!</span>
 </div>
 
-<script>
-  // --- Dark Mode Toggle ---
-  const themeToggle = document.getElementById('theme-toggle');
-  
-  // Check system preference or localStorage to set initial state (Optional enhancement)
-  // For now, simple toggle logic.
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-  });
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-  // --- Avatar Upload Preview Logic ---
-  const fileInput = document.getElementById('avatar-upload');
-  const previewImg = document.getElementById('profile-img-preview');
-  const removeBtn = document.getElementById('remove-avatar-btn');
-  const defaultAvatar = "https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=f5f5f5";
+  const firebaseConfig = {
+    apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
+    authDomain: "learnloop-f89c2.firebaseapp.com",
+    projectId: "learnloop-f89c2",
+    storageBucket: "learnloop-f89c2.firebasestorage.app",
+    messagingSenderId: "777914976314",
+    appId: "1:777914976314:web:2cd051169684c24caf8d03",
+    measurementId: "G-3SBVP21TE7"
+  };
 
-  fileInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      // Create a temporary URL to show the selected image
-      const objectUrl = URL.createObjectURL(file);
-      previewImg.src = objectUrl;
-    }
-  });
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-  removeBtn.addEventListener('click', () => {
-    previewImg.src = defaultAvatar;
-    fileInput.value = ''; // Clear the input
-  });
-
-  // --- Form Submission & Toast Notifications ---
-  const profileForm = document.getElementById('profile-form');
-  const passwordForm = document.getElementById('password-form');
-  const toastBox = document.getElementById('toastBox');
-  const toastMessage = document.getElementById('toastMessage');
-  let toastTimeout;
-
-  function showToast(message) {
-    toastMessage.textContent = message;
-    toastBox.classList.add('show');
-    
-    // Reset timeout if called rapidly
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-      toastBox.classList.remove('show');
-    }, 3000);
-  }
-
-  profileForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    // Simulate API Call
-    showToast("Profile details updated successfully.");
-  });
-
-  passwordForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const newPass = document.getElementById('new-password').value;
-    const confPass = document.getElementById('confirm-password').value;
-
-    if (newPass !== confPass) {
-      // Change toast to error style briefly (inline hack for demo)
-      document.querySelector('.toast-icon').innerHTML = '&#33;';
-      document.querySelector('.toast-icon').style.background = '#e53e3e';
-      showToast("New passwords do not match.");
-      
-      // Reset icon back to success after toast hides
-      setTimeout(() => {
-        document.querySelector('.toast-icon').innerHTML = '&#10003;';
-        document.querySelector('.toast-icon').style.background = '#10b981';
-      }, 3500);
+  // --- Auth state: populate profile with real user data ---
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // Not logged in — redirect to login
+      window.location.href = 'login.html';
       return;
     }
 
-    // Simulate API Call
+    // Navbar
+    const navAvatar   = document.getElementById('nav-avatar');
+    const navUsername = document.getElementById('nav-username');
+    const photoURL = user.photoURL
+      || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
+    navAvatar.src = photoURL;
+    const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
+    navUsername.textContent = firstName;
+
+    // Profile card — avatar
+    const previewImg = document.getElementById('profile-img-preview');
+    previewImg.src = photoURL;
+
+    // Profile card — name fields
+    if (user.displayName) {
+      const parts = user.displayName.split(' ');
+      document.getElementById('first-name').value = parts[0] || '';
+      document.getElementById('last-name').value  = parts.slice(1).join(' ') || '';
+    }
+
+    // Profile card — email
+    document.getElementById('email').value = user.email || '';
+  });
+
+  // --- Logout ---
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = 'index.html';
+  });
+
+  // --- Dark Mode Toggle ---
+  const themeToggle = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem('ll_theme');
+  if (saved === 'dark') document.body.classList.add('dark');
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('ll_theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+  });
+
+  // --- Avatar Upload Preview ---
+  const fileInput  = document.getElementById('avatar-upload');
+  const previewImg = document.getElementById('profile-img-preview');
+  const removeBtn  = document.getElementById('remove-avatar-btn');
+
+  fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) previewImg.src = URL.createObjectURL(file);
+  });
+
+  removeBtn.addEventListener('click', () => {
+    previewImg.src = `https://api.dicebear.com/7.x/initials/svg?seed=U&backgroundColor=111111&textColor=ffffff`;
+    fileInput.value = '';
+  });
+
+  // --- Toast helper ---
+  const toastBox     = document.getElementById('toastBox');
+  const toastMessage = document.getElementById('toastMessage');
+  let toastTimeout;
+
+  function showToast(message, isError = false) {
+    toastMessage.textContent = message;
+    const icon = document.querySelector('.toast-icon');
+    icon.innerHTML    = isError ? '&#33;' : '&#10003;';
+    icon.style.background = isError ? '#e53e3e' : '#10b981';
+    toastBox.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toastBox.classList.remove('show'), 3000);
+  }
+
+  // --- Profile form ---
+  document.getElementById('profile-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast("Profile details updated successfully.");
+  });
+
+  // --- Password form ---
+  document.getElementById('password-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newPass  = document.getElementById('new-password').value;
+    const confPass = document.getElementById('confirm-password').value;
+    if (newPass !== confPass) {
+      showToast("New passwords do not match.", true);
+      return;
+    }
     showToast("Password changed successfully.");
-    passwordForm.reset();
+    document.getElementById('password-form').reset();
   });
 </script>
 </body>

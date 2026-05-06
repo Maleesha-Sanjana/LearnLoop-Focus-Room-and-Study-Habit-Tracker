@@ -64,10 +64,10 @@
     <!-- Social Logins -->
     <div class="social-grid">
         <!-- Google Button Updated with Chrome/Google Logo -->
-        <button class="btn-social">
+        <button class="btn-social" id="google-login-btn">
             <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" width="18" height="18" alt="Google">  Google
         </button>
-        <button class="btn-social">
+        <button class="btn-social" id="facebook-login-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Facebook
         </button>
     </div>
@@ -99,13 +99,14 @@
     <div class="divider"><span>Or Mobile</span></div>
     <div id="phone-section">
         <input type="tel" placeholder="+1 (555) 000-0000" id="phone-number">
-        <button class="btn-social" onclick="sendOTP()" style="width:100%">Send OTP via SMS</button>
+        <button class="btn-social" id="send-otp-btn" style="width:100%">Send OTP via SMS</button>
     </div>
 
     <div id="otp-section" class="hidden">
         <p class="subtitle">Enter the 6-digit code sent to your phone.</p>
-        <input type="text" placeholder="000000" maxlength="6">
-        <button class="btn-primary">Verify & Login</button>
+        <input type="text" placeholder="000000" maxlength="6" id="otp-code">
+        <button class="btn-primary" id="verify-otp-btn">Verify & Login</button>
+        <div id="recaptcha-container"></div>
     </div>
 
     <!-- Toggle between Login/Signup -->
@@ -114,15 +115,47 @@
     </div>
 </div>
 
-<script>
+<!-- Firebase SDK -->
+<script type="module">
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { 
+        getAuth, 
+        signInWithPopup, 
+        GoogleAuthProvider, 
+        FacebookAuthProvider,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        sendPasswordResetEmail,
+        RecaptchaVerifier,
+        signInWithPhoneNumber
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
+        authDomain: "learnloop-f89c2.firebaseapp.com",
+        projectId: "learnloop-f89c2",
+        storageBucket: "learnloop-f89c2.firebasestorage.app",
+        messagingSenderId: "777914976314",
+        appId: "1:777914976314:web:2cd051169684c24caf8d03",
+        measurementId: "G-3SBVP21TE7"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
     // Theme logic to match main site
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.body.classList.add('dark');
     }
 
     let isSignUp = false;
+    let recaptchaVerifier;
+    let confirmationResult;
 
-    function toggleAuth(signUp) {
+    window.toggleAuth = function(signUp) {
         isSignUp = signUp;
         const title = document.getElementById('auth-title');
         const subtitle = document.getElementById('auth-subtitle');
@@ -145,27 +178,124 @@
         }
     }
 
-    function showForgetPassword() {
+    window.showForgetPassword = async function() {
         const email = document.getElementById('user-email').value;
         if(!email) {
             alert("Please enter your email address first.");
             return;
         }
-        const choice = confirm("Reset Password?\nOK to receive an Email Link\nCancel to receive an OTP via Phone (if linked)");
         
-        if(choice) {
+        try {
+            await sendPasswordResetEmail(auth, email);
             alert("Password reset link sent to: " + email);
-        } else {
-            alert("OTP sent to your registered mobile number.");
+        } catch (error) {
+            console.error("Password reset error:", error);
+            alert("Error sending password reset email: " + error.message);
         }
     }
 
-    function sendOTP() {
-        const phone = document.getElementById('phone-number').value;
-        if(!phone) return alert("Enter phone number");
-        document.getElementById('phone-section').classList.add('hidden');
-        document.getElementById('otp-section').classList.remove('hidden');
-    }
+    // Google Login
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            console.log("Google login successful:", result.user);
+            alert("Welcome " + result.user.displayName + "!");
+            window.location.href = "index.html"; // Redirect to home page
+        } catch (error) {
+            console.error("Google login error:", error);
+            alert("Google login failed: " + error.message);
+        }
+    });
+
+    // Facebook Login
+    document.getElementById('facebook-login-btn').addEventListener('click', async () => {
+        const provider = new FacebookAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            console.log("Facebook login successful:", result.user);
+            alert("Welcome " + result.user.displayName + "!");
+            window.location.href = "index.html"; // Redirect to home page
+        } catch (error) {
+            console.error("Facebook login error:", error);
+            alert("Facebook login failed: " + error.message);
+        }
+    });
+
+    // Email/Password Authentication
+    document.getElementById('main-auth-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('user-email').value;
+        const password = document.getElementById('user-password').value;
+        const name = document.getElementById('user-name').value;
+
+        try {
+            if (isSignUp) {
+                // Sign up
+                const result = await createUserWithEmailAndPassword(auth, email, password);
+                console.log("Sign up successful:", result.user);
+                alert("Account created successfully! Welcome " + (name || email) + "!");
+                window.location.href = "index.html";
+            } else {
+                // Sign in
+                const result = await signInWithEmailAndPassword(auth, email, password);
+                console.log("Sign in successful:", result.user);
+                alert("Welcome back!");
+                window.location.href = "index.html";
+            }
+        } catch (error) {
+            console.error("Authentication error:", error);
+            alert("Authentication failed: " + error.message);
+        }
+    });
+
+    // Phone Authentication - Send OTP
+    document.getElementById('send-otp-btn').addEventListener('click', async () => {
+        const phoneNumber = document.getElementById('phone-number').value;
+        if (!phoneNumber) {
+            alert("Please enter a phone number");
+            return;
+        }
+
+        try {
+            // Initialize reCAPTCHA
+            if (!recaptchaVerifier) {
+                recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => {
+                        console.log("reCAPTCHA solved");
+                    }
+                });
+            }
+
+            confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+            console.log("OTP sent successfully");
+            document.getElementById('phone-section').classList.add('hidden');
+            document.getElementById('otp-section').classList.remove('hidden');
+        } catch (error) {
+            console.error("Error sending OTP:", error);
+            alert("Failed to send OTP: " + error.message);
+        }
+    });
+
+    // Phone Authentication - Verify OTP
+    document.getElementById('verify-otp-btn').addEventListener('click', async () => {
+        const code = document.getElementById('otp-code').value;
+        if (!code) {
+            alert("Please enter the OTP code");
+            return;
+        }
+
+        try {
+            const result = await confirmationResult.confirm(code);
+            console.log("Phone authentication successful:", result.user);
+            alert("Phone verification successful! Welcome!");
+            window.location.href = "index.html";
+        } catch (error) {
+            console.error("Error verifying OTP:", error);
+            alert("Invalid OTP code: " + error.message);
+        }
+    });
 
     // Initialize hidden state
     document.getElementById('name-group').style.display = "none";
