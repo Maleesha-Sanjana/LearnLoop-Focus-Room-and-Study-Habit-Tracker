@@ -236,7 +236,7 @@
   <h1>Study smarter,<br/>achieve more.</h1>
   <p>Track sessions, set goals, join focus rooms, and build consistent study habits &mdash; all in one place.</p>
   <div class="hero-btns">
-    <a href="login.html" class="btn-hero-solid">Join for free</a>
+    <a href="login.html" class="btn-hero-solid" id="hero-cta-btn">Join for free</a>
     <a href="#features" class="btn-hero-outline">See features &rarr;</a>
   </div>
 
@@ -355,8 +355,8 @@
   <h2>Never fall behind<br/>on your studies again.</h2>
   <p>Use LearnLoop for free as long as you like.</p>
   <div class="cta-btns">
-    <a href="login.html" class="btn-hero-solid">Join for free</a>
-    <a href="login.html" class="btn-hero-outline">Log in &rarr;</a>
+    <a href="login.html" class="btn-hero-solid" id="cta-primary-btn">Join for free</a>
+    <a href="login.html" class="btn-hero-outline" id="cta-secondary-btn">Log in &rarr;</a>
   </div>
 </section>
 
@@ -482,6 +482,26 @@
       // Show first name only
       const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
       navUsername.textContent = firstName;
+
+      // Hero button → "Go to Dashboard"
+      const heroCta = document.getElementById('hero-cta-btn');
+      if (heroCta) {
+        heroCta.textContent = 'Go to Dashboard';
+        heroCta.href = '#';
+        heroCta.scrollIntoView = false;
+      }
+
+      // CTA section → replace both buttons with a single "Go to Dashboard"
+      const ctaPrimary   = document.getElementById('cta-primary-btn');
+      const ctaSecondary = document.getElementById('cta-secondary-btn');
+      if (ctaPrimary) {
+        ctaPrimary.textContent = 'Go to Dashboard';
+        ctaPrimary.href = '#';
+      }
+      if (ctaSecondary) {
+        ctaSecondary.style.display = 'none';
+      }
+
     } else {
       // Not logged in — show login/join, hide profile
       loginBtn.style.display  = '';
