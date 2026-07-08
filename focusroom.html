@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Focus Room - LearnLoop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; background: #fff; color: #111; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Variables */
+    :root { --bg: #ffffff; --text: #111; --border: #e8e8e8; --muted: #888; --accent: #111; }
+    body.dark { --bg: #0a0a0a; --text: #f0f0f0; --border: #2a2a2a; --muted: #666; --accent: #f0f0f0; background: var(--bg); color: var(--text); }
+
+    /* Navbar */
+    .navbar { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(255,255,255,.75); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,.9); border-radius: 999px; padding: 8px 16px; display: flex; align-items: center; gap: 24px; box-shadow: 0 2px 16px rgba(0,0,0,.06); white-space: nowrap; }
+    .nav-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: .95rem; letter-spacing: -.02em; }
+    .nav-brand .icon { width: 28px; height: 28px; background: #111; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .8rem; color: #fff; }
+    .nav-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+    .theme-toggle { width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; color: #888; padding: 0; }
+    .theme-toggle:hover { color: #111; transform: scale(1.15); }
+    #nav-profile-btn { display: flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 999px; border: 1.5px solid #e8e8e8; font-size: .88rem; font-weight: 600; color: #111; transition: .15s; }
+    #nav-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: #f5f5f5; flex-shrink: 0; }
+
+    /* Dark mode navbar */
+    body.dark .navbar { background: rgba(20,20,20,.65); border-color: rgba(255,255,255,.08); box-shadow: 0 2px 16px rgba(0,0,0,.3); }
+    body.dark .nav-brand { color: #f0f0f0; }
+    body.dark .nav-brand .icon { background: #f0f0f0; color: #111; }
+    body.dark .theme-toggle { color: #888; }
+    body.dark .theme-toggle:hover { color: #f0f0f0; }
+    body.dark #nav-profile-btn { border-color: #333; color: #f0f0f0; }
+
+    /* Main container */
+    .container { max-width: 900px; margin: 0 auto; padding: 100px 24px 60px; min-height: 100vh; }
+
+    /* Mode selection screen */
+    .mode-selection { text-align: center; }
+    .mode-selection h1 { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900; letter-spacing: -.04em; margin-bottom: 12px; }
+    .mode-selection p { color: var(--muted); font-size: 1rem; margin-bottom: 48px; }
+    .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 600px; margin: 0 auto; }
+    .mode-card { background: var(--bg); border: 2px solid var(--border); border-radius: 20px; padding: 32px; cursor: pointer; transition: all .2s; text-align: center; }
+    .mode-card:hover { border-color: var(--text); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+    .mode-card .icon { font-size: 3rem; margin-bottom: 16px; }
+    .mode-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+    .mode-card p { font-size: .85rem; color: var(--muted); }
+    body.dark .mode-card { background: #141414; border-color: #2a2a2a; }
+    body.dark .mode-card:hover { border-color: #888; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+
+    /* Team lobby */
+    .team-lobby { max-width: 700px; margin: 0 auto; }
+    .team-lobby h1 { font-size: 2rem; font-weight: 900; margin-bottom: 8px; }
+    .team-lobby .subtitle { color: var(--muted); font-size: .95rem; margin-bottom: 32px; }
+    .lobby-card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 32px; margin-bottom: 24px; }
+    body.dark .lobby-card { background: #141414; border-color: #2a2a2a; }
+    .lobby-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-size: .8rem; }
+    .member-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .member-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f5f5f5; border-radius: 12px; }
+    body.dark .member-item { background: #1a1a1a; }
+    .member-avatar { width: 40px; height: 40px; border-radius: 50%; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; flex-shrink: 0; }
+    .member-name { flex: 1; font-weight: 600; font-size: .95rem; }
+    .member-badge { font-size: .75rem; padding: 4px 10px; background: #111; color: #fff; border-radius: 999px; font-weight: 600; }
+    body.dark .member-badge { background: #f0f0f0; color: #111; }
+    .add-member-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafafa; font-family: inherit; font-size: .95rem; color: var(--text); margin-bottom: 12px; }
+    body.dark .add-member-input { background: #1a1a1a; border-color: #2a2a2a; }
+    .add-member-input:focus { outline: none; border-color: var(--text); }
+    .btn { padding: 12px 24px; border-radius: 999px; border: none; font-weight: 600; font-size: .9rem; cursor: pointer; transition: .2s; font-family: inherit; }
+    .btn-primary { background: var(--text); color: var(--bg); }
+    .btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--text); background: #f5f5f5; }
+    body.dark .btn-secondary:hover { background: #1e1e1e; }
+    .btn-full { width: 100%; }
+    .btn-group { display: flex; gap: 12px; }
+
+    /* Quiz screen */
+    .quiz-screen { max-width: 800px; margin: 0 auto; }
+    .quiz-header { text-align: center; margin-bottom: 32px; }
+    .quiz-header h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+    .quiz-header .timer { font-size: 2.5rem; font-weight: 900; color: var(--text); font-variant-numeric: tabular-nums; }
+    .question-card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 40px; margin-bottom: 24px; }
+    body.dark .question-card { background: #141414; border-color: #2a2a2a; }
+    .question-number { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+    .question-text { font-size: 1.4rem; font-weight: 700; line-height: 1.4; margin-bottom: 32px; }
+    .answers-grid { display: grid; gap: 12px; }
+    .answer-option { padding: 16px 20px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: .2s; font-size: .95rem; font-weight: 600; background: var(--bg); }
+    .answer-option:hover { border-color: var(--text); background: #f5f5f5; }
+    body.dark .answer-option { background: #1a1a1a; border-color: #2a2a2a; }
+    body.dark .answer-option:hover { border-color: #888; background: #1e1e1e; }
+    .answer-option.selected { border-color: var(--text); background: var(--text); color: var(--bg); }
+    .answer-option.correct { border-color: #16a34a; background: #16a34a; color: #fff; }
+    .answer-option.incorrect { border-color: #e53e3e; background: #e53e3e; color: #fff; }
+
+    /* Participants bar */
+    .participants-bar { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+    .participant-chip { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f5f5f5; border: 1px solid var(--border); border-radius: 999px; font-size: .85rem; font-weight: 600; }
+    body.dark .participant-chip { background: #1a1a1a; border-color: #2a2a2a; }
+    .participant-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; }
+    .participant-chip .score { margin-left: 4px; color: var(--muted); }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 600px) {
+      .mode-cards { grid-template-columns: 1fr; }
+      .btn-group { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<header class="navbar">
+  <a href="index.html" class="nav-brand">
+    <div class="icon">🎓</div>
+    <span>LearnLoop</span>
+  </a>
+  <div class="nav-actions">
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+      <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+    <a href="profile.html" id="nav-profile-btn">
+      <img id="nav-avatar" src="" alt="Profile"/>
+      <span id="nav-username">Profile</span>
+    </a>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- SCREEN 1: Mode Selection -->
+  <div id="mode-selection-screen" class="mode-selection">
+    <h1>Choose Your Focus Mode</h1>
+    <p>Study alone or collaborate with your team</p>
+    <div class="mode-cards">
+      <div class="mode-card" id="individual-mode-btn">
+        <div class="icon">👤</div>
+        <h3>Individual</h3>
+        <p>Focus on your own learning journey</p>
+      </div>
+      <div class="mode-card" id="team-mode-btn">
+        <div class="icon">👥</div>
+        <h3>Team</h3>
+        <p>Learn together with up to 5 people</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Team Lobby -->
+  <div id="team-lobby-screen" class="team-lobby hidden">
+    <h1>Team Lobby</h1>
+    <p class="subtitle">Invite your teammates to join the session</p>
+
+    <div class="lobby-card">
+      <h3>Team Members (<span id="member-count">1</span>/5)</h3>
+      <div class="member-list" id="member-list">
+        <!-- Members will be added here dynamically -->
+      </div>
+      
+      <input type="email" id="invite-email-input" class="add-member-input" placeholder="Enter teammate's email to invite..."/>
+      <button class="btn btn-secondary btn-full" id="send-invite-btn">Send Invite</button>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="back-to-mode-btn">← Back</button>
+      <button class="btn btn-primary" id="start-quiz-btn" style="flex:1">Start Quiz</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Quiz -->
+  <div id="quiz-screen" class="quiz-screen hidden">
+    <div class="participants-bar" id="participants-bar">
+      <!-- Participant chips will be added here -->
+    </div>
+
+    <div class="quiz-header">
+      <h2>Question <span id="current-question-num">1</span> of <span id="total-questions">5</span></h2>
+      <div class="timer" id="quiz-timer">30</div>
+    </div>
+
+    <div class="question-card">
+      <div class="question-number">Question <span id="q-num">1</span></div>
+      <div class="question-text" id="question-text">Loading question...</div>
+      <div class="answers-grid" id="answers-grid">
+        <!-- Answer options will be added here -->
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="next-question-btn" style="display:none">Next Question →</button>
+    <button class="btn btn-primary btn-full" id="finish-quiz-btn" style="display:none">Finish Quiz</button>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, arrayUnion, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
+    authDomain: "learnloop-f89c2.firebaseapp.com",
+    projectId: "learnloop-f89c2",
+    storageBucket: "learnloop-f89c2.firebasestorage.app",
+    messagingSenderId: "777914976314",
+    appId: "1:777914976314:web:2cd051169684c24caf8d03"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let sessionId = null;
+  let currentMode = null;
+  let teamMembers = [];
+  let currentQuestionIndex = 0;
+  let userScore = 0;
+  let timerInterval = null;
+
+  // Sample questions
+  const questions = [
+    {
+      question: "What is the capital of France?",
+      answers: ["London", "Berlin", "Paris", "Madrid"],
+      correct: 2
+    },
+    {
+      question: "Which planet is known as the Red Planet?",
+      answers: ["Venus", "Mars", "Jupiter", "Saturn"],
+      correct: 1
+    },
+    {
+      question: "What is 15 × 8?",
+      answers: ["120", "125", "115", "130"],
+      correct: 0
+    },
+    {
+      question: "Who wrote 'Romeo and Juliet'?",
+      answers: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+      correct: 1
+    },
+    {
+      question: "What is the largest ocean on Earth?",
+      answers: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+      correct: 3
+    }
+  ];
+
+  // Theme
+  const saved = localStorage.getItem('ll_theme');
+  if (saved === 'dark') document.body.classList.add('dark');
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    document.getElementById('theme-icon-sun').style.display = isDark ? 'block' : 'none';
+    document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'block';
+    localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
+  });
+  if (saved === 'dark') {
+    document.getElementById('theme-icon-sun').style.display = 'block';
+    document.getElementById('theme-icon-moon').style.display = 'none';
+  }
+
+  // Auth check
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = user;
+    const photoURL = user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
+    document.getElementById('nav-avatar').src = photoURL;
+    document.getElementById('nav-username').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
+  });
+
+  // Mode selection
+  document.getElementById('individual-mode-btn').addEventListener('click', () => {
+    currentMode = 'individual';
+    startIndividualQuiz();
+  });
+
+  document.getElementById('team-mode-btn').addEventListener('click', () => {
+    currentMode = 'team';
+    showTeamLobby();
+  });
+
+  function startIndividualQuiz() {
+    sessionId = 'individual_' + Date.now();
+    teamMembers = [{
+      email: currentUser.email,
+      name: currentUser.displayName || currentUser.email,
+      photoURL: currentUser.photoURL,
+      score: 0,
+      isHost: true
+    }];
+    showScreen('quiz-screen');
+    startQuiz();
+  }
+
+  function showTeamLobby() {
+    sessionId = 'team_' + Date.now();
+    teamMembers = [{
+      email: currentUser.email,
+      name: currentUser.displayName || currentUser.email,
+      photoURL: currentUser.photoURL,
+      score: 0,
+      isHost: true
+    }];
+    renderMemberList();
+    showScreen('team-lobby-screen');
+
+    // Create Firestore session
+    setDoc(doc(db, 'sessions', sessionId), {
+      hostEmail: currentUser.email,
+      members: teamMembers,
+      createdAt: serverTimestamp(),
+      status: 'lobby'
+    });
+
+    // Listen for new members
+    onSnapshot(doc(db, 'sessions', sessionId), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        teamMembers = data.members || [];
+        renderMemberList();
+        if (data.status === 'started') {
+          showScreen('quiz-screen');
+          startQuiz();
+        }
+      }
+    });
+  }
+
+  function renderMemberList() {
+    const list = document.getElementById('member-list');
+    list.innerHTML = '';
+    teamMembers.forEach(member => {
+      const div = document.createElement('div');
+      div.className = 'member-item';
+      const initial = member.name.charAt(0).toUpperCase();
+      div.innerHTML = `
+        <div class="member-avatar">${initial}</div>
+        <div class="member-name">${member.name}</div>
+        ${member.isHost ? '<span class="member-badge">Host</span>' : ''}
+      `;
+      list.appendChild(div);
+    });
+    document.getElementById('member-count').textContent = teamMembers.length;
+  }
+
+  document.getElementById('send-invite-btn').addEventListener('click', async () => {
+    const email = document.getElementById('invite-email-input').value.trim();
+    if (!email) return alert('Please enter an email');
+    if (teamMembers.length >= 5) return alert('Maximum 5 members allowed');
+    if (teamMembers.find(m => m.email === email)) return alert('User already in team');
+
+    // In a real app, you'd send an actual invite. For now, simulate adding them
+    const newMember = {
+      email: email,
+      name: email.split('@')[0],
+      photoURL: null,
+      score: 0,
+      isHost: false
+    };
+    teamMembers.push(newMember);
+    
+    await updateDoc(doc(db, 'sessions', sessionId), {
+      members: teamMembers
+    });
+
+    document.getElementById('invite-email-input').value = '';
+    alert(`Invite sent to ${email}!`);
+  });
+
+  document.getElementById('back-to-mode-btn').addEventListener('click', () => {
+    showScreen('mode-selection-screen');
+  });
+
+  document.getElementById('start-quiz-btn').addEventListener('click', async () => {
+    await updateDoc(doc(db, 'sessions', sessionId), {
+      status: 'started'
+    });
+  });
+
+  function startQuiz() {
+    currentQuestionIndex = 0;
+    userScore = 0;
+    renderParticipants();
+    showQuestion();
+  }
+
+  function renderParticipants() {
+    const bar = document.getElementById('participants-bar');
+    bar.innerHTML = '';
+    teamMembers.forEach(member => {
+      const chip = document.createElement('div');
+      chip.className = 'participant-chip';
+      chip.innerHTML = `
+        <div class="dot"></div>
+        <span>${member.name.split(' ')[0]}</span>
+        <span class="score">${member.score}</span>
+      `;
+      bar.appendChild(chip);
+    });
+  }
+
+  function showQuestion() {
+    const q = questions[currentQuestionIndex];
+    document.getElementById('current-question-num').textContent = currentQuestionIndex + 1;
+    document.getElementById('total-questions').textContent = questions.length;
+    document.getElementById('q-num').textContent = currentQuestionIndex + 1;
+    document.getElementById('question-text').textContent = q.question;
+
+    const grid = document.getElementById('answers-grid');
+    grid.innerHTML = '';
+    q.answers.forEach((answer, idx) => {
+      const div = document.createElement('div');
+      div.className = 'answer-option';
+      div.textContent = answer;
+      div.addEventListener('click', () => selectAnswer(idx));
+      grid.appendChild(div);
+    });
+
+    document.getElementById('next-question-btn').style.display = 'none';
+    document.getElementById('finish-quiz-btn').style.display = 'none';
+    startTimer();
+  }
+
+  function selectAnswer(selectedIdx) {
+    clearInterval(timerInterval);
+    const q = questions[currentQuestionIndex];
+    const options = document.querySelectorAll('.answer-option');
+    
+    options.forEach((opt, idx) => {
+      opt.style.pointerEvents = 'none';
+      if (idx === q.correct) {
+        opt.classList.add('correct');
+      } else if (idx === selectedIdx) {
+        opt.classList.add('incorrect');
+      }
+    });
+
+    if (selectedIdx === q.correct) {
+      userScore += 10;
+      teamMembers.find(m => m.email === currentUser.email).score = userScore;
+      renderParticipants();
+    }
+
+    if (currentQuestionIndex < questions.length - 1) {
+      document.getElementById('next-question-btn').style.display = 'block';
+    } else {
+      document.getElementById('finish-quiz-btn').style.display = 'block';
+    }
+  }
+
+  function startTimer() {
+    let time = 30;
+    document.getElementById('quiz-timer').textContent = time;
+    timerInterval = setInterval(() => {
+      time--;
+      document.getElementById('quiz-timer').textContent = time;
+      if (time <= 0) {
+        clearInterval(timerInterval);
+        selectAnswer(-1); // Auto-submit with wrong answer
+      }
+    }, 1000);
+  }
+
+  document.getElementById('next-question-btn').addEventListener('click', () => {
+    currentQuestionIndex++;
+    showQuestion();
+  });
+
+  document.getElementById('finish-quiz-btn').addEventListener('click', () => {
+    alert(`Quiz completed! Your score: ${userScore}/${questions.length * 10}`);
+    window.location.href = 'index.html';
+  });
+
+  function showScreen(screenId) {
+    document.getElementById('mode-selection-screen').classList.add('hidden');
+    document.getElementById('team-lobby-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById(screenId).classList.remove('hidden');
+  }
+</script>
+
+</body>
+</html>
