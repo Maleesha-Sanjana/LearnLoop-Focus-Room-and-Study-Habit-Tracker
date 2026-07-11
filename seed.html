@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>LearnLoop Firestore Seed (Admin)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; }
+    button { padding: 10px 16px; margin: 8px 8px 8px 0; cursor: pointer; }
+    pre { background: #f5f5f5; padding: 12px; border-radius: 8px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>LearnLoop Firestore Seed</h1>
+  <p>One-time admin page to seed quiz questions into Firestore. Run while logged in as a project admin.</p>
+  <button id="seed-quiz">Seed quizSets/default</button>
+  <button id="seed-config">Seed config/app</button>
+  <pre id="log">Ready.</pre>
+
+  <script type="module">
+    import { auth } from './js/firebase.js';
+    import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { db } from './js/firebase.js';
+
+    const log = document.getElementById('log');
+    function write(msg) { log.textContent += '\n' + msg; }
+
+    document.getElementById('seed-quiz').addEventListener('click', async () => {
+      if (!auth.currentUser) {
+        write('Please log in first via login.html, then return here.');
+        return;
+      }
+
+      const questions = [
+        { question: 'What is the capital of France?', answers: ['London', 'Berlin', 'Paris', 'Madrid'], correct: 2 },
+        { question: 'Which planet is known as the Red Planet?', answers: ['Venus', 'Mars', 'Jupiter', 'Saturn'], correct: 1 },
+        { question: 'What is 15 × 8?', answers: ['120', '125', '115', '130'], correct: 0 },
+        { question: "Who wrote 'Romeo and Juliet'?", answers: ['Charles Dickens', 'William Shakespeare', 'Jane Austen', 'Mark Twain'], correct: 1 },
+        { question: 'What is the largest ocean on Earth?', answers: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'], correct: 3 }
+      ];
+
+      try {
+        await setDoc(doc(db, 'quizSets', 'default'), { questions, updatedAt: new Date().toISOString() });
+        write(`Seeded ${questions.length} questions to quizSets/default`);
+      } catch (err) {
+        write('Error: ' + err.message);
+      }
+    });
+
+    document.getElementById('seed-config').addEventListener('click', async () => {
+      if (!auth.currentUser) {
+        write('Please log in first via login.html, then return here.');
+        return;
+      }
+
+      try {
+        await setDoc(doc(db, 'config', 'app'), {
+          subjects: ['Java', 'React', 'Database', 'Networking', 'Algorithms', 'Machine Learning', 'System Design'],
+          avatars: ['Aisha', 'David', 'Emma', 'Sarah', 'Caleb', 'Maya'],
+          badgeDefinitions: [
+            { id: 'streak-badge', title: '7 Day Streak', icon: '🔥', threshold: 7, metric: 'streak' },
+            { id: 'goal-badge', title: 'Goal Master', icon: '🎯', threshold: 20, metric: 'goalsCompleted' },
+            { id: 'hours-badge', title: '100 Study Hours', icon: '📚', threshold: 100, metric: 'hours' },
+            { id: 'team-badge', title: 'Reputation Pro', icon: '✨', threshold: 500, metric: 'reputation' },
+            { id: 'notes-badge', title: 'Contributor Portfolio', icon: '📝', threshold: 3, metric: 'resourcesCount' },
+            { id: 'focus-badge', title: 'Focus Champion', icon: '⚡', threshold: 95, metric: 'focusScore' }
+          ],
+          updatedAt: new Date().toISOString()
+        });
+        write('Seeded config/app (subjects, avatars, badges)');
+      } catch (err) {
+        write('Error: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

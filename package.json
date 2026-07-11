@@ -1,0 +1,17 @@
+{
+  "name": "learnloop",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "firebase:use": "firebase use learnloop-f89c2",
+    "firebase:deploy": "firebase deploy",
+    "firebase:deploy:rules": "firebase deploy --only firestore:rules",
+    "firebase:deploy:storage": "firebase deploy --only storage",
+    "firebase:deploy:hosting": "firebase deploy --only hosting",
+    "firebase:deploy:firestore": "firebase deploy --only firestore",
+    "firebase:seed": "node scripts/seed-firestore.mjs"
+  },
+  "devDependencies": {
+    "firebase-admin": "^13.4.0"
+  }
+}

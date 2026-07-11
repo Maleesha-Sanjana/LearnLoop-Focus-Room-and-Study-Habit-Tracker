@@ -1,6 +1,6 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import {
   getAuth,
+  onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
@@ -10,33 +10,7 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
-  authDomain: "learnloop-f89c2.firebaseapp.com",
-  projectId: "learnloop-f89c2",
-  storageBucket: "learnloop-f89c2.firebasestorage.app",
-  messagingSenderId: "777914976314",
-  appId: "1:777914976314:web:2cd051169684c24caf8d03",
-  measurementId: "G-3SBVP21TE7"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-async function saveUserToDatabase(user, userName) {
-  const resolvedName = (userName || user.displayName || user.phoneNumber || user.email?.split('@')[0] || 'User').trim();
-  await setDoc(doc(db, 'users', user.uid), {
-    userName: resolvedName,
-    email: user.email || '',
-    phoneNumber: user.phoneNumber || null,
-    photoURL: user.photoURL || null,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-  return resolvedName;
-}
+import { auth, upsertUserRecord } from './firebase.js';
 
 function normalizePhone(raw) {
   const trimmed = raw.trim();
@@ -71,14 +45,25 @@ function getPhoneAuthErrorMessage(error) {
   return messages[error.code] || 'Something went wrong. Please try again.';
 }
 
-async function initLoginPageAuth() {
-  await auth.authStateReady();
-  if (auth.currentUser) {
-    window.location.replace('index.html');
-  }
+async function saveUserToDatabase(user, userName) {
+  const resolvedName = (userName || user.displayName || user.phoneNumber || user.email?.split('@')[0] || 'User').trim();
+  await upsertUserRecord(user, resolvedName);
+  return resolvedName;
 }
 
-initLoginPageAuth();
+let loginRedirectDone = false;
+
+async function initLoginRedirect() {
+  await auth.authStateReady();
+  onAuthStateChanged(auth, (user) => {
+    if (user && !loginRedirectDone) {
+      loginRedirectDone = true;
+      window.location.href = 'index.html';
+    }
+  });
+}
+
+initLoginRedirect();
 
 function showError(msg) {
   let el = document.getElementById('auth-error');

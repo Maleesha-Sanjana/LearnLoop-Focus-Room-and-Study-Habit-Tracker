@@ -86,15 +86,29 @@ function animateCounter(el, target, suffix = '') {
 
 const statsSection = document.querySelector('.stats-section');
 let statsAnimated = false;
+let statsDataReady = false;
+
+function animateStatsFromDom() {
+  if (statsAnimated || !statsDataReady) return;
+  statsAnimated = true;
+  const spans = document.querySelectorAll('.stats-big span');
+  const suffixes = [' students', ' study sessions', ' goals completed'];
+  spans.forEach((span, i) => {
+    const target = parseInt(span.dataset.target || '0', 10);
+    animateCounter(span, target, suffixes[i] || '');
+  });
+}
+
+window.addEventListener('ll-stats-loaded', () => {
+  statsDataReady = true;
+  if (statsSection) {
+    const rect = statsSection.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.6) animateStatsFromDom();
+  }
+});
 
 const statsObserver = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting && !statsAnimated) {
-    statsAnimated = true;
-    const spans = document.querySelectorAll('.stats-big span');
-    if (spans[0]) animateCounter(spans[0], 12400, ' students');
-    if (spans[1]) animateCounter(spans[1], 890000, ' study sessions');
-    if (spans[2]) animateCounter(spans[2], 34000, ' goals completed');
-  }
+  if (entries[0].isIntersecting) animateStatsFromDom();
 }, { threshold: 0.5 });
 
 if (statsSection) statsObserver.observe(statsSection);
