@@ -4,311 +4,10 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LearnLoop</title>
+  <link rel="icon" href="assets/logo.png" type="image/png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#111;-webkit-font-smoothing:antialiased}
-    a{text-decoration:none;color:inherit}
-    img{display:block;width:100%;height:100%;object-fit:cover}
-
-    /* NAVBAR */
-    .navbar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(255,255,255,.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.9);border-radius:999px;padding:8px 16px 8px 16px;display:flex;align-items:center;gap:24px;box-shadow:0 2px 16px rgba(0,0,0,.06),0 0 0 0.5px rgba(0,0,0,.04);white-space:nowrap}
-    .nav-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.95rem;letter-spacing:-.02em}
-    .nav-brand .icon{width:28px;height:28px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff}
-    .nav-links{display:flex;gap:4px}
-    .nav-links a{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s}
-    .nav-links a:hover,.nav-links a.active{color:#111;background:#f5f5f5}
-    .nav-actions{display:flex;gap:8px;align-items:center}
-    .btn-ghost{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s}
-    .btn-ghost:hover{color:#111;background:#f5f5f5}
-    .btn-solid{padding:8px 18px;border-radius:999px;background:#111;color:#fff;font-size:.88rem;font-weight:600;transition:.15s}
-    .btn-solid:hover{background:#333}
-
-    /* SECTION 1 - HERO */
-    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px}
-    .hero-img{width:72px;height:72px;border-radius:18px;overflow:hidden;margin-bottom:28px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
-    .hero h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:900;letter-spacing:-.04em;line-height:1.08;max-width:700px;margin-bottom:20px}
-    .hero p{font-size:1rem;color:#888;max-width:420px;line-height:1.6;margin-bottom:32px}
-    .hero-btns{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
-    .btn-hero-solid{padding:13px 28px;border-radius:999px;background:#111;color:#fff;font-size:.95rem;font-weight:700;transition:.15s}
-    .btn-hero-solid:hover{background:#333;transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
-    .btn-hero-outline{padding:12px 24px;border-radius:999px;border:1.5px solid #d0d0d0;color:#111;font-size:.95rem;font-weight:600;display:flex;align-items:center;gap:6px;transition:.15s}
-    .btn-hero-outline:hover{border-color:#111;background:#f5f5f5}
-    /* SECTION 2 - APP PREVIEW */
-    .preview-section{background:#f5f5f5;padding:80px 24px;display:flex;justify-content:center}
-    .preview-wrap{width:100%;max-width:900px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.1);border:1px solid #e8e8e8}
-    .preview-wrap img{width:100%;height:auto;object-fit:cover;display:block}
-
-    /* SECTION 3 - STATS */
-    .stats-section{padding:100px 24px;text-align:center;position:relative;overflow:hidden}
-    .stats-eyebrow{font-size:.9rem;color:#888;font-weight:500;margin-bottom:16px}
-    .stats-big{font-size:clamp(2.4rem,5vw,4.2rem);font-weight:900;letter-spacing:-.04em;line-height:1.15;color:#111}
-    .stats-big span{display:block}
-    .floating-icons{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-    .fi{position:absolute;font-size:2.2rem;opacity:.18;animation:float 6s ease-in-out infinite}
-    .fi-1{top:15%;left:8%;animation-delay:0s}
-    .fi-2{top:20%;right:10%;animation-delay:1s}
-    .fi-3{top:55%;left:5%;animation-delay:2s}
-    .fi-4{bottom:20%;right:8%;animation-delay:.5s}
-    .fi-5{bottom:15%;left:15%;animation-delay:1.5s}
-    .fi-6{top:40%;right:5%;animation-delay:2.5s}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
-
-    /* SECTION 4 - FLOWS */
-    .flows-section{padding:80px 24px;max-width:1100px;margin:0 auto}
-    .section-title{font-size:clamp(2rem,4vw,3rem);font-weight:900;letter-spacing:-.04em;line-height:1.1;text-align:center;margin-bottom:56px}
-    .flows-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .flow-card{border-radius:20px;overflow:hidden;background:#f5f5f5;aspect-ratio:4/3;position:relative}
-    .flow-card img{width:100%;height:100%;object-fit:cover}
-    .flow-card.large{grid-column:span 2;aspect-ratio:16/7}
-
-    /* SECTION 5 - FEATURES */
-    .features-section{padding:80px 24px;max-width:1100px;margin:0 auto}
-    .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-    .feat-card{background:#f5f5f5;border-radius:20px;overflow:hidden;border:1px solid #e8e8e8}
-    .feat-img{aspect-ratio:4/3;overflow:hidden}
-    .feat-img img{width:100%;height:100%;object-fit:cover}
-    .feat-body{padding:20px}
-    .feat-body h3{font-size:1rem;font-weight:700;margin-bottom:6px}
-    .feat-body p{font-size:.85rem;color:#888;line-height:1.55}
-
-    /* SECTION 5b - LEADERBOARD */
-    .leaderboard-section{padding:80px 24px;max-width:1100px;margin:0 auto}
-    .leaderboard-section .section-subtitle{text-align:center;font-size:.95rem;color:#888;max-width:520px;margin:-40px auto 40px;line-height:1.6}
-    .lb-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:32px;background:#f5f5f5;padding:6px;border-radius:999px;width:fit-content;margin-left:auto;margin-right:auto}
-    .lb-tab{padding:10px 24px;border-radius:999px;border:none;background:transparent;font-family:inherit;font-size:.88rem;font-weight:600;color:#888;cursor:pointer;transition:.15s}
-    .lb-tab:hover{color:#111}
-    .lb-tab.active{background:#fff;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-    .lb-panel{display:none}
-    .lb-panel.active{display:block}
-    .lb-podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px;align-items:end;margin-bottom:32px;max-width:720px;margin-left:auto;margin-right:auto}
-    .lb-podium-card{background:#f5f5f5;border-radius:20px;padding:24px 16px;text-align:center;border:1px solid #e8e8e8;position:relative}
-    .lb-podium-card.first{order:2;padding-top:36px;background:#111;color:#fff;border-color:#111}
-    .lb-podium-card.second{order:1}
-    .lb-podium-card.third{order:3}
-    .lb-rank{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:12px}
-    .lb-podium-card.first .lb-rank{color:#aaa}
-    .lb-avatar{width:56px;height:56px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:#fff;background:#111;flex-shrink:0}
-    .lb-podium-card.first .lb-avatar{background:#fff;color:#111;box-shadow:0 0 0 3px rgba(255,255,255,.2)}
-    .lb-podium-card .lb-avatar{width:48px;height:48px;font-size:1rem}
-    .lb-name{font-size:.95rem;font-weight:700;margin-bottom:4px;line-height:1.3}
-    .lb-score{font-size:1.4rem;font-weight:900;letter-spacing:-.02em}
-    .lb-podium-card.first .lb-score{font-size:1.6rem}
-    .lb-meta{font-size:.78rem;color:#888;margin-top:4px}
-    .lb-podium-card.first .lb-meta{color:#aaa}
-    .lb-crown{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:1.4rem}
-    .lb-table{background:#fff;border:1px solid #e8e8e8;border-radius:20px;overflow:hidden}
-    .lb-table-head{display:grid;grid-template-columns:48px 1fr auto;padding:14px 20px;background:#fafafa;border-bottom:1px solid #e8e8e8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888}
-    .lb-row{display:grid;grid-template-columns:48px 1fr auto;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0;transition:.15s}
-    .lb-row:last-child{border-bottom:none}
-    .lb-row:hover{background:#fafafa}
-    .lb-row-rank{font-size:.95rem;font-weight:800;color:#888;width:28px;text-align:center}
-    .lb-row-user{display:flex;align-items:center;gap:12px;min-width:0}
-    .lb-row-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;flex-shrink:0}
-    .lb-row-info{min-width:0}
-    .lb-row-name{font-size:.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .lb-row-detail{font-size:.78rem;color:#888}
-    .lb-row-score{font-size:1rem;font-weight:800;text-align:right;white-space:nowrap}
-    .lb-row-score span{font-size:.75rem;font-weight:600;color:#888;margin-left:2px}
-
-    /* SECTION 6 - TESTIMONIALS */
-    .testimonials-section{padding:80px 24px;max-width:1100px;margin:0 auto}
-    .tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .tcard{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:20px}
-    .tcard-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-    .tcard-av{width:36px;height:36px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
-    .tcard-name{font-size:.88rem;font-weight:700}
-    .tcard-role{font-size:.75rem;color:#888}
-    .tcard p{font-size:.83rem;color:#444;line-height:1.6}
-
-    /* SECTION 7 - CTA */
-    .cta-section{padding:100px 24px;text-align:center}
-    .cta-section h2{font-size:clamp(2.4rem,5vw,4rem);font-weight:900;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px}
-    .cta-section p{font-size:.95rem;color:#888;margin-bottom:32px}
-    .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-
-    /* SECTION 8 - MARQUEE */
-    .marquee-wrap{background:#f5f5f5;padding:28px 0;overflow:hidden;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8}
-    .marquee-track{display:flex;gap:0;animation:marquee 28s linear infinite;width:max-content}
-    .marquee-item{display:flex;align-items:center;gap:10px;padding:0 28px;font-size:.9rem;font-weight:600;color:#555;white-space:nowrap}
-    .marquee-item img{width:28px;height:28px;border-radius:7px;object-fit:cover;flex-shrink:0}
-    @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-    /* SECTION 9 - EXTRA PREVIEW */
-    .extra-section{padding:80px 24px;max-width:1100px;margin:0 auto}
-    .extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .extra-card{border-radius:20px;overflow:hidden;background:#f5f5f5;aspect-ratio:4/3}
-    .extra-card img{width:100%;height:100%;object-fit:cover}
-
-    /* SECTION 10 - FOOTER */
-    footer{background:#111;color:#fff;padding:60px 24px 32px}
-    .footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:48px;margin-bottom:48px}
-    .footer-brand .logo{font-size:1.4rem;font-weight:900;letter-spacing:-.03em;margin-bottom:10px}
-    .footer-brand p{font-size:.85rem;color:#888;line-height:1.6}
-    .footer-links{display:flex;gap:48px}
-    .footer-col h5{font-size:.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
-    .footer-col a{display:block;font-size:.88rem;color:#aaa;margin-bottom:8px;transition:.15s}
-    .footer-col a:hover{color:#fff}
-    .footer-bottom{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid #222;font-size:.8rem;color:#555}
-    .footer-bottom a{color:#555;margin-left:20px;transition:.15s}
-    .footer-bottom a:hover{color:#fff}
-
-
-    /* FOOTER REVEAL EFFECT */
-    body{position:relative}
-    footer{position:fixed;bottom:0;left:0;right:0;z-index:0}
-    .main-wrap{background:#fff;border-radius:0 0 48px 48px;position:relative;z-index:1;margin-bottom:0}
-    body.dark .main-wrap{background:#0a0a0a}
-    .footer-spacer{height:0}
-
-    @media(max-width:900px){
-      .navbar{min-width:unset;width:calc(100% - 32px);gap:12px}
-      .nav-links{display:none}
-      .flows-grid,.extra-grid{grid-template-columns:1fr}
-      .flow-card.large{grid-column:span 1;aspect-ratio:4/3}
-      .features-grid{grid-template-columns:1fr}
-      .lb-podium{grid-template-columns:1fr;max-width:360px}
-      .lb-podium-card.first{order:1;padding-top:24px}
-      .lb-podium-card.second,.lb-podium-card.third{order:2}
-      .tgrid{grid-template-columns:1fr 1fr}
-      .footer-inner{grid-template-columns:1fr}
-      .footer-links{flex-wrap:wrap;gap:24px}
-    }
-    @media(max-width:600px){
-      .tgrid{grid-template-columns:1fr}
-    }
-
-    /* THEME TOGGLE BUTTON */
-    .theme-toggle{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;color:#888;padding:0}
-    .theme-toggle:hover{color:#111;transform:scale(1.15)}
-
-    /* NOTIFICATION BELL */
-    .notif-wrapper{position:fixed;top:14px;right:20px;z-index:1100;display:none}
-    .notif-btn{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(0,0,0,.08);box-shadow:0 2px 16px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;transition:.2s;position:relative;flex-shrink:0}
-    .notif-btn:hover{background:#fff;color:#111;transform:scale(1.05)}
-    .notif-badge{position:absolute;top:6px;right:6px;width:9px;height:9px;background:#e53e3e;border-radius:50%;border:2px solid #fff;display:none}
-    .notif-badge.has-unread{display:block}
-    .notif-dropdown{position:absolute;top:calc(100% + 10px);right:0;width:320px;background:#fff;border:1px solid #e8e8e8;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.12);overflow:hidden;opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;transition:opacity .2s,transform .2s}
-    .notif-dropdown.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
-    .notif-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid #e8e8e8}
-    .notif-header h4{font-size:.9rem;font-weight:800;letter-spacing:-.01em}
-    .notif-mark-all{font-size:.78rem;font-weight:600;color:#888;cursor:pointer;border:none;background:none;font-family:inherit;transition:.15s}
-    .notif-mark-all:hover{color:#111}
-    .notif-list{max-height:340px;overflow-y:auto}
-    .notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 20px;border-bottom:1px solid #f0f0f0;transition:.15s;cursor:pointer}
-    .notif-item:last-child{border-bottom:none}
-    .notif-item:hover{background:#fafafa}
-    .notif-item.unread{background:#fafafa}
-    .notif-item.unread .notif-dot{opacity:1}
-    .notif-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-    .notif-icon.green{background:#f0fdf4}
-    .notif-icon.blue{background:#eff6ff}
-    .notif-icon.yellow{background:#fffbeb}
-    .notif-icon.purple{background:#f5f3ff}
-    .notif-body{flex:1;min-width:0}
-    .notif-title{font-size:.85rem;font-weight:600;margin-bottom:3px;line-height:1.3}
-    .notif-time{font-size:.75rem;color:#aaa}
-    .notif-dot{width:7px;height:7px;border-radius:50%;background:#e53e3e;flex-shrink:0;margin-top:5px;opacity:0;transition:.15s}
-    .notif-empty{padding:32px 20px;text-align:center;color:#aaa;font-size:.88rem}
-    .notif-footer{padding:12px 20px;border-top:1px solid #e8e8e8;text-align:center}
-    .notif-footer a{font-size:.82rem;font-weight:600;color:#888;transition:.15s}
-    .notif-footer a:hover{color:#111}
-
-    /* Dark mode notifications */
-    body.dark .notif-btn{background:rgba(20,20,20,.85);border-color:rgba(255,255,255,.1);color:#888;box-shadow:0 2px 16px rgba(0,0,0,.3)}
-    body.dark .notif-btn:hover{background:#1a1a1a;color:#f0f0f0}
-    body.dark .notif-badge{border-color:#0a0a0a}
-    body.dark .notif-dropdown{background:#141414;border-color:#2a2a2a;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-    body.dark .notif-header{border-color:#2a2a2a}
-    body.dark .notif-header h4{color:#f0f0f0}
-    body.dark .notif-mark-all:hover{color:#f0f0f0}
-    body.dark .notif-item{border-color:#1e1e1e}
-    body.dark .notif-item:hover{background:#1a1a1a}
-    body.dark .notif-item.unread{background:#1a1a1a}
-    body.dark .notif-icon.green{background:#052e16}
-    body.dark .notif-icon.blue{background:#0c1a2e}
-    body.dark .notif-icon.yellow{background:#1c1400}
-    body.dark .notif-icon.purple{background:#1a0a2e}
-    body.dark .notif-title{color:#f0f0f0}
-    body.dark .notif-footer{border-color:#2a2a2a}
-    body.dark .notif-footer a:hover{color:#f0f0f0}
-
-    /* DARK MODE */
-    body.dark{background:#0a0a0a;color:#f0f0f0}
-    body.dark .navbar{background:rgba(20,20,20,.65);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-color:rgba(255,255,255,.08);box-shadow:0 2px 16px rgba(0,0,0,.3),0 0 0 0.5px rgba(255,255,255,.04)}
-    body.dark .nav-brand{color:#f0f0f0}
-    body.dark .nav-brand .icon{background:#f0f0f0;color:#111}
-    body.dark .nav-links a{color:#888}
-    body.dark .nav-links a:hover,body.dark .nav-links a.active{color:#f0f0f0;background:#1e1e1e}
-    body.dark .btn-ghost{color:#888}
-    body.dark .btn-ghost:hover{color:#f0f0f0;background:#1e1e1e}
-    body.dark .btn-solid{background:#f0f0f0;color:#111}
-    body.dark .btn-solid:hover{background:#ccc}
-    body.dark .theme-toggle{color:#888}
-    body.dark .theme-toggle:hover{color:#f0f0f0;transform:scale(1.15)}
-    body.dark #nav-profile-btn{border-color:#333;color:#f0f0f0}
-    body.dark #nav-profile-btn:hover{border-color:#888;background:#1e1e1e}
-
-    body.dark .hero h1{color:#f0f0f0}
-    body.dark .hero p{color:#888}
-    body.dark .btn-hero-solid{background:#f0f0f0;color:#111}
-    body.dark .btn-hero-solid:hover{background:#ccc}
-    body.dark .btn-hero-outline{border-color:#333;color:#f0f0f0}
-    body.dark .btn-hero-outline:hover{border-color:#888;background:#1e1e1e}
-    body.dark .preview-section{background:#111}
-    body.dark .preview-wrap{background:#1a1a1a;border-color:#2a2a2a;box-shadow:0 8px 40px rgba(0,0,0,.4)}
-
-    body.dark .stats-section{background:#0a0a0a}
-    body.dark .stats-eyebrow{color:#555}
-    body.dark .stats-big{color:#f0f0f0}
-
-    body.dark .flows-section{background:#0a0a0a}
-    body.dark .section-title{color:#f0f0f0}
-    body.dark .flow-card{background:#1a1a1a}
-
-    body.dark .features-section{background:#0a0a0a}
-    body.dark .feat-card{background:#141414;border-color:#2a2a2a}
-    body.dark .feat-body h3{color:#f0f0f0}
-    body.dark .feat-body p{color:#666}
-
-    body.dark .leaderboard-section{background:#0a0a0a}
-    body.dark .leaderboard-section .section-subtitle{color:#666}
-    body.dark .lb-tabs{background:#141414}
-    body.dark .lb-tab{color:#666}
-    body.dark .lb-tab:hover{color:#f0f0f0}
-    body.dark .lb-tab.active{background:#1e1e1e;color:#f0f0f0;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-    body.dark .lb-podium-card{background:#141414;border-color:#2a2a2a}
-    body.dark .lb-podium-card.first{background:#f0f0f0;color:#111;border-color:#f0f0f0}
-    body.dark .lb-podium-card.first .lb-rank,body.dark .lb-podium-card.first .lb-meta{color:#666}
-    body.dark .lb-podium-card.first .lb-avatar{background:#111;color:#fff}
-    body.dark .lb-table{background:#141414;border-color:#2a2a2a}
-    body.dark .lb-table-head{background:#1a1a1a;border-color:#2a2a2a;color:#555}
-    body.dark .lb-row{border-color:#1e1e1e}
-    body.dark .lb-row:hover{background:#1a1a1a}
-    body.dark .lb-row-name{color:#f0f0f0}
-    body.dark .lb-row-detail{color:#555}
-
-    body.dark .testimonials-section{background:#0a0a0a}
-    body.dark .tcard{background:#141414;border-color:#2a2a2a}
-    body.dark .tcard-name{color:#f0f0f0}
-    body.dark .tcard-role{color:#555}
-    body.dark .tcard p{color:#777}
-
-    body.dark .cta-section{background:#0a0a0a}
-    body.dark .cta-section h2{color:#f0f0f0}
-    body.dark .cta-section p{color:#666}
-
-    body.dark .marquee-wrap{background:#111;border-color:#1e1e1e}
-    body.dark .marquee-item{color:#555}
-
-    body.dark .extra-section{background:#0a0a0a}
-    body.dark .extra-card{background:#1a1a1a}
-
-    body.dark footer{background:#000}
-    body.dark .footer-bottom{border-color:#1a1a1a}
-  </style>
+  <link rel="stylesheet" href="css/index.css"/>
 </head>
 <body>
 
@@ -337,7 +36,7 @@
 <!-- NAVBAR -->
 <header class="navbar">
   <a href="index.html" class="nav-brand">
-    <div class="icon">&#127891;</div>
+    <img class="icon" src="assets/logo.png" alt="LearnLoop"/>
     <span>LearnLoop</span>
   </a>
   <nav class="nav-links">
@@ -350,7 +49,7 @@
     <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
     <!-- Logged-out state -->
     <a href="login.html" class="btn-ghost" id="nav-login-btn">Log in</a>
-    <a href="login.html" class="btn-solid" id="nav-join-btn">Join for free</a>
+    <a href="login.html#signup" class="btn-solid" id="nav-join-btn">Join for free</a>
     <!-- Logged-in state (hidden by default) -->
     <a href="profile.html" id="nav-profile-btn" style="display:none;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;border:1.5px solid #e8e8e8;font-size:.88rem;font-weight:600;color:#111;transition:.15s;text-decoration:none;">
       <img id="nav-avatar" src="" alt="Profile" style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:#f5f5f5;flex-shrink:0;"/>
@@ -362,12 +61,12 @@
 <!-- SECTION 1: HERO -->
 <section class="hero" id="hero">
   <div class="hero-img">
-    <img src="images/1.png" alt="LearnLoop App"/>
+    <img src="assets/logo.png" alt="LearnLoop"/>
   </div>
   <h1>Study smarter,<br/>achieve more.</h1>
   <p>Track sessions, set goals, join focus rooms, and build consistent study habits &mdash; all in one place.</p>
   <div class="hero-btns">
-    <a href="login.html" class="btn-hero-solid" id="hero-cta-btn">Join for free</a>
+    <a href="login.html#signup" class="btn-hero-solid" id="hero-cta-btn">Join for free</a>
     <a href="#features" class="btn-hero-outline">See features &rarr;</a>
   </div>
 </section>
@@ -676,7 +375,7 @@
   <h2>Never fall behind<br/>on your studies again.</h2>
   <p>Use LearnLoop for free as long as you like.</p>
   <div class="cta-btns">
-    <a href="login.html" class="btn-hero-solid" id="cta-primary-btn">Join for free</a>
+    <a href="login.html#signup" class="btn-hero-solid" id="cta-primary-btn">Join for free</a>
     <a href="login.html" class="btn-hero-outline" id="cta-secondary-btn">Log in &rarr;</a>
   </div>
 </section>
@@ -726,7 +425,7 @@
 <footer>
   <div class="footer-inner">
     <div class="footer-brand">
-      <div class="logo">&#127891; LearnLoop</div>
+      <div class="logo"><img src="assets/logo.png" alt="LearnLoop"/></div>
       <p>Study better digital experiences<br/>with LearnLoop.</p>
     </div>
     <div class="footer-links">
@@ -742,7 +441,7 @@
       <div class="footer-col">
         <h5>Account</h5>
         <a href="login.html">Log in</a>
-        <a href="login.html">Sign up</a>
+        <a href="login.html#signup">Sign up</a>
         <a href="profile.html">Profile</a>
         <a href="index.html">Goals</a>
       </div>
@@ -766,156 +465,6 @@
 
 <script src="js/main.js"></script>
 
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
-    authDomain: "learnloop-f89c2.firebaseapp.com",
-    projectId: "learnloop-f89c2",
-    storageBucket: "learnloop-f89c2.firebasestorage.app",
-    messagingSenderId: "777914976314",
-    appId: "1:777914976314:web:2cd051169684c24caf8d03",
-    measurementId: "G-3SBVP21TE7"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  const loginBtn   = document.getElementById('nav-login-btn');
-  const joinBtn    = document.getElementById('nav-join-btn');
-  const profileBtn = document.getElementById('nav-profile-btn');
-  const navAvatar  = document.getElementById('nav-avatar');
-  const navUsername = document.getElementById('nav-username');
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // User is logged in — show profile icon, hide login/join
-      loginBtn.style.display  = 'none';
-      joinBtn.style.display   = 'none';
-      profileBtn.style.display = 'flex';
-
-      // Set avatar: use Google/Facebook photo or fallback to initials avatar
-      const photoURL = user.photoURL
-        || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
-      navAvatar.src = photoURL;
-
-      // Show first name only
-      const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
-      navUsername.textContent = firstName;
-
-      // Hero button → "Go to Focus Room"
-      const heroCta = document.getElementById('hero-cta-btn');
-      if (heroCta) {
-        heroCta.textContent = 'Go to Focus Room';
-        heroCta.href = 'focusroom.html';
-      }
-
-      // CTA section → replace both buttons with a single "Go to Dashboard"
-      const ctaPrimary   = document.getElementById('cta-primary-btn');
-      const ctaSecondary = document.getElementById('cta-secondary-btn');
-      if (ctaPrimary) {
-        ctaPrimary.textContent = 'Go to Dashboard';
-        ctaPrimary.href = '#';
-      }
-      if (ctaSecondary) {
-        ctaSecondary.style.display = 'none';
-      }
-
-      // Show notification bell
-      document.getElementById('notif-wrapper').style.display = 'block';
-      initNotifications(user);
-
-    } else {
-      // Not logged in — show login/join, hide profile
-      loginBtn.style.display  = '';
-      joinBtn.style.display   = '';
-      profileBtn.style.display = 'none';
-      document.getElementById('notif-wrapper').style.display = 'none';
-    }
-  });
-
-  // ── Notifications ──
-  function initNotifications(user) {
-    const firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
-
-    const notifications = [
-      { id: 1, icon: '🔥', color: 'yellow', title: `You're on a 3-day streak, ${firstName}! Keep it up.`, time: '2 min ago', unread: true },
-      { id: 2, icon: '🏆', color: 'purple', title: 'You scored 90% on your last quiz. Great work!', time: '1 hour ago', unread: true },
-      { id: 3, icon: '👥', color: 'blue',   title: 'A teammate invited you to a Focus Room session.', time: '3 hours ago', unread: true },
-      { id: 4, icon: '🎯', color: 'green',  title: 'Daily goal completed! You studied for 2 hours today.', time: 'Yesterday', unread: false },
-      { id: 5, icon: '📚', color: 'blue',   title: 'New study material added to your dashboard.', time: '2 days ago', unread: false },
-    ];
-
-    let unreadIds = new Set(notifications.filter(n => n.unread).map(n => n.id));
-
-    function renderNotifications() {
-      const list = document.getElementById('notif-list');
-      list.innerHTML = '';
-
-      if (notifications.length === 0) {
-        list.innerHTML = '<div class="notif-empty">You\'re all caught up! 🎉</div>';
-        return;
-      }
-
-      notifications.forEach(n => {
-        const isUnread = unreadIds.has(n.id);
-        const item = document.createElement('div');
-        item.className = `notif-item${isUnread ? ' unread' : ''}`;
-        item.innerHTML = `
-          <div class="notif-icon ${n.color}">${n.icon}</div>
-          <div class="notif-body">
-            <div class="notif-title">${n.title}</div>
-            <div class="notif-time">${n.time}</div>
-          </div>
-          <div class="notif-dot"></div>
-        `;
-        item.addEventListener('click', () => {
-          unreadIds.delete(n.id);
-          updateBadge();
-          renderNotifications();
-        });
-        list.appendChild(item);
-      });
-
-      updateBadge();
-    }
-
-    function updateBadge() {
-      const badge = document.getElementById('notif-badge');
-      if (unreadIds.size > 0) {
-        badge.classList.add('has-unread');
-      } else {
-        badge.classList.remove('has-unread');
-      }
-    }
-
-    // Toggle dropdown
-    const btn      = document.getElementById('notif-btn');
-    const dropdown = document.getElementById('notif-dropdown');
-
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdown.classList.toggle('open');
-    });
-
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target) && e.target !== btn) {
-        dropdown.classList.remove('open');
-      }
-    });
-
-    // Mark all as read
-    document.getElementById('notif-mark-all').addEventListener('click', () => {
-      unreadIds.clear();
-      updateBadge();
-      renderNotifications();
-    });
-
-    renderNotifications();
-  }
-</script>
+<script type="module" src="js/index-auth.js"></script>
 </body>
 </html>

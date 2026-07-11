@@ -4,71 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join LearnLoop</title>
+    <link rel="icon" href="assets/logo.png" type="image/png"/>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* Shared Styles from main template */
-        :root { --bg: #ffffff; --text: #111; --border: #e8e8e8; --muted: #888; --accent: #111; }
-        body.dark { --bg: #0a0a0a; --text: #f0f0f0; --border: #2a2a2a; --muted: #666; --accent: #f0f0f0; }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: background 0.3s; }
-
-        .auth-container { width: 100%; max-width: 400px; padding: 40px 24px; text-align: center; }
-        .logo { font-size: 1.5rem; font-weight: 900; margin-bottom: 32px; display: block; text-decoration: none; color: var(--text); }
-        h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
-        p.subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
-
-        /* Forms */
-        form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
-        .input-group { display: flex; flex-direction: column; gap: 6px; }
-        label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
-        input { padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: inherit; font-size: 0.95rem; outline: none; }
-        input:focus { border-color: var(--text); }
-
-        /* Buttons */
-        .btn-primary { padding: 14px; border-radius: 999px; background: var(--accent); color: var(--bg); border: none; font-weight: 700; cursor: pointer; margin-top: 8px; transition: 0.2s; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        
-        .divider { margin: 24px 0; position: relative; text-align: center; }
-        .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); z-index: 1; }
-        .divider span { position: relative; z-index: 2; background: var(--bg); padding: 0 12px; color: var(--muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-
-        /* Social Auth */
-        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        .btn-social { padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
-        .btn-social:hover { background: rgba(0,0,0,0.05); }
-        body.dark .btn-social:hover { background: rgba(255,255,255,0.05); }
-
-        /* Utility */
-        .toggle-link { margin-top: 24px; font-size: 0.9rem; color: var(--muted); }
-        .toggle-link span { color: var(--text); font-weight: 600; cursor: pointer; }
-        .forgot-pass { font-size: 0.8rem; color: var(--muted); text-align: right; cursor: pointer; }
-        .hidden { display: none !important; }
-
-        /* OTP/Phone specifics */
-        #phone-section, #otp-section { display: flex; flex-direction: column; gap: 12px; }
-
-        /* Theme toggle button */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 36px;
-            height: 36px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-            z-index: 100;
-        }
-        .theme-toggle:hover { background: var(--border); transform: scale(1.1); }
-    </style>
+    <link rel="stylesheet" href="css/login.css"/>
+    <script>
+      if (new URLSearchParams(location.search).get('mode') === 'signup' || location.hash === '#signup') {
+        document.documentElement.classList.add('auth-signup');
+      }
+    </script>
 </head>
 <body>
 
@@ -79,7 +23,7 @@
 </button>
 
 <div class="auth-container">
-    <a href="index.html" class="logo">🎓 LearnLoop</a>
+    <a href="index.html" class="logo"><img src="assets/logo.png" alt="LearnLoop"/></a>
 
     <!-- Header Text -->
     <div id="auth-header">
@@ -89,12 +33,8 @@
 
     <!-- Social Logins -->
     <div class="social-grid">
-        <!-- Google Button Updated with Chrome/Google Logo -->
         <button class="btn-social" id="google-login-btn">
             <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" width="18" height="18" alt="Google">  Google
-        </button>
-        <button class="btn-social" id="facebook-login-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Facebook
         </button>
     </div>
 
@@ -102,9 +42,9 @@
 
     <!-- Main Auth Form -->
     <form id="main-auth-form">
-        <div class="input-group" id="name-group" class="hidden">
-            <label>Full Name</label>
-            <input type="text" placeholder="Aisha Rahman" id="user-name">
+        <div class="input-group hidden" id="name-group">
+            <label for="userName">UserName</label>
+            <input type="text" name="UserName" id="userName" placeholder="Enter your username" autocomplete="username">
         </div>
         
         <div class="input-group">
@@ -124,15 +64,16 @@
     <!-- Phone Authentication Section (Optional/Alternative) -->
     <div class="divider"><span>Or Mobile</span></div>
     <div id="phone-section">
-        <input type="tel" placeholder="+1 (555) 000-0000" id="phone-number">
+        <input type="tel" placeholder="+94 78 636 0508" id="phone-number">
+        <div id="recaptcha-container"></div>
         <button class="btn-social" id="send-otp-btn" style="width:100%">Send OTP via SMS</button>
     </div>
 
     <div id="otp-section" class="hidden">
-        <p class="subtitle">Enter the 6-digit code sent to your phone.</p>
-        <input type="text" placeholder="000000" maxlength="6" id="otp-code">
+        <p class="subtitle" id="otp-sent-msg">Enter the 6-digit code sent to your phone.</p>
+        <input type="text" placeholder="000000" maxlength="6" id="otp-code" inputmode="numeric" autocomplete="one-time-code">
         <button class="btn-primary" id="verify-otp-btn">Verify & Login</button>
-        <div id="recaptcha-container"></div>
+        <button type="button" class="btn-social" id="change-phone-btn" style="width:100%">Use a different number</button>
     </div>
 
     <!-- Toggle between Login/Signup -->
@@ -141,216 +82,18 @@
     </div>
 </div>
 
-<!-- Firebase SDK -->
-<script type="module">
-    // Import Firebase modules
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { 
-        getAuth, 
-        onAuthStateChanged,
-        signInWithPopup, 
-        GoogleAuthProvider, 
-        FacebookAuthProvider,
-        createUserWithEmailAndPassword,
-        signInWithEmailAndPassword,
-        sendPasswordResetEmail,
-        RecaptchaVerifier,
-        signInWithPhoneNumber
-    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-    // Your Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
-        authDomain: "learnloop-f89c2.firebaseapp.com",
-        projectId: "learnloop-f89c2",
-        storageBucket: "learnloop-f89c2.firebasestorage.app",
-        messagingSenderId: "777914976314",
-        appId: "1:777914976314:web:2cd051169684c24caf8d03",
-        measurementId: "G-3SBVP21TE7"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // If already logged in, skip the login page entirely
-    onAuthStateChanged(auth, (user) => {
-        if (user) window.location.href = "index.html";
-    });
-
-    // ── Error display (replaces alert) ──
-    function showError(msg) {
-        let el = document.getElementById('auth-error');
-        if (!el) {
-            el = document.createElement('p');
-            el.id = 'auth-error';
-            el.style.cssText = 'color:#e53e3e;font-size:.85rem;margin-top:8px;text-align:center;';
-            document.querySelector('.auth-container').appendChild(el);
-        }
-        el.textContent = msg;
-        setTimeout(() => { el.textContent = ''; }, 4000);
-    }
-
-    // ── Theme: read from localStorage (shared with index.html / profile.html) ──
-    const SUN  = document.getElementById('theme-icon-sun');
-    const MOON = document.getElementById('theme-icon-moon');
-
-    function applyTheme(dark) {
-        document.body.classList.toggle('dark', dark);
-        SUN.style.display  = dark ? 'block' : 'none';
-        MOON.style.display = dark ? 'none'  : 'block';
-        localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
-    }
-
-    // On load: respect whatever the dashboard last saved, fall back to system pref
-    const saved = localStorage.getItem('ll_theme');
-    if (saved) {
-        applyTheme(saved === 'dark');
-    } else {
-        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
-    }
-
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-        applyTheme(!document.body.classList.contains('dark'));
-    });
-
-    let isSignUp = false;
-    let recaptchaVerifier;
-    let confirmationResult;
-
-    window.toggleAuth = function(signUp) {
-        isSignUp = signUp;
-        const title = document.getElementById('auth-title');
-        const subtitle = document.getElementById('auth-subtitle');
-        const submitBtn = document.getElementById('submit-btn');
-        const nameGroup = document.getElementById('name-group');
-        const toggleText = document.getElementById('toggle-text');
-
-        if (isSignUp) {
-            title.innerText = "Create an account";
-            subtitle.innerText = "Start tracking your study sessions today.";
-            submitBtn.innerText = "Create Account";
-            nameGroup.style.display = "flex";
-            toggleText.innerHTML = 'Already have an account? <span onclick="toggleAuth(false)">Log in</span>';
-        } else {
-            title.innerText = "Welcome back";
-            subtitle.innerText = "Log in to continue your study journey.";
-            submitBtn.innerText = "Sign In";
-            nameGroup.style.display = "none";
-            toggleText.innerHTML = 'Don\'t have an account? <span onclick="toggleAuth(true)">Sign up</span>';
-        }
-    }
-
-    window.showForgetPassword = async function() {
-        const email = document.getElementById('user-email').value;
-        if(!email) {
-            alert("Please enter your email address first.");
-            return;
-        }
-        
-        try {
-            await sendPasswordResetEmail(auth, email);
-            alert("Password reset link sent to: " + email);
-        } catch (error) {
-            console.error("Password reset error:", error);
-            alert("Error sending password reset email: " + error.message);
-        }
-    }
-
-    // Google Login
-    document.getElementById('google-login-btn').addEventListener('click', async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            console.log("Google login successful:", result.user);
-            window.location.href = "index.html";
-        } catch (error) {
-            console.error("Google login error:", error);
-            showError("Google login failed: " + error.message);
-        }
-    });
-
-    // Facebook Login
-    document.getElementById('facebook-login-btn').addEventListener('click', async () => {
-        const provider = new FacebookAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            console.log("Facebook login successful:", result.user);
-            window.location.href = "index.html";
-        } catch (error) {
-            console.error("Facebook login error:", error);
-            showError("Facebook login failed: " + error.message);
-        }
-    });
-
-    // Email/Password Authentication
-    document.getElementById('main-auth-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('user-email').value;
-        const password = document.getElementById('user-password').value;
-        const name = document.getElementById('user-name').value;
-
-        try {
-            if (isSignUp) {
-                const result = await createUserWithEmailAndPassword(auth, email, password);
-                console.log("Sign up successful:", result.user);
-                window.location.href = "index.html";
-            } else {
-                const result = await signInWithEmailAndPassword(auth, email, password);
-                console.log("Sign in successful:", result.user);
-                window.location.href = "index.html";
-            }
-        } catch (error) {
-            console.error("Authentication error:", error);
-            showError(error.message);
-        }
-    });
-
-    // Phone Authentication - Send OTP
-    document.getElementById('send-otp-btn').addEventListener('click', async () => {
-        const phoneNumber = document.getElementById('phone-number').value;
-        if (!phoneNumber) {
-            showError("Please enter a phone number");
-            return;
-        }
-
-        try {
-            if (!recaptchaVerifier) {
-                recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': (response) => { console.log("reCAPTCHA solved"); }
-                });
-            }
-            confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-            document.getElementById('phone-section').classList.add('hidden');
-            document.getElementById('otp-section').classList.remove('hidden');
-        } catch (error) {
-            console.error("Error sending OTP:", error);
-            showError("Failed to send OTP: " + error.message);
-        }
-    });
-
-    // Phone Authentication - Verify OTP
-    document.getElementById('verify-otp-btn').addEventListener('click', async () => {
-        const code = document.getElementById('otp-code').value;
-        if (!code) {
-            showError("Please enter the OTP code");
-            return;
-        }
-
-        try {
-            const result = await confirmationResult.confirm(code);
-            console.log("Phone authentication successful:", result.user);
-            window.location.href = "index.html";
-        } catch (error) {
-            console.error("Error verifying OTP:", error);
-            showError("Invalid OTP code: " + error.message);
-        }
-    });
-
-    // Initialize hidden state
-    document.getElementById('name-group').style.display = "none";
+<script>
+  if (document.documentElement.classList.contains('auth-signup')) {
+    document.getElementById('auth-title').textContent = 'Create an account';
+    document.getElementById('auth-subtitle').textContent = 'Start tracking your study sessions today.';
+    document.getElementById('submit-btn').textContent = 'Create Account';
+    document.getElementById('name-group').classList.remove('hidden');
+    document.getElementById('toggle-text').innerHTML = 'Already have an account? <span onclick="toggleAuth(false)">Log in</span>';
+  }
 </script>
+
+<!-- Firebase SDK -->
+<script type="module" src="js/login.js?v=4"></script>
 
 </body>
 </html>
