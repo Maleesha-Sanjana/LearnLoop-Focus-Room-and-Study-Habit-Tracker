@@ -63,18 +63,6 @@ body {
   background: var(--ll-accent-hover);
 }
 
-/* AI panel — dark card like index footer / podium */
-.ll-ai-panel {
-  background: #111111;
-  border-color: #222222;
-  color: #f0f0f0;
-}
-
-.dark .ll-ai-panel {
-  background: #141414;
-  border-color: #2a2a2a;
-}
-
 /* Footer — match index */
 .ll-footer {
   background: #111111;
