@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/login.css"/>
+    <script>
+      if (new URLSearchParams(location.search).get('mode') === 'signup' || location.hash === '#signup') {
+        document.documentElement.classList.add('auth-signup');
+      }
+    </script>
 </head>
 <body>
 
@@ -77,8 +82,18 @@
     </div>
 </div>
 
+<script>
+  if (document.documentElement.classList.contains('auth-signup')) {
+    document.getElementById('auth-title').textContent = 'Create an account';
+    document.getElementById('auth-subtitle').textContent = 'Start tracking your study sessions today.';
+    document.getElementById('submit-btn').textContent = 'Create Account';
+    document.getElementById('name-group').classList.remove('hidden');
+    document.getElementById('toggle-text').innerHTML = 'Already have an account? <span onclick="toggleAuth(false)">Log in</span>';
+  }
+</script>
+
 <!-- Firebase SDK -->
-<script type="module" src="js/login.js?v=2"></script>
+<script type="module" src="js/login.js?v=4"></script>
 
 </body>
 </html>
