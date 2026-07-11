@@ -1,7 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import {
   getAuth,
-  onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
@@ -72,9 +71,14 @@ function getPhoneAuthErrorMessage(error) {
   return messages[error.code] || 'Something went wrong. Please try again.';
 }
 
-onAuthStateChanged(auth, (user) => {
-  if (user) window.location.href = "index.html";
-});
+async function initLoginPageAuth() {
+  await auth.authStateReady();
+  if (auth.currentUser) {
+    window.location.replace('index.html');
+  }
+}
+
+initLoginPageAuth();
 
 function showError(msg) {
   let el = document.getElementById('auth-error');

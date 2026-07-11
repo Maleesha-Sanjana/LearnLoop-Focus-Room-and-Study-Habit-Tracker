@@ -14,15 +14,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  // --- Auth state: populate profile with real user data ---
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      // Not logged in — redirect to login
-      window.location.href = 'login.html';
-      return;
-    }
-
-    // Navbar
+  function populateProfile(user) {
     const navAvatar   = document.getElementById('nav-avatar');
     const navUsername = document.getElementById('nav-username');
     const photoURL = user.photoURL
@@ -31,11 +23,9 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
     const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
     navUsername.textContent = firstName;
 
-    // Profile card — avatar
     const previewImg = document.getElementById('profile-img-preview');
     previewImg.src = photoURL;
 
-    // Profile card — name fields
     if (user.displayName && !user.displayName.startsWith('+')) {
       const parts = user.displayName.split(' ');
       document.getElementById('first-name').value = parts[0] || '';
@@ -45,9 +35,21 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
       document.getElementById('last-name').value = '';
     }
 
-    // Profile card — email
     document.getElementById('email').value = user.email || '';
-  });
+  }
+
+  async function initProfileAuth() {
+    await auth.authStateReady();
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace('login.html');
+        return;
+      }
+      populateProfile(user);
+    });
+  }
+
+  initProfileAuth();
 
   // --- Logout ---
   document.getElementById('logout-btn').addEventListener('click', async () => {
