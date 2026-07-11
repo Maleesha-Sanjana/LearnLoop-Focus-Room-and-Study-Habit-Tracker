@@ -20,30 +20,27 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
   const navAvatar  = document.getElementById('nav-avatar');
   const navUsername = document.getElementById('nav-username');
 
-  onAuthStateChanged(auth, (user) => {
+  let notificationsReady = false;
+
+  function updateNavForUser(user) {
     if (user) {
-      // User is logged in — show profile icon, hide login/join
       loginBtn.style.display  = 'none';
       joinBtn.style.display   = 'none';
       profileBtn.style.display = 'flex';
 
-      // Set avatar: use Google photo or fallback to initials avatar
       const photoURL = user.photoURL
         || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
       navAvatar.src = photoURL;
 
-      // Show first name only
       const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
       navUsername.textContent = firstName;
 
-      // Hero button → "Go to Focus Room"
       const heroCta = document.getElementById('hero-cta-btn');
       if (heroCta) {
         heroCta.textContent = 'Go to Focus Room';
         heroCta.href = 'focusroom.html';
       }
 
-      // CTA section → replace both buttons with a single "Go to Dashboard"
       const ctaPrimary   = document.getElementById('cta-primary-btn');
       const ctaSecondary = document.getElementById('cta-secondary-btn');
       if (ctaPrimary) {
@@ -54,18 +51,26 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
         ctaSecondary.style.display = 'none';
       }
 
-      // Show notification bell
       document.getElementById('notif-wrapper').style.display = 'block';
-      initNotifications(user);
-
+      if (!notificationsReady) {
+        notificationsReady = true;
+        initNotifications(user);
+      }
     } else {
-      // Not logged in — show login/join, hide profile
+      notificationsReady = false;
       loginBtn.style.display  = '';
       joinBtn.style.display   = '';
       profileBtn.style.display = 'none';
       document.getElementById('notif-wrapper').style.display = 'none';
     }
-  });
+  }
+
+  async function initIndexAuth() {
+    await auth.authStateReady();
+    onAuthStateChanged(auth, updateNavForUser);
+  }
+
+  initIndexAuth();
 
   // ── Notifications ──
   function initNotifications(user) {

@@ -65,17 +65,26 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
     localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
   });
 
-  // Auth check
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = 'login.html';
-      return;
-    }
+  // Auth check — wait for persisted session before redirecting
+  function populateNav(user) {
     currentUser = user;
     const photoURL = user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
     document.getElementById('nav-avatar').src = photoURL;
     document.getElementById('nav-username').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
-  });
+  }
+
+  async function initFocusRoomAuth() {
+    await auth.authStateReady();
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace('login.html');
+        return;
+      }
+      populateNav(user);
+    });
+  }
+
+  initFocusRoomAuth();
 
   // Mode selection
   document.getElementById('individual-mode-btn').addEventListener('click', () => {
