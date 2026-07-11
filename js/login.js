@@ -109,7 +109,13 @@ const TEST_PHONES = {
   '+94786360508': '123456',
 };
 
-let isSignUp = false;
+function isSignupPage() {
+  return new URLSearchParams(window.location.search).get('mode') === 'signup'
+    || window.location.hash === '#signup'
+    || document.documentElement.classList.contains('auth-signup');
+}
+
+let isSignUp = isSignupPage();
 let recaptchaVerifier = null;
 let confirmationResult = null;
 let pendingPhone = '';
@@ -176,6 +182,11 @@ window.toggleAuth = function(signUp) {
     toggleText.innerHTML = 'Don\'t have an account? <span onclick="toggleAuth(true)">Sign up</span>';
   }
 };
+
+const authMode = new URLSearchParams(window.location.search).get('mode');
+if (isSignUp || authMode === 'signup' || window.location.hash === '#signup') {
+  toggleAuth(true);
+}
 
 window.showForgetPassword = async function() {
   const email = document.getElementById('user-email').value;
