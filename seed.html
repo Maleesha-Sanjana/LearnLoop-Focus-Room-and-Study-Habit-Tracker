@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-  <h1>Uploading quiz questions…</h1>
+  <h1>Upload quiz questions to database</h1>
   <p id="status">Checking login…</p>
   <p id="next" style="display:none"><a href="focusroom.html">Go to Focus Room →</a></p>
 
@@ -20,19 +20,6 @@
     import { auth } from './js/firebase.js';
     import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     import { db } from './js/firebase.js';
-
-    const questions = [
-      { question: 'What is a variable in programming?', answers: ['A type of loop', 'A named place to store data', 'A keyboard shortcut', 'An error message'], correct: 1 },
-      { question: 'Which symbol is commonly used for single-line comments in JavaScript?', answers: ['#', '//', '/*', '--'], correct: 1 },
-      { question: 'What does HTML stand for?', answers: ['HyperText Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyper Transfer Mark Language'], correct: 0 },
-      { question: 'In a database table, what is a row also called?', answers: ['Column', 'Record', 'Index', 'Query'], correct: 1 },
-      { question: 'What is the Pomodoro Technique used for?', answers: ['Cooking pasta', 'Focused study in timed intervals', 'Learning a new language', 'Memorizing formulas'], correct: 1 },
-      { question: 'Which device connects your computer to the internet at home?', answers: ['Monitor', 'Router', 'Printer', 'Keyboard'], correct: 1 },
-      { question: 'What does CPU stand for?', answers: ['Central Processing Unit', 'Computer Personal Utility', 'Core Program Unit', 'Central Power Usage'], correct: 0 },
-      { question: 'In React, what is a component?', answers: ['A reusable piece of UI', 'A database table', 'A network cable', 'A file format'], correct: 0 },
-      { question: 'What is the purpose of a study goal?', answers: ['To waste time', 'To track what you want to achieve', 'To replace exams', 'To avoid studying'], correct: 1 },
-      { question: 'Which of these is a search engine?', answers: ['Microsoft Word', 'Google', 'Photoshop', 'Excel'], correct: 1 }
-    ];
 
     const status = document.getElementById('status');
 
@@ -45,15 +32,24 @@
       }
 
       try {
+        status.textContent = 'Loading questions from data/quiz-questions.json…';
+        const res = await fetch('data/quiz-questions.json');
+        if (!res.ok) throw new Error('Could not load data/quiz-questions.json');
+        const questions = await res.json();
+        if (!Array.isArray(questions) || !questions.length) {
+          throw new Error('Quiz questions file is empty.');
+        }
+
         await setDoc(doc(db, 'quizSets', 'default'), {
           questions,
           updatedAt: serverTimestamp()
         });
-        status.textContent = `Done! ${questions.length} beginner questions saved to Firestore. All users can play now.`;
+
+        status.textContent = `Done! ${questions.length} questions saved to Firestore (quizSets/default). Focus Room will load from the database.`;
         status.className = 'ok';
         document.getElementById('next').style.display = 'block';
       } catch (err) {
-        status.textContent = 'Error: ' + err.message + ' — Firestore rules may block writes. Use Firebase Console instead.';
+        status.textContent = 'Error: ' + err.message;
         status.className = 'err';
       }
     }

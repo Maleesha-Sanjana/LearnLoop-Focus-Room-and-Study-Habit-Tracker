@@ -49,19 +49,42 @@
     </div>
   </div>
 
-  <!-- SCREEN 2: Team Lobby -->
-  <div id="team-lobby-screen" class="team-lobby hidden">
-    <h1>Team Lobby</h1>
-    <p class="subtitle">Invite your teammates to join the session</p>
+  <!-- SCREEN 2: Team Setup (name) -->
+  <div id="team-setup-screen" class="team-lobby hidden">
+    <h1>Create Your Team</h1>
+    <p class="subtitle">Enter a team name, then invite up to 4 teammates (5 players total including you)</p>
 
     <div class="lobby-card">
+      <label class="field-label" for="team-name-input">Team Name</label>
+      <input type="text" id="team-name-input" class="add-member-input" placeholder="e.g. Kottu Coders" maxlength="40"/>
+      <button class="btn btn-primary btn-full" id="create-team-btn" style="margin-top:12px">Continue to Invite Members</button>
+    </div>
+
+    <button class="btn btn-secondary" id="back-from-setup-btn">← Back</button>
+  </div>
+
+  <!-- SCREEN 3: Team Lobby -->
+  <div id="team-lobby-screen" class="team-lobby hidden">
+    <h1 id="lobby-team-title">Team Lobby</h1>
+    <p class="subtitle">Invite teammates by email. They will receive a join link via email.</p>
+
+    <div class="lobby-card">
+      <div class="team-name-display" id="lobby-team-name">Team Name</div>
+
       <h3>Team Members (<span id="member-count">1</span>/5)</h3>
-      <div class="member-list" id="member-list">
-        <!-- Members will be added here dynamically -->
+      <div class="member-list" id="member-list"></div>
+
+      <h3 class="section-gap">Pending Invites (<span id="pending-count">0</span>)</h3>
+      <div class="pending-list" id="pending-list">
+        <p class="empty-hint" id="pending-empty">No invites sent yet.</p>
       </div>
-      
-      <input type="email" id="invite-email-input" class="add-member-input" placeholder="Enter teammate's email to invite..."/>
-      <button class="btn btn-secondary btn-full" id="send-invite-btn">Send Invite</button>
+
+      <div class="invite-section" id="invite-section">
+        <label class="field-label" for="invite-email-input">Teammate email</label>
+        <input type="email" id="invite-email-input" class="add-member-input" placeholder="friend@email.com"/>
+        <button class="btn btn-secondary btn-full" id="send-invite-btn">Send Request</button>
+        <p class="invite-hint">You can invite up to 4 people. Each person gets an email with a join link.</p>
+      </div>
     </div>
 
     <div class="btn-group">
@@ -70,7 +93,7 @@
     </div>
   </div>
 
-  <!-- SCREEN 3: Quiz -->
+  <!-- SCREEN 4: Quiz -->
   <div id="quiz-screen" class="quiz-screen hidden">
     <div class="participants-bar" id="participants-bar">
       <!-- Participant chips will be added here -->
