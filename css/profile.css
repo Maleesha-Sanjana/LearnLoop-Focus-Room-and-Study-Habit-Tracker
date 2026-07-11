@@ -1,3 +1,89 @@
+/* LearnLoop profile theme — matches index.css / login.css */
+:root {
+  --ll-bg: #ffffff;
+  --ll-text: #111111;
+  --ll-muted: #888888;
+  --ll-border: #e8e8e8;
+  --ll-surface: #f5f5f5;
+  --ll-accent: #111111;
+  --ll-accent-hover: #333333;
+  --ll-accent-fg: #ffffff;
+  --ll-card: #ffffff;
+}
+
+.dark {
+  --ll-bg: #0a0a0a;
+  --ll-text: #f0f0f0;
+  --ll-muted: #666666;
+  --ll-border: #2a2a2a;
+  --ll-surface: #141414;
+  --ll-accent: #f0f0f0;
+  --ll-accent-hover: #cccccc;
+  --ll-accent-fg: #111111;
+  --ll-card: #141414;
+}
+
+body {
+  background: var(--ll-bg);
+  color: var(--ll-text);
+}
+
+/* Navbar — match home page glass pill */
+.ll-navbar {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .ll-navbar {
+  background: rgba(20, 20, 20, 0.65);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.04);
+}
+
+/* Cards */
+.ll-card {
+  background: var(--ll-card);
+  border-color: var(--ll-border);
+}
+
+.ll-surface {
+  background: var(--ll-surface);
+}
+
+/* Primary buttons — black on light, white on dark (like index .btn-solid) */
+.ll-btn-primary {
+  background: var(--ll-accent);
+  color: var(--ll-accent-fg);
+}
+
+.ll-btn-primary:hover {
+  background: var(--ll-accent-hover);
+}
+
+/* AI panel — dark card like index footer / podium */
+.ll-ai-panel {
+  background: #111111;
+  border-color: #222222;
+  color: #f0f0f0;
+}
+
+.dark .ll-ai-panel {
+  background: #141414;
+  border-color: #2a2a2a;
+}
+
+/* Footer — match index */
+.ll-footer {
+  background: #111111;
+}
+
+.dark .ll-footer {
+  background: #000000;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

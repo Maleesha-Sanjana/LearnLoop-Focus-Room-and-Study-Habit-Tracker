@@ -92,13 +92,14 @@ function profileDocRef(uid) {
 }
 
 function initTheme() {
-  if (localStorage.getItem('ll_theme') === 'dark') {
-    document.documentElement.classList.add('dark');
-  }
+  const isDark = localStorage.getItem('ll_theme') === 'dark';
+  document.documentElement.classList.toggle('dark', isDark);
+  document.body.classList.toggle('dark', isDark);
   document.getElementById('theme-toggle')?.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
+    const dark = !document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', dark);
+    document.body.classList.toggle('dark', dark);
+    localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
   });
 }
 
@@ -322,8 +323,8 @@ window.openChatModal = function (buddyName) {
   const container = document.getElementById('chat-messages-container');
   container.innerHTML = `
     <div class="flex flex-col">
-      <span class="text-brand-600 dark:text-brand-400 font-bold text-[10px] mb-0.5">${buddy.name}</span>
-      <div class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">
+      <span class="text-[#111] dark:text-[#f0f0f0] font-bold text-[10px] mb-0.5">${buddy.name}</span>
+      <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">
         Hey ${window.userProfile.name}! ${buddy.desc} Interested in a joint session?
       </div>
     </div>
@@ -348,8 +349,8 @@ window.sendChatMessage = function () {
   const container = document.getElementById('chat-messages-container');
   container.insertAdjacentHTML('beforeend', `
     <div class="flex flex-col items-end">
-      <span class="text-slate-400 text-[10px] mb-0.5">You</span>
-      <div class="bg-brand-600 text-white p-2.5 rounded-2xl rounded-tr-none inline-block max-w-[80%] text-right">${msgText}</div>
+      <span class="text-[#888] text-[10px] mb-0.5">You</span>
+      <div class="ll-btn-primary p-2.5 rounded-2xl rounded-tr-none inline-block max-w-[80%] text-right">${msgText}</div>
     </div>
   `);
   input.value = '';
@@ -363,8 +364,8 @@ window.sendChatMessage = function () {
 
     container.insertAdjacentHTML('beforeend', `
       <div class="flex flex-col">
-        <span class="text-brand-600 dark:text-brand-400 font-bold text-[10px] mb-0.5">${currentChattingBuddy.name}</span>
-        <div class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">${reply}</div>
+        <span class="text-[#111] dark:text-[#f0f0f0] font-bold text-[10px] mb-0.5">${currentChattingBuddy.name}</span>
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">${reply}</div>
       </div>
     `);
     container.scrollTop = container.scrollHeight;
@@ -419,8 +420,8 @@ window.toggleTab = function (tabName) {
   const btnProfile = document.getElementById('btn-tab-profile');
   const btnSettings = document.getElementById('btn-tab-settings');
 
-  const activeClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-brand-600 text-white shadow-brand-500/10 hover:bg-brand-700';
-  const inactiveClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700';
+  const activeClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition ll-btn-primary';
+  const inactiveClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] hover:bg-[#e8e8e8] dark:hover:bg-[#2a2a2a]';
 
   if (tabName === 'profile') {
     profileTab?.classList.remove('hidden');
@@ -444,11 +445,11 @@ window.showToast = function (message, isError = false) {
   icon.innerText = isError ? '⚠️' : '✨';
   text.innerText = message;
   box.className =
-    'fixed bottom-6 right-6 bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300';
+    'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300';
 
   setTimeout(() => {
     box.className =
-      'fixed bottom-6 right-6 bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none';
+      'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none';
   }, 2800);
 };
 
@@ -465,12 +466,12 @@ window.generateAIInsights = async function () {
   const hrs = document.getElementById('stat-hours')?.innerText ?? '0 hrs';
 
   container.innerHTML = `
-    <div class="space-y-3 bg-brand-900/40 p-4 rounded-2xl border border-brand-800/40 text-[11px] animate-fade-in">
-      <p><strong class="text-emerald-400">🔥 Strongest Focus:</strong> ${selectedSubjects.join(' & ') || 'General study'}. Consistent streak: ${streak} days.</p>
-      <p><strong class="text-orange-400">⚠️ Needs Improvement:</strong> Database schemas and SQL joins need more practice assignments.</p>
-      <p class="text-[10px] text-indigo-200 font-medium">💡 Recommended: Join a Databases focus room this afternoon.</p>
+    <div class="space-y-3 bg-[#1a1a1a] dark:bg-[#0a0a0a] p-4 rounded-2xl border border-[#333] dark:border-[#2a2a2a] text-[11px] animate-fade-in text-[#ccc]">
+      <p><strong class="text-[#f0f0f0]">🔥 Strongest Focus:</strong> ${selectedSubjects.join(' & ') || 'General study'}. Consistent streak: ${streak} days.</p>
+      <p><strong class="text-[#aaa]">⚠️ Needs Improvement:</strong> Database schemas and SQL joins need more practice assignments.</p>
+      <p class="text-[10px] text-[#888] font-medium">💡 Recommended: Join a Databases focus room this afternoon.</p>
     </div>
-    <button onclick="generateAIInsights()" class="w-full bg-white text-indigo-950 font-extrabold text-[10px] py-2 rounded-xl mt-3 hover:bg-slate-100 transition">
+    <button onclick="generateAIInsights()" class="w-full bg-[#f0f0f0] text-[#111] font-extrabold text-[10px] py-2 rounded-xl mt-3 hover:bg-white transition">
       Re-Analyze Profile
     </button>
   `;
@@ -499,17 +500,17 @@ function renderGoalTrackers() {
 
   goalsState.forEach(goal => {
     list.insertAdjacentHTML('beforeend', `
-      <div class="bg-slate-50 dark:bg-zinc-850/40 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/60">
+      <div class="bg-[#f5f5f5] dark:bg-[#1a1a1a] p-4 rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a]">
         <div class="flex items-center justify-between mb-2">
-          <span class="font-bold text-sm text-slate-900 dark:text-zinc-100">${goal.name}</span>
-          <span class="text-xs text-brand-600 dark:text-brand-400 font-extrabold" id="goal-val-${goal.id}">${goal.progress}%</span>
+          <span class="font-bold text-sm text-[#111] dark:text-[#f0f0f0]">${goal.name}</span>
+          <span class="text-xs text-[#111] dark:text-[#f0f0f0] font-extrabold" id="goal-val-${goal.id}">${goal.progress}%</span>
         </div>
-        <div class="w-full bg-slate-200 dark:bg-zinc-800 h-2.5 rounded-full overflow-hidden">
-          <div id="goal-bar-${goal.id}" class="bg-brand-500 h-full rounded-full transition-all duration-300" style="width: ${goal.progress}%"></div>
+        <div class="w-full bg-[#e8e8e8] dark:bg-[#2a2a2a] h-2.5 rounded-full overflow-hidden">
+          <div id="goal-bar-${goal.id}" class="bg-[#111] dark:bg-[#f0f0f0] h-full rounded-full transition-all duration-300" style="width: ${goal.progress}%"></div>
         </div>
         <div class="flex items-center justify-between mt-3">
-          <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal(${goal.id}, this.value)" class="w-3/4 accent-brand-600 cursor-pointer"/>
-          <button onclick="accomplishGoal(${goal.id})" class="text-xs font-bold text-slate-500 hover:text-emerald-500 dark:text-slate-400 transition">Mark Done</button>
+          <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal(${goal.id}, this.value)" class="w-3/4 accent-[#111] dark:accent-[#f0f0f0] cursor-pointer"/>
+          <button onclick="accomplishGoal(${goal.id})" class="text-xs font-bold text-[#888] hover:text-[#111] dark:hover:text-[#f0f0f0] transition">Mark Done</button>
         </div>
       </div>
     `);
@@ -524,8 +525,8 @@ function renderSubjectsList() {
   subjectsPool.forEach(subject => {
     const isSelected = selectedSubjects.includes(subject);
     const tagClass = isSelected
-      ? 'px-3 py-1.5 rounded-full text-xs font-bold bg-brand-100 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-900 cursor-pointer transition hover:scale-105'
-      : 'px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-zinc-800/60 text-slate-500 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700 cursor-pointer transition hover:scale-105';
+      ? 'px-3 py-1.5 rounded-full text-xs font-bold bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105'
+      : 'px-3 py-1.5 rounded-full text-xs font-semibold bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#888] dark:text-[#666] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105';
 
     const btn = document.createElement('button');
     btn.className = tagClass;
@@ -567,17 +568,17 @@ window.filterBuddies = function () {
 
   filtered.forEach(buddy => {
     list.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 rounded-2xl">
+      <div class="flex items-center justify-between p-3.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-2xl">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-brand-500/15">${buddy.avatar}</div>
+          <div class="w-8 h-8 rounded-xl bg-[#111] dark:bg-[#f0f0f0] text-white dark:text-[#111] flex items-center justify-center font-bold text-xs">${buddy.avatar}</div>
           <div>
-            <p class="text-xs font-bold text-slate-900 dark:text-zinc-100">${buddy.name}</p>
-            <p class="text-[9px] text-brand-600 dark:text-brand-400 font-semibold">${buddy.subjects.join(', ')}</p>
+            <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${buddy.name}</p>
+            <p class="text-[9px] text-[#888] dark:text-[#666] font-semibold">${buddy.subjects.join(', ')}</p>
           </div>
         </div>
         <div class="flex gap-1">
-          <button onclick="openChatModal('${buddy.name}')" class="text-[10px] bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 px-2.5 py-1.5 rounded-lg hover:bg-brand-100 font-bold transition">Message</button>
-          <button onclick="sendFocusCall('${buddy.name}')" class="text-[10px] bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-750 font-bold shadow-sm transition">Invite Focus</button>
+          <button onclick="openChatModal('${buddy.name}')" class="text-[10px] bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] px-2.5 py-1.5 rounded-lg hover:bg-[#e8e8e8] font-bold transition">Message</button>
+          <button onclick="sendFocusCall('${buddy.name}')" class="text-[10px] bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] px-2.5 py-1.5 rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#1e1e1e] font-bold shadow-sm transition">Invite Focus</button>
         </div>
       </div>
     `);
@@ -592,11 +593,11 @@ function renderAchievementsBadges() {
   badgesList.forEach(badge => {
     const isUnlocked = badge.state === 'unlocked';
     grid.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center gap-3 p-2.5 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800/60 ${isUnlocked ? '' : 'opacity-40'}">
+      <div class="flex items-center gap-3 p-2.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a] ${isUnlocked ? '' : 'opacity-40'}">
         <span class="text-2xl">${badge.icon}</span>
         <div>
           <p class="text-[11px] font-bold leading-tight">${badge.title}</p>
-          <span class="text-[9px] ${isUnlocked ? 'text-emerald-500 font-semibold' : 'text-slate-400'}">${isUnlocked ? 'Unlocked' : 'In Progress'}</span>
+          <span class="text-[9px] ${isUnlocked ? 'text-[#111] dark:text-[#f0f0f0] font-semibold' : 'text-[#888]'}">${isUnlocked ? 'Unlocked' : 'In Progress'}</span>
         </div>
       </div>
     `);
@@ -610,16 +611,16 @@ function renderSharedResources() {
 
   sharedResources.forEach((res, index) => {
     list.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800/60">
+      <div class="flex items-center justify-between p-3 bg-[#f5f5f5] dark:bg-[#1a1a1a] rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a]">
         <div class="flex items-center gap-3">
           <span class="text-xl">📄</span>
           <div>
-            <p class="text-xs font-bold leading-tight text-slate-800 dark:text-zinc-200">${res.name}</p>
-            <span class="text-[10px] text-slate-400">${res.size} • ${res.scope}</span>
+            <p class="text-xs font-bold leading-tight text-[#111] dark:text-[#f0f0f0]">${res.name}</p>
+            <span class="text-[10px] text-[#888]">${res.size} • ${res.scope}</span>
           </div>
         </div>
         <div class="flex gap-2 text-[10px] font-bold">
-          <button onclick="downloadResourceSimulated('${res.name.replace(/'/g, "\\'")}')" class="text-brand-600 dark:text-brand-400 hover:underline">Download</button>
+          <button onclick="downloadResourceSimulated('${res.name.replace(/'/g, "\\'")}')" class="text-[#111] dark:text-[#f0f0f0] hover:underline">Download</button>
           <button onclick="deleteResourceSimulated(${index})" class="text-red-500 hover:underline">Delete</button>
         </div>
       </div>
@@ -635,14 +636,14 @@ function renderBuddiesSidebar() {
   buddiesDatabase.slice(0, 4).forEach(b => {
     const isOnline = b.status !== 'Offline';
     const badgeColor =
-      b.status === 'Studying React' ? 'bg-brand-500 animate-pulse' : isOnline ? 'bg-emerald-500' : 'bg-slate-300';
+      b.status === 'Studying React' ? 'bg-[#111] dark:bg-[#f0f0f0] animate-pulse' : isOnline ? 'bg-[#111] dark:bg-[#f0f0f0]' : 'bg-[#ccc]';
     container.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800/30 p-1.5 rounded-xl transition" onclick="openChatModal('${b.name}')">
+      <div class="flex items-center justify-between cursor-pointer hover:bg-[#f5f5f5] dark:hover:bg-[#1a1a1a] p-1.5 rounded-xl transition" onclick="openChatModal('${b.name}')">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-brand-100 dark:bg-brand-950 flex items-center justify-center font-black text-brand-700 text-sm">${b.avatar}</div>
+          <div class="w-9 h-9 rounded-full bg-[#f5f5f5] dark:bg-[#1e1e1e] flex items-center justify-center font-black text-[#111] dark:text-[#f0f0f0] text-sm">${b.avatar}</div>
           <div>
-            <p class="text-xs font-bold text-slate-900 dark:text-zinc-100">${b.name}</p>
-            <p class="text-[10px] text-slate-400">${b.status}</p>
+            <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${b.name}</p>
+            <p class="text-[10px] text-[#888]">${b.status}</p>
           </div>
         </div>
         <span class="w-2.5 h-2.5 rounded-full ${badgeColor}"></span>
@@ -659,9 +660,9 @@ function renderActivityTimeline() {
   recentActivities.forEach(act => {
     container.insertAdjacentHTML('beforeend', `
       <div class="relative">
-        <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-brand-500 border-2 border-white dark:border-zinc-900"></div>
-        <p class="text-xs font-bold text-slate-800 dark:text-zinc-200">${act.text}</p>
-        <span class="text-[10px] text-slate-400">${act.time}</span>
+        <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-[#111] dark:bg-[#f0f0f0] border-2 border-white dark:border-[#0a0a0a]"></div>
+        <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${act.text}</p>
+        <span class="text-[10px] text-[#888]">${act.time}</span>
       </div>
     `);
   });
@@ -679,7 +680,7 @@ function renderAvatarSelections() {
 
   presetAvatars.forEach(avatar => {
     grid.insertAdjacentHTML('beforeend', `
-      <button onclick="updateAvatarSelection('${avatar}')" class="flex flex-col items-center p-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-brand-500 dark:hover:border-brand-400 rounded-2xl transition">
+      <button onclick="updateAvatarSelection('${avatar}')" class="flex flex-col items-center p-3 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] hover:border-[#111] dark:hover:border-[#f0f0f0] rounded-2xl transition">
         <img class="w-14 h-14 rounded-xl mb-1.5" src="https://api.dicebear.com/7.x/notionists/svg?seed=${avatar}&backgroundColor=ede9fe" alt="${avatar}"/>
         <span class="text-xs font-semibold text-slate-900 dark:text-zinc-100">${avatar}</span>
       </button>
