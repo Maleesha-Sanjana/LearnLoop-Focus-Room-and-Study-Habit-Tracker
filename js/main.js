@@ -113,7 +113,6 @@ if (marqueeTrack) {
 
 // ── Light / Dark Theme Toggle ──
 const themeToggle = document.getElementById('theme-toggle');
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 const SUN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="5"/>
@@ -133,28 +132,16 @@ const MOON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
 
 function applyTheme(dark) {
   document.body.classList.toggle('dark', dark);
-  // dark mode → show sun (to switch back to light); light mode → show moon (to switch to dark)
   themeToggle.innerHTML = dark ? SUN_SVG : MOON_SVG;
   themeToggle.setAttribute('title', dark ? 'Switch to light mode' : 'Switch to dark mode');
   themeToggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
   localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
 }
 
-// Load saved preference, fall back to system preference
-const saved = localStorage.getItem('ll_theme');
-if (saved) {
-  applyTheme(saved === 'dark');
-} else {
-  applyTheme(prefersDark.matches);
-}
+applyTheme(localStorage.getItem('ll_theme') === 'dark');
 
 themeToggle.addEventListener('click', () => {
   applyTheme(!document.body.classList.contains('dark'));
-});
-
-// Sync if system preference changes and user has no saved preference
-prefersDark.addEventListener('change', (e) => {
-  if (!localStorage.getItem('ll_theme')) applyTheme(e.matches);
 });
 
 

@@ -52,20 +52,18 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
     }
   ];
 
-  // Theme
+  // Theme (user choice only, defaults to light)
   const saved = localStorage.getItem('ll_theme');
-  if (saved === 'dark') document.body.classList.add('dark');
+  const isDark = saved === 'dark';
+  document.body.classList.toggle('dark', isDark);
+  document.getElementById('theme-icon-sun').style.display = isDark ? 'block' : 'none';
+  document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'block';
   document.getElementById('theme-toggle').addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    document.getElementById('theme-icon-sun').style.display = isDark ? 'block' : 'none';
-    document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'block';
-    localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
+    const dark = document.body.classList.toggle('dark');
+    document.getElementById('theme-icon-sun').style.display = dark ? 'block' : 'none';
+    document.getElementById('theme-icon-moon').style.display = dark ? 'none' : 'block';
+    localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
   });
-  if (saved === 'dark') {
-    document.getElementById('theme-icon-sun').style.display = 'block';
-    document.getElementById('theme-icon-moon').style.display = 'none';
-  }
 
   // Auth check
   onAuthStateChanged(auth, (user) => {

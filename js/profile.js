@@ -36,10 +36,13 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
     previewImg.src = photoURL;
 
     // Profile card — name fields
-    if (user.displayName) {
+    if (user.displayName && !user.displayName.startsWith('+')) {
       const parts = user.displayName.split(' ');
       document.getElementById('first-name').value = parts[0] || '';
-      document.getElementById('last-name').value  = parts.slice(1).join(' ') || '';
+      document.getElementById('last-name').value = parts.slice(1).join(' ') || '';
+    } else {
+      document.getElementById('first-name').value = '';
+      document.getElementById('last-name').value = '';
     }
 
     // Profile card — email
@@ -52,10 +55,10 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/fireba
     window.location.href = 'index.html';
   });
 
-  // --- Dark Mode Toggle ---
+  // --- Dark Mode Toggle (user choice only, defaults to light) ---
   const themeToggle = document.getElementById('theme-toggle');
-  const saved = localStorage.getItem('ll_theme');
-  if (saved === 'dark') document.body.classList.add('dark');
+  const isDark = localStorage.getItem('ll_theme') === 'dark';
+  document.body.classList.toggle('dark', isDark);
   themeToggle.addEventListener('click', () => {
     document.body.classList.toggle('dark');
     localStorage.setItem('ll_theme', document.body.classList.contains('dark') ? 'dark' : 'light');
