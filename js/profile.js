@@ -91,26 +91,22 @@ function profileDocRef(uid) {
   return doc(db, 'users', uid, 'profileData', 'learnerSettings');
 }
 
-function initTheme() {
-  if (localStorage.getItem('ll_theme') === 'dark') {
-    document.documentElement.classList.add('dark');
-  }
-  document.getElementById('theme-toggle')?.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
-  });
-}
+  function populateProfile(user) {
+    const navAvatar   = document.getElementById('nav-avatar');
+    const navUsername = document.getElementById('nav-username');
+    const photoURL = user.photoURL
+      || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
+    navAvatar.src = photoURL;
+    const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
+    navUsername.textContent = firstName;
 
-async function loadProfileForUser(user) {
-  window.userProfile = createDefaultProfile(user);
-  selectedSubjects = [...window.userProfile.subjects];
+    const previewImg = document.getElementById('profile-img-preview');
+    previewImg.src = photoURL;
 
-  try {
-    const docSnap = await getDoc(profileDocRef(user.uid));
-    if (docSnap.exists()) {
-      window.userProfile = { ...window.userProfile, ...docSnap.data() };
-      selectedSubjects = window.userProfile.subjects?.length ? [...window.userProfile.subjects] : selectedSubjects;
+    if (user.displayName && !user.displayName.startsWith('+')) {
+      const parts = user.displayName.split(' ');
+      document.getElementById('first-name').value = parts[0] || '';
+      document.getElementById('last-name').value = parts.slice(1).join(' ') || '';
     } else {
       await setDoc(profileDocRef(user.uid), window.userProfile);
     }
@@ -123,17 +119,21 @@ async function loadProfileForUser(user) {
   }
 }
 
-async function initAuth() {
-  await auth.authStateReady();
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.replace('login.html');
-      return;
-    }
-    await loadProfileForUser(user);
-    renderProfileUI();
-  });
-}
+    document.getElementById('email').value = user.email || '';
+  }
+
+  async function initProfileAuth() {
+    await auth.authStateReady();
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace('login.html');
+        return;
+      }
+      populateProfile(user);
+    });
+  }
+
+  initProfileAuth();
 
 document.getElementById('nav-logout-btn')?.addEventListener('click', async () => {
   try {
