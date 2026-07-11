@@ -554,3 +554,138 @@ export async function upsertUserRecord(user, userName) {
 export async function saveUserProfileOnSignup(user, userName) {
   await upsertUserRecord(user, userName);
 }
+
+export const FOCUS_ROOM_MAX_TEAM = 5;
+
+export function buildFocusRoomJoinUrl(sessionId, inviteId) {
+  const base = typeof window !== 'undefined' ? window.location.origin : 'https://learnloop-f89c2.web.app';
+  return `${base}/focusroom.html?join=${encodeURIComponent(sessionId)}&invite=${encodeURIComponent(inviteId)}`;
+}
+
+export async function queueTeamInviteEmail({ to, teamName, hostName, joinUrl }) {
+  await addDoc(collection(db, 'mail'), {
+    to: [to.trim().toLowerCase()],
+    message: {
+      subject: `You're invited to join ${teamName} on LearnLoop`,
+      text: `${hostName} invited you to join the team "${teamName}" for a Focus Room quiz on LearnLoop.\n\nOpen this link to join: ${joinUrl}\n\nTeam size is limited to 5 players.`,
+      html: `
+        <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111;">
+          <h2 style="margin:0 0 12px;">You're invited to a team quiz 🎯</h2>
+          <p><strong>${hostName}</strong> invited you to join <strong>${teamName}</strong> on LearnLoop Focus Room.</p>
+          <p>Click below to join the team lobby (5 players max):</p>
+          <p><a href="${joinUrl}" style="display:inline-block;background:#111;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:700;">Join Team Game</a></p>
+          <p style="font-size:12px;color:#666;">If the button does not work, copy this link:<br/>${joinUrl}</p>
+        </div>
+      `
+    },
+    createdAt: serverTimestamp()
+  });
+}
+
+export async function sendTeamInviteRequest({
+  sessionId,
+  teamName,
+  inviteeEmail,
+  hostUid,
+  hostName,
+  pendingInvites = []
+}) {
+  const email = inviteeEmail.trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    throw new Error('Enter a valid email address.');
+  }
+
+  const alreadyPending = pendingInvites.some(i => (i.email || '').toLowerCase() === email);
+  if (alreadyPending) {
+    throw new Error('An invite was already sent to this email.');
+  }
+
+  const inviteRef = doc(collection(db, 'teamInvites'));
+  const joinUrl = buildFocusRoomJoinUrl(sessionId, inviteRef.id);
+
+  await setDoc(inviteRef, {
+    sessionId,
+    teamName,
+    inviteeEmail: email,
+    hostUid,
+    hostName,
+    status: 'pending',
+    joinUrl,
+    createdAt: serverTimestamp()
+  });
+
+  try {
+    await queueTeamInviteEmail({ to: email, teamName, hostName, joinUrl });
+  } catch (err) {
+    console.warn('Email queue failed (invite link still created):', err);
+  }
+
+  return { inviteId: inviteRef.id, email, joinUrl };
+}
+
+export async function acceptTeamInvite({ inviteId, sessionId, user }) {
+  const inviteRef = doc(db, 'teamInvites', inviteId);
+  const inviteSnap = await getDoc(inviteRef);
+  if (!inviteSnap.exists()) throw new Error('Invite not found or expired.');
+  const invite = inviteSnap.data();
+
+  if (invite.sessionId !== sessionId) throw new Error('Invalid invite link.');
+  if (invite.status === 'accepted') throw new Error('This invite was already accepted.');
+  if (invite.status !== 'pending') throw new Error('This invite is no longer valid.');
+
+  const userEmail = (user.email || '').toLowerCase();
+  if (userEmail !== (invite.inviteeEmail || '').toLowerCase()) {
+    throw new Error(`Please sign in with ${invite.inviteeEmail} to join this team.`);
+  }
+
+  const sessionRef = doc(db, 'sessions', sessionId);
+  const sessionSnap = await getDoc(sessionRef);
+  if (!sessionSnap.exists()) throw new Error('Team session not found.');
+  const session = sessionSnap.data();
+
+  if (session.status !== 'lobby') throw new Error('This team game has already started.');
+
+  const members = session.members || [];
+  if (members.some(m => m.uid === user.uid)) {
+    await updateDoc(inviteRef, { status: 'accepted', acceptedAt: serverTimestamp(), acceptedBy: user.uid });
+    return session;
+  }
+
+  if (members.length >= FOCUS_ROOM_MAX_TEAM) {
+    throw new Error('This team is already full (5/5).');
+  }
+
+  const newMember = {
+    uid: user.uid,
+    email: user.email,
+    name: user.displayName || invite.inviteeEmail.split('@')[0],
+    photoURL: user.photoURL || null,
+    score: 0,
+    isHost: false
+  };
+
+  const pendingInvites = (session.pendingInvites || []).filter(
+    i => (i.email || '').toLowerCase() !== userEmail
+  );
+
+  await updateDoc(sessionRef, {
+    members: [...members, newMember],
+    pendingInvites
+  });
+
+  await updateDoc(inviteRef, {
+    status: 'accepted',
+    acceptedAt: serverTimestamp(),
+    acceptedBy: user.uid
+  });
+
+  await addNotification(user.uid, {
+    icon: '✅',
+    color: 'green',
+    title: `You joined "${session.teamName || invite.teamName}" for the team quiz.`,
+    type: 'team_join',
+    read: false
+  });
+
+  return { ...session, members: [...members, newMember], pendingInvites };
+}

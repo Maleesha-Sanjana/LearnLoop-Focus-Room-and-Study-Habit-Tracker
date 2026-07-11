@@ -5,14 +5,18 @@ import {
   db,
   getQuizQuestions,
   saveQuizResult,
-  lookupUserByEmail,
-  addNotification
+  sendTeamInviteRequest,
+  acceptTeamInvite,
+  FOCUS_ROOM_MAX_TEAM
 } from './firebase.js';
 
 let currentUser = null;
 let sessionId = null;
+let sessionUnsubscribe = null;
 let currentMode = null;
+let teamName = '';
 let teamMembers = [];
+let pendingInvites = [];
 let questions = [];
 let currentQuestionIndex = 0;
 let userScore = 0;
@@ -31,6 +35,10 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
 });
 
+function hostName() {
+  return currentUser.displayName || currentUser.email?.split('@')[0] || 'Host';
+}
+
 async function initAuth() {
   await auth.authStateReady();
   onAuthStateChanged(auth, async (user) => {
@@ -44,38 +52,196 @@ async function initAuth() {
     document.getElementById('nav-username').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
 
     try {
-      questions = await getQuizQuestions();
+      await loadQuestionsFromDatabase();
     } catch (err) {
       console.warn('Could not load quiz questions from Firestore.', err);
-      questions = [];
     }
+
+    await handleJoinFromUrl();
   });
 }
 
-document.getElementById('individual-mode-btn').addEventListener('click', () => {
+async function handleJoinFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const joinSession = params.get('join');
+  const inviteId = params.get('invite');
+  if (!joinSession || !inviteId) return;
+
+  try {
+    currentMode = 'team';
+    sessionId = joinSession;
+    const session = await acceptTeamInvite({
+      inviteId,
+      sessionId: joinSession,
+      user: currentUser
+    });
+
+    teamName = session.teamName || 'Team';
+    teamMembers = session.members || [];
+    pendingInvites = session.pendingInvites || [];
+
+    window.history.replaceState({}, '', 'focusroom.html');
+    subscribeToSession();
+    showScreen('team-lobby-screen');
+    alert(`You joined "${teamName}"! Waiting for the host to start the quiz.`);
+  } catch (err) {
+    alert(err.message || 'Could not join team from invite link.');
+    window.history.replaceState({}, '', 'focusroom.html');
+  }
+}
+
+async function loadQuestionsFromDatabase() {
+  try {
+    questions = await getQuizQuestions();
+  } catch (err) {
+    console.warn('Could not load quiz questions from Firestore.', err);
+    questions = [];
+  }
+  return questions;
+}
+
+document.getElementById('individual-mode-btn').addEventListener('click', async () => {
+  await loadQuestionsFromDatabase();
   if (!questions.length) {
-    alert('Quiz questions are not set up yet. Ask the admin to run: npm run firebase:seed');
+    alert('No quiz questions in the database yet.\n\nLog in and open seed.html once to upload questions from data/quiz-questions.json to Firestore.');
     return;
   }
   currentMode = 'individual';
   startIndividualQuiz();
 });
 
-document.getElementById('team-mode-btn').addEventListener('click', () => {
+document.getElementById('team-mode-btn').addEventListener('click', async () => {
+  await loadQuestionsFromDatabase();
   if (!questions.length) {
-    alert('Quiz questions are not set up yet. Ask the admin to run: npm run firebase:seed');
+    alert('No quiz questions in the database yet.\n\nLog in and open seed.html once to upload questions from data/quiz-questions.json to Firestore.');
     return;
   }
   currentMode = 'team';
-  showTeamLobby();
+  document.getElementById('team-name-input').value = '';
+  showScreen('team-setup-screen');
 });
+
+document.getElementById('back-from-setup-btn').addEventListener('click', () => {
+  showScreen('mode-selection-screen');
+});
+
+document.getElementById('create-team-btn').addEventListener('click', async () => {
+  const name = document.getElementById('team-name-input').value.trim();
+  if (!name) return alert('Please enter a team name.');
+  if (name.length < 2) return alert('Team name must be at least 2 characters.');
+
+  teamName = name;
+  sessionId = `team_${Date.now()}_${currentUser.uid.slice(0, 6)}`;
+  teamMembers = [{
+    uid: currentUser.uid,
+    email: currentUser.email,
+    name: hostName(),
+    photoURL: currentUser.photoURL,
+    score: 0,
+    isHost: true
+  }];
+  pendingInvites = [];
+
+  try {
+    await setDoc(doc(db, 'sessions', sessionId), {
+      teamName,
+      hostEmail: currentUser.email,
+      hostUid: currentUser.uid,
+      members: teamMembers,
+      pendingInvites: [],
+      createdAt: serverTimestamp(),
+      status: 'lobby'
+    });
+
+    subscribeToSession();
+    showTeamLobby();
+  } catch (err) {
+    console.warn(err);
+    alert('Could not create team. Please try again.');
+  }
+});
+
+function subscribeToSession() {
+  if (sessionUnsubscribe) sessionUnsubscribe();
+  sessionUnsubscribe = onSnapshot(doc(db, 'sessions', sessionId), (docSnap) => {
+    if (!docSnap.exists()) return;
+    const data = docSnap.data();
+    teamName = data.teamName || teamName;
+    teamMembers = data.members || [];
+    pendingInvites = data.pendingInvites || [];
+    renderTeamLobby();
+
+    if (data.status === 'started') {
+      showScreen('quiz-screen');
+      startQuiz();
+    }
+  });
+}
+
+function showTeamLobby() {
+  renderTeamLobby();
+  showScreen('team-lobby-screen');
+}
+
+function renderTeamLobby() {
+  document.getElementById('lobby-team-name').textContent = teamName;
+  document.getElementById('lobby-team-title').textContent = teamName;
+
+  const list = document.getElementById('member-list');
+  list.innerHTML = '';
+  teamMembers.forEach(member => {
+    const div = document.createElement('div');
+    div.className = 'member-item';
+    const initial = (member.name || '?').charAt(0).toUpperCase();
+    div.innerHTML = `
+      <div class="member-avatar">${initial}</div>
+      <div class="member-name">${member.name}${member.email ? `<span style="display:block;font-size:.72rem;color:var(--muted);font-weight:500;">${member.email}</span>` : ''}</div>
+      ${member.isHost ? '<span class="member-badge">Host</span>' : '<span class="member-badge" style="background:#e8e8e8;color:#111;">Joined</span>'}
+    `;
+    list.appendChild(div);
+  });
+  document.getElementById('member-count').textContent = teamMembers.length;
+
+  const pendingList = document.getElementById('pending-list');
+  const pendingEmpty = document.getElementById('pending-empty');
+  pendingList.querySelectorAll('.pending-item').forEach(el => el.remove());
+
+  if (!pendingInvites.length) {
+    pendingEmpty.style.display = 'block';
+  } else {
+    pendingEmpty.style.display = 'none';
+    pendingInvites.forEach(inv => {
+      const div = document.createElement('div');
+      div.className = 'pending-item';
+      div.innerHTML = `
+        <span>${inv.email}</span>
+        <span class="status">${inv.status === 'accepted' ? 'Joined' : 'Email sent'}</span>
+      `;
+      pendingList.appendChild(div);
+    });
+  }
+  document.getElementById('pending-count').textContent = pendingInvites.length;
+
+  const slotsUsed = teamMembers.length + pendingInvites.filter(i => i.status !== 'accepted').length;
+  const canInvite = slotsUsed < FOCUS_ROOM_MAX_TEAM;
+  const inviteSection = document.getElementById('invite-section');
+  const emailInput = document.getElementById('invite-email-input');
+  const sendBtn = document.getElementById('send-invite-btn');
+
+  inviteSection.style.display = canInvite ? 'block' : 'none';
+  if (sendBtn) sendBtn.disabled = !canInvite;
+  if (emailInput) emailInput.disabled = !canInvite;
+
+  const isHost = teamMembers.some(m => m.uid === currentUser?.uid && m.isHost);
+  document.getElementById('start-quiz-btn').style.display = isHost ? 'block' : 'none';
+}
 
 function startIndividualQuiz() {
   sessionId = 'individual_' + Date.now();
   teamMembers = [{
     uid: currentUser.uid,
     email: currentUser.email,
-    name: currentUser.displayName || currentUser.email,
+    name: hostName(),
     photoURL: currentUser.photoURL,
     score: 0,
     isHost: true
@@ -84,95 +250,70 @@ function startIndividualQuiz() {
   startQuiz();
 }
 
-function showTeamLobby() {
-  sessionId = 'team_' + Date.now();
-  teamMembers = [{
-    uid: currentUser.uid,
-    email: currentUser.email,
-    name: currentUser.displayName || currentUser.email,
-    photoURL: currentUser.photoURL,
-    score: 0,
-    isHost: true
-  }];
-  renderMemberList();
-  showScreen('team-lobby-screen');
-
-  setDoc(doc(db, 'sessions', sessionId), {
-    hostEmail: currentUser.email,
-    hostUid: currentUser.uid,
-    members: teamMembers,
-    createdAt: serverTimestamp(),
-    status: 'lobby'
-  });
-
-  onSnapshot(doc(db, 'sessions', sessionId), (docSnap) => {
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      teamMembers = data.members || [];
-      renderMemberList();
-      if (data.status === 'started') {
-        showScreen('quiz-screen');
-        startQuiz();
-      }
-    }
-  });
-}
-
-function renderMemberList() {
-  const list = document.getElementById('member-list');
-  list.innerHTML = '';
-  teamMembers.forEach(member => {
-    const div = document.createElement('div');
-    div.className = 'member-item';
-    const initial = member.name.charAt(0).toUpperCase();
-    div.innerHTML = `
-      <div class="member-avatar">${initial}</div>
-      <div class="member-name">${member.name}</div>
-      ${member.isHost ? '<span class="member-badge">Host</span>' : ''}
-    `;
-    list.appendChild(div);
-  });
-  document.getElementById('member-count').textContent = teamMembers.length;
-}
-
 document.getElementById('send-invite-btn').addEventListener('click', async () => {
-  const email = document.getElementById('invite-email-input').value.trim();
-  if (!email) return alert('Please enter an email');
-  if (teamMembers.length >= 5) return alert('Maximum 5 members allowed');
-  if (teamMembers.find(m => m.email === email)) return alert('User already in team');
+  const emailInput = document.getElementById('invite-email-input');
+  const email = emailInput.value.trim();
+  const btn = document.getElementById('send-invite-btn');
 
-  const found = await lookupUserByEmail(email);
-  if (!found) return alert('No LearnLoop user found with that email.');
+  if (!email) return alert('Please enter an email address.');
+  if ((teamMembers.length + pendingInvites.length) >= FOCUS_ROOM_MAX_TEAM) {
+    return alert('Team is full. Maximum 5 members including you.');
+  }
+  if (email.toLowerCase() === (currentUser.email || '').toLowerCase()) {
+    return alert('You are already on the team as host.');
+  }
+  if (teamMembers.some(m => (m.email || '').toLowerCase() === email.toLowerCase())) {
+    return alert('This person is already on the team.');
+  }
 
-  const newMember = {
-    uid: found.uid,
-    email: found.email,
-    name: found.userName || email.split('@')[0],
-    photoURL: found.photoURL || null,
-    score: 0,
-    isHost: false
-  };
-  teamMembers.push(newMember);
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
 
-  await updateDoc(doc(db, 'sessions', sessionId), { members: teamMembers });
+  try {
+    const result = await sendTeamInviteRequest({
+      sessionId,
+      teamName,
+      inviteeEmail: email,
+      hostUid: currentUser.uid,
+      hostName: hostName(),
+      pendingInvites
+    });
 
-  await addNotification(found.uid, {
-    icon: '👥',
-    color: 'blue',
-    title: `${currentUser.displayName || 'Someone'} invited you to a team focus room.`,
-    type: 'invite',
-    read: false
-  });
+    pendingInvites = [
+      ...pendingInvites,
+      { email: result.email, inviteId: result.inviteId, status: 'pending', sentAt: Date.now() }
+    ];
 
-  document.getElementById('invite-email-input').value = '';
-  alert(`Invite sent to ${email}!`);
+    await updateDoc(doc(db, 'sessions', sessionId), { pendingInvites });
+
+    emailInput.value = '';
+    alert(`Request sent! An email was sent to ${result.email} with a join link.`);
+  } catch (err) {
+    const msg = err.code === 'permission-denied'
+      ? 'Permission denied. Deploy latest Firestore rules: firebase deploy --only firestore:rules'
+      : (err.message || 'Could not send invite.');
+    alert(msg);
+    console.error('Send invite failed:', err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Request';
+    renderTeamLobby();
+  }
 });
 
 document.getElementById('back-to-mode-btn').addEventListener('click', () => {
+  if (sessionUnsubscribe) {
+    sessionUnsubscribe();
+    sessionUnsubscribe = null;
+  }
+  sessionId = null;
   showScreen('mode-selection-screen');
 });
 
 document.getElementById('start-quiz-btn').addEventListener('click', async () => {
+  if (!teamMembers.some(m => m.uid === currentUser.uid && m.isHost)) {
+    return alert('Only the host can start the quiz.');
+  }
   await updateDoc(doc(db, 'sessions', sessionId), { status: 'started' });
 });
 
@@ -235,7 +376,7 @@ function selectAnswer(selectedIdx) {
   if (selectedIdx === q.correct) {
     userScore += 10;
     correctCount += 1;
-    const member = teamMembers.find(m => m.email === currentUser.email);
+    const member = teamMembers.find(m => m.uid === currentUser.uid);
     if (member) member.score = userScore;
     renderParticipants();
   }
@@ -266,7 +407,7 @@ document.getElementById('next-question-btn').addEventListener('click', () => {
 });
 
 document.getElementById('finish-quiz-btn').addEventListener('click', async () => {
-  const userName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Learner';
+  const userName = hostName();
 
   try {
     await saveQuizResult({
@@ -280,10 +421,13 @@ document.getElementById('finish-quiz-btn').addEventListener('click', async () =>
     });
 
     if (currentMode === 'team' && sessionId) {
+      const updatedMembers = teamMembers.map(m =>
+        m.uid === currentUser.uid ? { ...m, score: userScore } : m
+      );
       await updateDoc(doc(db, 'sessions', sessionId), {
         status: 'finished',
-        members: teamMembers,
-        teamName: `Team ${userName}`,
+        members: updatedMembers,
+        teamName,
         finishedAt: serverTimestamp()
       });
     }
@@ -296,9 +440,9 @@ document.getElementById('finish-quiz-btn').addEventListener('click', async () =>
 });
 
 function showScreen(screenId) {
-  document.getElementById('mode-selection-screen').classList.add('hidden');
-  document.getElementById('team-lobby-screen').classList.add('hidden');
-  document.getElementById('quiz-screen').classList.add('hidden');
+  ['mode-selection-screen', 'team-setup-screen', 'team-lobby-screen', 'quiz-screen'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
   document.getElementById(screenId).classList.remove('hidden');
 }
 

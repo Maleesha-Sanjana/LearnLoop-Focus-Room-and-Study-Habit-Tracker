@@ -19,8 +19,7 @@
       "package-lock.json",
       "README.md",
       "*.rules",
-      "firestore.indexes.json",
-      "data"
+      "firestore.indexes.json"
     ],
     "headers": [
       {
