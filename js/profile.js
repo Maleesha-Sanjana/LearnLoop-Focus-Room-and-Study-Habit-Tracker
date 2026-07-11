@@ -156,7 +156,6 @@ function setupFirestoreListeners(uid) {
 
   firestoreUnsubs.push(subscribeResources(uid, resources => {
     sharedResources = resources;
-    renderSharedResources();
     evaluateAchievementsUnlocks();
   }));
 
@@ -170,13 +169,9 @@ function applyPreferencesToUI() {
   const p = window.userProfile;
   const weekdays = document.getElementById('avail-weekdays');
   const weekends = document.getElementById('avail-weekends');
-  const companion = document.getElementById('pref-companion-alerts');
-  const publicMatch = document.getElementById('pref-public-matchmaking');
 
   if (weekdays) weekdays.checked = p.availWeekdays !== false;
   if (weekends) weekends.checked = p.availWeekends !== false;
-  if (companion) companion.checked = p.companionAlerts !== false;
-  if (publicMatch) publicMatch.checked = p.publicMatchmaking !== false;
 
   renderMatchmakerSubjects();
 }
@@ -187,9 +182,7 @@ async function persistMatchmakerPreferences() {
   const prefs = {
     matchmakerSearchSubjects: [...matchmakerSearchSubjects],
     availWeekdays: document.getElementById('avail-weekdays')?.checked ?? true,
-    availWeekends: document.getElementById('avail-weekends')?.checked ?? true,
-    companionAlerts: document.getElementById('pref-companion-alerts')?.checked ?? true,
-    publicMatchmaking: document.getElementById('pref-public-matchmaking')?.checked ?? true
+    availWeekends: document.getElementById('avail-weekends')?.checked ?? true
   };
 
   window.userProfile = { ...window.userProfile, ...prefs };
