@@ -53,7 +53,7 @@ sections.forEach(s => observer.observe(s));
 
 // ── Scroll-reveal animation ──
 const revealEls = document.querySelectorAll(
-  '.feat-card, .tcard, .flow-card, .extra-card, .preview-wrap, .stats-big'
+  '.feat-card, .tcard, .flow-card, .extra-card, .preview-wrap, .stats-big, .lb-table, .lb-podium-card'
 );
 
 const revealObserver = new IntersectionObserver((entries) => {
@@ -169,3 +169,34 @@ function setFooterSpacer() {
 
 setFooterSpacer();
 window.addEventListener('resize', setFooterSpacer);
+
+
+// ── Leaderboard tabs (Individual / Team) ──
+const lbTabs = document.querySelectorAll('.lb-tab');
+const lbPanels = document.querySelectorAll('.lb-panel');
+
+lbTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.lbTab;
+
+    lbTabs.forEach(t => {
+      t.classList.toggle('active', t === tab);
+      t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+    });
+
+    lbPanels.forEach(panel => {
+      panel.classList.toggle('active', panel.id === `lb-${target}`);
+    });
+  });
+});
+
+// Scroll to leaderboard when arriving with #leaderboard hash
+if (window.location.hash === '#leaderboard') {
+  const lbSection = document.getElementById('leaderboard');
+  if (lbSection) {
+    requestAnimationFrame(() => {
+      const top = lbSection.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  }
+}
