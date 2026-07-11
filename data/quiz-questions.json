@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What is a variable in programming?",
+    "answers": ["A type of loop", "A named place to store data", "A keyboard shortcut", "An error message"],
+    "correct": 1
+  },
+  {
+    "question": "Which symbol is commonly used for single-line comments in JavaScript?",
+    "answers": ["#", "//", "/*", "--"],
+    "correct": 1
+  },
+  {
+    "question": "What does HTML stand for?",
+    "answers": ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyper Transfer Mark Language"],
+    "correct": 0
+  },
+  {
+    "question": "In a database table, what is a row also called?",
+    "answers": ["Column", "Record", "Index", "Query"],
+    "correct": 1
+  },
+  {
+    "question": "What is the Pomodoro Technique used for?",
+    "answers": ["Cooking pasta", "Focused study in timed intervals", "Learning a new language", "Memorizing formulas"],
+    "correct": 1
+  },
+  {
+    "question": "Which device connects your computer to the internet at home?",
+    "answers": ["Monitor", "Router", "Printer", "Keyboard"],
+    "correct": 1
+  },
+  {
+    "question": "What does CPU stand for?",
+    "answers": ["Central Processing Unit", "Computer Personal Utility", "Core Program Unit", "Central Power Usage"],
+    "correct": 0
+  },
+  {
+    "question": "In React, what is a component?",
+    "answers": ["A reusable piece of UI", "A database table", "A network cable", "A file format"],
+    "correct": 0
+  },
+  {
+    "question": "What is the purpose of a study goal?",
+    "answers": ["To waste time", "To track what you want to achieve", "To replace exams", "To avoid studying"],
+    "correct": 1
+  },
+  {
+    "question": "Which of these is a search engine?",
+    "answers": ["Microsoft Word", "Google", "Photoshop", "Excel"],
+    "correct": 1
+  }
+]

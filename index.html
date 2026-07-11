@@ -90,9 +90,9 @@
   </div>
   <p class="stats-eyebrow">A growing community of</p>
   <div class="stats-big">
-    <span>12,400 students</span>
-    <span>890,000 study sessions</span>
-    <span>34,000 goals completed</span>
+    <span data-target="0">0 students</span>
+    <span data-target="0">0 study sessions</span>
+    <span data-target="0">0 goals completed</span>
   </div>
 </section>
 
@@ -152,222 +152,21 @@
 
   <!-- Individual Leaderboard -->
   <div class="lb-panel active" id="lb-individual" role="tabpanel">
-    <div class="lb-podium">
-      <div class="lb-podium-card second">
-        <div class="lb-rank">2nd</div>
-        <div class="lb-avatar" style="background:#6c63ff">A</div>
-        <div class="lb-name">Aisha Rahman</div>
-        <div class="lb-score">450</div>
-        <div class="lb-meta">22 quizzes · 94% avg</div>
-      </div>
-      <div class="lb-podium-card first">
-        <div class="lb-crown">&#127942;</div>
-        <div class="lb-rank">1st</div>
-        <div class="lb-avatar">M</div>
-        <div class="lb-name">Marcus Chen</div>
-        <div class="lb-score">480</div>
-        <div class="lb-meta">24 quizzes · 96% avg</div>
-      </div>
-      <div class="lb-podium-card third">
-        <div class="lb-rank">3rd</div>
-        <div class="lb-avatar" style="background:#0891b2">R</div>
-        <div class="lb-name">Ravi Kumar</div>
-        <div class="lb-score">430</div>
-        <div class="lb-meta">21 quizzes · 92% avg</div>
-      </div>
-    </div>
-    <div class="lb-table">
-      <div class="lb-table-head">
-        <span>Rank</span>
-        <span>Student</span>
-        <span>Score</span>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">4</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#f59e0b">S</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Sofia Patel</div>
-            <div class="lb-row-detail">19 quizzes · 90% avg</div>
-          </div>
-        </div>
-        <div class="lb-row-score">410<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">5</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#16a34a">J</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">James Okafor</div>
-            <div class="lb-row-detail">18 quizzes · 88% avg</div>
-          </div>
-        </div>
-        <div class="lb-row-score">390<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">6</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#7c3aed">T</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Tara Nguyen</div>
-            <div class="lb-row-detail">17 quizzes · 87% avg</div>
-          </div>
-        </div>
-        <div class="lb-row-score">370<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">7</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#e53e3e">L</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Lena Muller</div>
-            <div class="lb-row-detail">16 quizzes · 85% avg</div>
-          </div>
-        </div>
-        <div class="lb-row-score">350<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">8</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#db2777">H</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Hana Yilmaz</div>
-            <div class="lb-row-detail">15 quizzes · 84% avg</div>
-          </div>
-        </div>
-        <div class="lb-row-score">330<span>pts</span></div>
-      </div>
-    </div>
+    <div class="lb-podium" id="lb-individual-podium"></div>
+    <div class="lb-table" id="lb-individual-table"></div>
   </div>
 
   <!-- Team Leaderboard -->
   <div class="lb-panel" id="lb-team" role="tabpanel">
-    <div class="lb-podium">
-      <div class="lb-podium-card second">
-        <div class="lb-rank">2nd</div>
-        <div class="lb-avatar" style="background:#6c63ff">&#128101;</div>
-        <div class="lb-name">Night Owls</div>
-        <div class="lb-score">1,980</div>
-        <div class="lb-meta">5 members · 38 sessions</div>
-      </div>
-      <div class="lb-podium-card first">
-        <div class="lb-crown">&#127942;</div>
-        <div class="lb-rank">1st</div>
-        <div class="lb-avatar">&#128101;</div>
-        <div class="lb-name">Study Squad Alpha</div>
-        <div class="lb-score">2,150</div>
-        <div class="lb-meta">5 members · 42 sessions</div>
-      </div>
-      <div class="lb-podium-card third">
-        <div class="lb-rank">3rd</div>
-        <div class="lb-avatar" style="background:#0891b2">&#128101;</div>
-        <div class="lb-name">Exam Crushers</div>
-        <div class="lb-score">1,840</div>
-        <div class="lb-meta">4 members · 35 sessions</div>
-      </div>
-    </div>
-    <div class="lb-table">
-      <div class="lb-table-head">
-        <span>Rank</span>
-        <span>Team</span>
-        <span>Score</span>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">4</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#f59e0b">&#128101;</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Focus Force</div>
-            <div class="lb-row-detail">5 members · 31 sessions</div>
-          </div>
-        </div>
-        <div class="lb-row-score">1,720<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">5</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#16a34a">&#128101;</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Brain Boosters</div>
-            <div class="lb-row-detail">4 members · 28 sessions</div>
-          </div>
-        </div>
-        <div class="lb-row-score">1,650<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">6</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#7c3aed">&#128101;</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Quiz Masters</div>
-            <div class="lb-row-detail">5 members · 26 sessions</div>
-          </div>
-        </div>
-        <div class="lb-row-score">1,580<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">7</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#e53e3e">&#128101;</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">The Grinders</div>
-            <div class="lb-row-detail">3 members · 24 sessions</div>
-          </div>
-        </div>
-        <div class="lb-row-score">1,490<span>pts</span></div>
-      </div>
-      <div class="lb-row">
-        <span class="lb-row-rank">8</span>
-        <div class="lb-row-user">
-          <div class="lb-row-av" style="background:#db2777">&#128101;</div>
-          <div class="lb-row-info">
-            <div class="lb-row-name">Loop Learners</div>
-            <div class="lb-row-detail">4 members · 22 sessions</div>
-          </div>
-        </div>
-        <div class="lb-row-score">1,420<span>pts</span></div>
-      </div>
-    </div>
+    <div class="lb-podium" id="lb-team-podium"></div>
+    <div class="lb-table" id="lb-team-table"></div>
   </div>
 </section>
 
 <!-- SECTION 6: TESTIMONIALS -->
 <section class="testimonials-section" id="reviews">
   <h2 class="section-title">What our students are saying.</h2>
-  <div class="tgrid">
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av">A</div><div><div class="tcard-name">Aisha Rahman</div><div class="tcard-role">University Student</div></div></div>
-      <p>LearnLoop completely changed how I study. The streak feature keeps me consistent and focus rooms make studying with friends so much easier.</p>
-    </div>
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av" style="background:#6c63ff">M</div><div><div class="tcard-name">Marcus Chen</div><div class="tcard-role">Exam Prep</div></div></div>
-      <p>The analytics are incredible. I can see exactly which subjects I am neglecting and the Pomodoro timer keeps me focused during long sessions.</p>
-    </div>
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av" style="background:#f59e0b">S</div><div><div class="tcard-name">Sofia Patel</div><div class="tcard-role">Self-Learner</div></div></div>
-      <p>I love how everything is in one place. Goals, timer, analytics &mdash; it is the only study app I need. The focus rooms are a game changer.</p>
-    </div>
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av" style="background:#16a34a">J</div><div><div class="tcard-name">James Okafor</div><div class="tcard-role">School Student</div></div></div>
-      <p>Setting daily goals and watching the progress bar fill up is so satisfying. My grades have improved since I started using LearnLoop.</p>
-    </div>
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av" style="background:#e53e3e">L</div><div><div class="tcard-name">Lena Muller</div><div class="tcard-role">University Student</div></div></div>
-      <p>The streak calendar is my favourite feature. Seeing all those active days motivates me to never break the chain. Highly recommend!</p>
-    </div>
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av" style="background:#0891b2">R</div><div><div class="tcard-name">Ravi Kumar</div><div class="tcard-role">IIT Aspirant</div></div></div>
-      <p>LearnLoop is one of those apps I cannot live without. The subject-wise analytics help me balance my preparation perfectly.</p>
-    </div>
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av" style="background:#7c3aed">T</div><div><div class="tcard-name">Tara Nguyen</div><div class="tcard-role">Med Student</div></div></div>
-      <p>I finally deleted that folder of 2,000 unorganized screenshots. LearnLoop keeps everything structured and I have not looked back since.</p>
-    </div>
-    <div class="tcard">
-      <div class="tcard-head"><div class="tcard-av" style="background:#db2777">H</div><div><div class="tcard-name">Hana Yilmaz</div><div class="tcard-role">Design Student</div></div></div>
-      <p>Designing my study schedule around LearnLoop has been a game changer. It is the most intuitive study tracker I have used.</p>
-    </div>
-  </div>
+  <div class="tgrid" id="testimonials-grid"></div>
 </section>
 
 <!-- SECTION 7: CTA -->
@@ -464,7 +263,7 @@
 </footer>
 
 <script src="js/main.js"></script>
-
+<script type="module" src="js/index-data.js"></script>
 <script type="module" src="js/index-auth.js"></script>
 </body>
 </html>

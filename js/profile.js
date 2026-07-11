@@ -119,21 +119,128 @@ function profileDocRef(uid) {
   }
 }
 
-    document.getElementById('email').value = user.email || '';
+  if (user.displayName && !user.displayName.startsWith('+')) {
+    window.userProfile.name = user.displayName;
   }
 
-  async function initProfileAuth() {
-    await auth.authStateReady();
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.replace('login.html');
-        return;
+  selectedSubjects = window.userProfile.subjects?.length ? [...window.userProfile.subjects] : [];
+  matchmakerSearchSubjects = window.userProfile.matchmakerSearchSubjects?.length
+    ? [...window.userProfile.matchmakerSearchSubjects]
+    : [...(defaultProfile(null).matchmakerSearchSubjects || [])];
+
+  applyPreferencesToUI();
+  setupFirestoreListeners(user.uid);
+  await filterBuddies();
+}
+
+function setupFirestoreListeners(uid) {
+  firestoreUnsubs.forEach(unsub => unsub());
+  firestoreUnsubs.length = 0;
+
+  firestoreUnsubs.push(subscribeLearnerSettings(uid, data => {
+    window.userProfile = { ...window.userProfile, ...data };
+    selectedSubjects = window.userProfile.subjects?.length ? [...window.userProfile.subjects] : selectedSubjects;
+    renderProfileUI();
+    renderSubjectsList();
+  }));
+
+  firestoreUnsubs.push(subscribeGoals(uid, goals => {
+    goalsState = goals;
+    renderGoalTrackers();
+  }));
+
+  firestoreUnsubs.push(subscribeActivities(uid, activities => {
+    recentActivities = activities;
+    renderActivityTimeline();
+  }));
+
+  firestoreUnsubs.push(subscribeResources(uid, resources => {
+    sharedResources = resources;
+    renderSharedResources();
+    evaluateAchievementsUnlocks();
+  }));
+
+  firestoreUnsubs.push(subscribeAchievements(uid, badges => {
+    unlockedBadges = badges;
+    renderAchievementsBadges();
+  }));
+}
+
+function applyPreferencesToUI() {
+  const p = window.userProfile;
+  const weekdays = document.getElementById('avail-weekdays');
+  const weekends = document.getElementById('avail-weekends');
+  const companion = document.getElementById('pref-companion-alerts');
+  const publicMatch = document.getElementById('pref-public-matchmaking');
+
+  if (weekdays) weekdays.checked = p.availWeekdays !== false;
+  if (weekends) weekends.checked = p.availWeekends !== false;
+  if (companion) companion.checked = p.companionAlerts !== false;
+  if (publicMatch) publicMatch.checked = p.publicMatchmaking !== false;
+
+  renderMatchmakerSubjects();
+}
+
+async function persistMatchmakerPreferences() {
+  if (!currentUid) return;
+
+  const prefs = {
+    matchmakerSearchSubjects: [...matchmakerSearchSubjects],
+    availWeekdays: document.getElementById('avail-weekdays')?.checked ?? true,
+    availWeekends: document.getElementById('avail-weekends')?.checked ?? true,
+    companionAlerts: document.getElementById('pref-companion-alerts')?.checked ?? true,
+    publicMatchmaking: document.getElementById('pref-public-matchmaking')?.checked ?? true
+  };
+
+  window.userProfile = { ...window.userProfile, ...prefs };
+
+  try {
+    await saveMatchmakerPreferences(currentUid, prefs);
+  } catch (err) {
+    console.warn('Could not save matchmaker preferences.', err);
+  }
+}
+
+function renderMatchmakerSubjects() {
+  const container = document.getElementById('matchmaker-subjects');
+  if (!container) return;
+  container.innerHTML = '';
+
+  subjectsPool.forEach(subject => {
+    const checked = matchmakerSearchSubjects.includes(subject);
+    const label = document.createElement('label');
+    label.className = 'flex items-center gap-2.5 text-sm font-semibold cursor-pointer';
+    label.innerHTML = `
+      <input type="checkbox" ${checked ? 'checked' : ''} class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]" data-subject="${subject}"/>
+      <span>${subject}</span>
+    `;
+    label.querySelector('input').addEventListener('change', async (e) => {
+      if (e.target.checked) {
+        if (!matchmakerSearchSubjects.includes(subject)) matchmakerSearchSubjects.push(subject);
+      } else {
+        matchmakerSearchSubjects = matchmakerSearchSubjects.filter(s => s !== subject);
       }
-      populateProfile(user);
+      await persistMatchmakerPreferences();
+      await filterBuddies();
     });
-  }
+    container.appendChild(label);
+  });
+}
 
-  initProfileAuth();
+async function initAuth() {
+  await auth.authStateReady();
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.replace('login.html');
+      return;
+    }
+    await loadProfileForUser(user);
+    renderProfileUI();
+    renderSubjectsList();
+    renderAvatarSelections();
+    renderAchievementsBadges();
+  });
+}
 
 document.getElementById('nav-logout-btn')?.addEventListener('click', async () => {
   try {
@@ -558,6 +665,38 @@ window.filterBuddies = function () {
       (buddy.avail === 'weekends' && weekendChecked);
     return matchSubj && matchAvail;
   });
+}
+
+function renderSharedResources() {
+  const list = document.getElementById('notes-list');
+  if (!list) return;
+
+  if (!sharedResources.length) {
+    list.innerHTML = '<p class="text-xs text-[#888] text-center py-4">No shared resources yet. Upload your first notes!</p>';
+    return;
+  }
+
+  list.innerHTML = sharedResources.map(res => `
+    <div class="flex items-center justify-between p-3 bg-[#f5f5f5] dark:bg-[#1a1a1a] rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a]">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">📄</span>
+        <div>
+          <p class="text-xs font-bold leading-tight text-[#111] dark:text-[#f0f0f0]">${escapeHtml(res.name)}</p>
+          <span class="text-[10px] text-[#888]">${res.size} • ${res.scope}</span>
+        </div>
+      </div>
+      <div class="flex gap-2 text-[10px] font-bold">
+        <button onclick="downloadResource('${res.id}')" class="text-[#111] dark:text-[#f0f0f0] hover:underline">Download</button>
+        <button onclick="deleteResource('${res.id}')" class="text-red-500 hover:underline">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBuddiesSidebar() {
+  const container = document.getElementById('friends-list');
+  const countEl = document.getElementById('buddies-count');
+  if (countEl) countEl.textContent = `${buddiesList.length} Active`;
 
   if (filtered.length === 0) {
     list.innerHTML =
