@@ -2,75 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>LearnLoop Firestore Seed (Admin)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seed Quiz - LearnLoop</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; }
-    button { padding: 10px 16px; margin: 8px 8px 8px 0; cursor: pointer; }
-    pre { background: #f5f5f5; padding: 12px; border-radius: 8px; overflow: auto; }
+    body { font-family: system-ui, sans-serif; max-width: 520px; margin: 60px auto; padding: 0 20px; text-align: center; }
+    .ok { color: #065f46; background: #ecfdf5; padding: 16px; border-radius: 12px; margin-top: 20px; }
+    .err { color: #991b1b; background: #fef2f2; padding: 16px; border-radius: 12px; margin-top: 20px; }
+    a { color: #111; font-weight: 600; }
   </style>
 </head>
 <body>
-  <h1>LearnLoop Firestore Seed</h1>
-  <p>One-time admin page to seed quiz questions into Firestore. Run while logged in as a project admin.</p>
-  <button id="seed-quiz">Seed quizSets/default</button>
-  <button id="seed-config">Seed config/app</button>
-  <pre id="log">Ready.</pre>
+  <h1>Uploading quiz questions…</h1>
+  <p id="status">Checking login…</p>
+  <p id="next" style="display:none"><a href="focusroom.html">Go to Focus Room →</a></p>
 
   <script type="module">
     import { auth } from './js/firebase.js';
-    import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     import { db } from './js/firebase.js';
 
-    const log = document.getElementById('log');
-    function write(msg) { log.textContent += '\n' + msg; }
+    const questions = [
+      { question: 'What is a variable in programming?', answers: ['A type of loop', 'A named place to store data', 'A keyboard shortcut', 'An error message'], correct: 1 },
+      { question: 'Which symbol is commonly used for single-line comments in JavaScript?', answers: ['#', '//', '/*', '--'], correct: 1 },
+      { question: 'What does HTML stand for?', answers: ['HyperText Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyper Transfer Mark Language'], correct: 0 },
+      { question: 'In a database table, what is a row also called?', answers: ['Column', 'Record', 'Index', 'Query'], correct: 1 },
+      { question: 'What is the Pomodoro Technique used for?', answers: ['Cooking pasta', 'Focused study in timed intervals', 'Learning a new language', 'Memorizing formulas'], correct: 1 },
+      { question: 'Which device connects your computer to the internet at home?', answers: ['Monitor', 'Router', 'Printer', 'Keyboard'], correct: 1 },
+      { question: 'What does CPU stand for?', answers: ['Central Processing Unit', 'Computer Personal Utility', 'Core Program Unit', 'Central Power Usage'], correct: 0 },
+      { question: 'In React, what is a component?', answers: ['A reusable piece of UI', 'A database table', 'A network cable', 'A file format'], correct: 0 },
+      { question: 'What is the purpose of a study goal?', answers: ['To waste time', 'To track what you want to achieve', 'To replace exams', 'To avoid studying'], correct: 1 },
+      { question: 'Which of these is a search engine?', answers: ['Microsoft Word', 'Google', 'Photoshop', 'Excel'], correct: 1 }
+    ];
 
-    document.getElementById('seed-quiz').addEventListener('click', async () => {
+    const status = document.getElementById('status');
+
+    async function run() {
+      await auth.authStateReady();
       if (!auth.currentUser) {
-        write('Please log in first via login.html, then return here.');
-        return;
-      }
-
-      const questions = [
-        { question: 'What is the capital of France?', answers: ['London', 'Berlin', 'Paris', 'Madrid'], correct: 2 },
-        { question: 'Which planet is known as the Red Planet?', answers: ['Venus', 'Mars', 'Jupiter', 'Saturn'], correct: 1 },
-        { question: 'What is 15 × 8?', answers: ['120', '125', '115', '130'], correct: 0 },
-        { question: "Who wrote 'Romeo and Juliet'?", answers: ['Charles Dickens', 'William Shakespeare', 'Jane Austen', 'Mark Twain'], correct: 1 },
-        { question: 'What is the largest ocean on Earth?', answers: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'], correct: 3 }
-      ];
-
-      try {
-        await setDoc(doc(db, 'quizSets', 'default'), { questions, updatedAt: new Date().toISOString() });
-        write(`Seeded ${questions.length} questions to quizSets/default`);
-      } catch (err) {
-        write('Error: ' + err.message);
-      }
-    });
-
-    document.getElementById('seed-config').addEventListener('click', async () => {
-      if (!auth.currentUser) {
-        write('Please log in first via login.html, then return here.');
+        status.innerHTML = 'Please <a href="login.html">log in</a> first, then open this page again.';
+        status.className = 'err';
         return;
       }
 
       try {
-        await setDoc(doc(db, 'config', 'app'), {
-          subjects: ['Java', 'React', 'Database', 'Networking', 'Algorithms', 'Machine Learning', 'System Design'],
-          avatars: ['Aisha', 'David', 'Emma', 'Sarah', 'Caleb', 'Maya'],
-          badgeDefinitions: [
-            { id: 'streak-badge', title: '7 Day Streak', icon: '🔥', threshold: 7, metric: 'streak' },
-            { id: 'goal-badge', title: 'Goal Master', icon: '🎯', threshold: 20, metric: 'goalsCompleted' },
-            { id: 'hours-badge', title: '100 Study Hours', icon: '📚', threshold: 100, metric: 'hours' },
-            { id: 'team-badge', title: 'Reputation Pro', icon: '✨', threshold: 500, metric: 'reputation' },
-            { id: 'notes-badge', title: 'Contributor Portfolio', icon: '📝', threshold: 3, metric: 'resourcesCount' },
-            { id: 'focus-badge', title: 'Focus Champion', icon: '⚡', threshold: 95, metric: 'focusScore' }
-          ],
-          updatedAt: new Date().toISOString()
+        await setDoc(doc(db, 'quizSets', 'default'), {
+          questions,
+          updatedAt: serverTimestamp()
         });
-        write('Seeded config/app (subjects, avatars, badges)');
+        status.textContent = `Done! ${questions.length} beginner questions saved to Firestore. All users can play now.`;
+        status.className = 'ok';
+        document.getElementById('next').style.display = 'block';
       } catch (err) {
-        write('Error: ' + err.message);
+        status.textContent = 'Error: ' + err.message + ' — Firestore rules may block writes. Use Firebase Console instead.';
+        status.className = 'err';
       }
-    });
+    }
+
+    run();
   </script>
 </body>
 </html>

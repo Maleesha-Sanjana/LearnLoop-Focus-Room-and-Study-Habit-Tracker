@@ -12,6 +12,8 @@
     "firebase:seed": "node scripts/seed-firestore.mjs"
   },
   "devDependencies": {
-    "firebase-admin": "^13.4.0"
+    "@google-cloud/firestore": "^7.11.0",
+    "firebase-admin": "^13.4.0",
+    "google-auth-library": "^9.15.1"
   }
 }

@@ -12,16 +12,15 @@
       "firebase.json",
       ".firebaserc",
       "**/.*",
-      "**/node_modules/**",
-      "scripts/**",
-      "server/**",
+      "node_modules",
+      "scripts",
+      "server",
       "package.json",
       "package-lock.json",
       "README.md",
-      "seed.html",
-      "serviceAccountKey.json",
       "*.rules",
-      "firestore.indexes.json"
+      "firestore.indexes.json",
+      "data"
     ],
     "headers": [
       {

@@ -54,7 +54,7 @@ async function initAuth() {
 
 document.getElementById('individual-mode-btn').addEventListener('click', () => {
   if (!questions.length) {
-    alert('No quiz questions available yet. Add questions to Firestore at quizSets/default.');
+    alert('Quiz questions are not set up yet. Ask the admin to run: npm run firebase:seed');
     return;
   }
   currentMode = 'individual';
@@ -63,7 +63,7 @@ document.getElementById('individual-mode-btn').addEventListener('click', () => {
 
 document.getElementById('team-mode-btn').addEventListener('click', () => {
   if (!questions.length) {
-    alert('No quiz questions available yet. Add questions to Firestore at quizSets/default.');
+    alert('Quiz questions are not set up yet. Ask the admin to run: npm run firebase:seed');
     return;
   }
   currentMode = 'team';

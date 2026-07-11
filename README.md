@@ -62,7 +62,21 @@ Firebase Storage is not enabled yet on this project. One-time setup:
 npm run firebase:deploy:storage
 ```
 
-### Seed Firestore data (quiz questions + app config)
+### Seed quiz questions (one-time, admin only)
+
+All users load the same 10 questions from Firestore document `quizSets/default`.
+
+1. Edit `data/quiz-questions.json` (10 questions)
+2. Download service account key from Firebase Console → Project Settings → Service accounts
+3. Save as `serviceAccountKey.json` in project root
+4. Run:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
+npm run firebase:seed
+```
+
+**Or add manually in Firebase Console:** Firestore → Add collection `quizSets` → document ID `default` → field `questions` (array) → paste JSON from `data/quiz-questions.json`.
 
 The seed script writes `quizSets/default`, `config/app`, and `platformStats/global`.
 

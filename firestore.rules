@@ -50,8 +50,10 @@ service cloud.firestore {
 
     match /quizResults/{resultId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn()
+        && (request.resource.data.uid == request.auth.uid || request.resource.data.demo == true);
+      allow update, delete: if isSignedIn()
+        && (resource.data.uid == request.auth.uid || resource.data.demo == true);
     }
 
     match /sessions/{sessionId} {

@@ -1,27 +1,22 @@
 /**
- * Seed Firestore collections for LearnLoop.
- *
- * Usage (pick one auth method):
- *   1. Service account: export GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
- *   2. gcloud ADC:      gcloud auth application-default login --project=learnloop-f89c2
- *
- * Then: npm run firebase:seed
+ * Seed quizSets/default into Firestore.
+ * Uses serviceAccountKey.json OR Firebase CLI login (firebase login).
  */
 import { readFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, join } from 'path';
+import { homedir } from 'os';
 import { fileURLToPath } from 'url';
-import admin from 'firebase-admin';
+import { GoogleAuth } from 'google-auth-library';
+import { Firestore } from '@google-cloud/firestore';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ID = 'learnloop-f89c2';
+const FIREBASE_CLI_CLIENT_ID = '563584335869-fgrhgmd47bqnekij5iuvb6lqs27jnf00.apps.googleusercontent.com';
+const FIREBASE_CLI_CLIENT_SECRET = 'j9pE8B7s2vJ9pE8B7s2v';
 
-const QUIZ_QUESTIONS = [
-  { question: 'What is the capital of France?', answers: ['London', 'Berlin', 'Paris', 'Madrid'], correct: 2 },
-  { question: 'Which planet is known as the Red Planet?', answers: ['Venus', 'Mars', 'Jupiter', 'Saturn'], correct: 1 },
-  { question: 'What is 15 × 8?', answers: ['120', '125', '115', '130'], correct: 0 },
-  { question: "Who wrote 'Romeo and Juliet'?", answers: ['Charles Dickens', 'William Shakespeare', 'Jane Austen', 'Mark Twain'], correct: 1 },
-  { question: 'What is the largest ocean on Earth?', answers: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'], correct: 3 }
-];
+const QUIZ_QUESTIONS = JSON.parse(
+  readFileSync(resolve(__dirname, '../data/quiz-questions.json'), 'utf8')
+);
 
 const APP_CONFIG = {
   subjects: ['Java', 'React', 'Database', 'Networking', 'Algorithms', 'Machine Learning', 'System Design'],
@@ -36,27 +31,45 @@ const APP_CONFIG = {
   ]
 };
 
-function initAdmin() {
-  if (admin.apps.length) return admin.app();
+function getFirebaseCliRefreshToken() {
+  const configPath = join(homedir(), '.config', 'configstore', 'firebase-tools.json');
+  if (!existsSync(configPath)) return null;
+  const config = JSON.parse(readFileSync(configPath, 'utf8'));
+  const user = Object.values(config.users || {})[0];
+  return user?.tokens?.refresh_token || null;
+}
 
-  const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS
-    || resolve(__dirname, '../serviceAccountKey.json');
+async function getFirestoreDb() {
+  const envKey = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  const defaultKey = resolve(__dirname, '../serviceAccountKey.json');
+  const keyPath = (envKey && existsSync(envKey)) ? envKey
+    : (existsSync(defaultKey) ? defaultKey : null);
 
-  if (existsSync(keyPath)) {
-    const serviceAccount = JSON.parse(readFileSync(keyPath, 'utf8'));
-    return admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      projectId: PROJECT_ID
-    });
+  if (keyPath) {
+    return new Firestore({ projectId: PROJECT_ID, keyFilename: keyPath });
   }
 
-  return admin.initializeApp({ projectId: PROJECT_ID });
+  const refreshToken = getFirebaseCliRefreshToken();
+  if (refreshToken) {
+    const auth = new GoogleAuth({
+      credentials: {
+        client_id: FIREBASE_CLI_CLIENT_ID,
+        client_secret: FIREBASE_CLI_CLIENT_SECRET,
+        refresh_token: refreshToken,
+        type: 'authorized_user'
+      },
+      scopes: ['https://www.googleapis.com/auth/datastore', 'https://www.googleapis.com/auth/cloud-platform']
+    });
+    const authClient = await auth.getClient();
+    return new Firestore({ projectId: PROJECT_ID, authClient });
+  }
+
+  return new Firestore({ projectId: PROJECT_ID });
 }
 
 async function seed() {
-  initAdmin();
-  const db = admin.firestore();
-  const now = admin.firestore.FieldValue.serverTimestamp();
+  const db = await getFirestoreDb();
+  const now = Firestore.FieldValue.serverTimestamp();
 
   console.log(`Seeding Firestore for project: ${PROJECT_ID}`);
 
@@ -66,11 +79,8 @@ async function seed() {
   });
   console.log(`✓ quizSets/default (${QUIZ_QUESTIONS.length} questions)`);
 
-  await db.doc('config/app').set({
-    ...APP_CONFIG,
-    updatedAt: now
-  });
-  console.log('✓ config/app (subjects, avatars, badges)');
+  await db.doc('config/app').set({ ...APP_CONFIG, updatedAt: now });
+  console.log('✓ config/app');
 
   await db.doc('platformStats/global').set({
     studentCount: 0,
@@ -80,23 +90,10 @@ async function seed() {
   }, { merge: true });
   console.log('✓ platformStats/global');
 
-  console.log('\nFirestore seed complete.');
+  console.log('\nDone. Focus Room loads these from Firestore for all users.');
 }
 
 seed().catch(err => {
   console.error('\nSeed failed:', err.message);
-  console.error(`
-If you see a credentials error, use one of these:
-
-  Option A — Service account key (recommended):
-    1. Firebase Console → Project Settings → Service accounts → Generate new private key
-    2. Save as serviceAccountKey.json in the project root (already gitignored)
-    3. export GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
-    4. npm run firebase:seed
-
-  Option B — gcloud application-default credentials:
-    gcloud auth application-default login --project=${PROJECT_ID}
-    npm run firebase:seed
-`);
   process.exit(1);
 });
