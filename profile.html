@@ -1,460 +1,571 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profile Settings - LearnLoop</title>
+  <title>My Learner Profile - LearnLoop</title>
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Confetti library for progression rewards -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              950: '#1e1b4b',
+            }
+          },
+          boxShadow: {
+            'glow': '0 0 15px rgba(124, 58, 237, 0.15)',
+            'glow-lg': '0 0 25px rgba(124, 58, 237, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+  
   <style>
-    /* ==========================================================================
-       BASE & INHERITED STYLES (From your LearnLoop Theme)
-       ========================================================================== */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#111;-webkit-font-smoothing:antialiased; min-height: 100vh;}
-    a{text-decoration:none;color:inherit}
-    img{display:block;width:100%;height:100%;object-fit:cover}
-
-    /* NAVBAR */
-    .navbar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(255,255,255,.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.9);border-radius:999px;padding:8px 16px 8px 16px;display:flex;align-items:center;gap:24px;box-shadow:0 2px 16px rgba(0,0,0,.06),0 0 0 0.5px rgba(0,0,0,.04);white-space:nowrap; width: max-content; max-width: calc(100% - 32px);}
-    .nav-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.95rem;letter-spacing:-.02em}
-    .nav-brand .icon{width:28px;height:28px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff}
-    .nav-links{display:flex;gap:4px}
-    .nav-links a{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s}
-    .nav-links a:hover, .nav-links a.active{color:#111;background:#f5f5f5}
-    .nav-actions{display:flex;gap:8px;align-items:center}
-    
-    /* BUTTONS */
-    .btn-ghost{padding:6px 14px;border-radius:999px;font-size:.88rem;font-weight:500;color:#888;transition:.15s; border:none; background:transparent; cursor:pointer; font-family: inherit;}
-    .btn-ghost:hover{color:#111;background:#f5f5f5}
-    .btn-solid{padding:8px 18px;border-radius:999px;background:#111;color:#fff;font-size:.88rem;font-weight:600;transition:.15s; border:none; cursor:pointer; font-family: inherit;}
-    .btn-solid:hover{background:#333}
-    .btn-outline{padding:8px 18px;border-radius:999px;border:1.5px solid #e8e8e8;color:#111;background: transparent; font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:6px;transition:.15s; cursor:pointer;}
-    .btn-outline:hover{border-color:#111;background:#f5f5f5}
-
-    /* THEME TOGGLE */
-    .theme-toggle{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;color:#888;padding:0}
-    .theme-toggle:hover{color:#111;transform:scale(1.15)}
-
-    /* ==========================================================================
-       SETTINGS PAGE SPECIFIC STYLES
-       ========================================================================== */
-    .page-wrapper {
-        padding: 120px 24px 80px; /* Accounts for fixed navbar */
-        min-height: calc(100vh - 100px); /* Keeps footer at bottom */
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-
-    .settings-container {
-        max-width: 800px;
-        margin: 0 auto;
-        width: 100%;
+    ::-webkit-scrollbar-track {
+      background: transparent;
     }
-
-    .settings-header {
-        margin-bottom: 40px;
+    ::-webkit-scrollbar-thumb {
+      background: #cbcbcb;
+      border-radius: 999px;
     }
-
-    .settings-header h1 {
-        font-size: clamp(2rem, 4vw, 2.5rem);
-        font-weight: 900;
-        letter-spacing: -.04em;
-        line-height: 1.1;
-        margin-bottom: 8px;
+    .dark ::-webkit-scrollbar-thumb {
+      background: #3f3f46;
     }
-
-    .settings-header p {
-        color: #888;
-        font-size: 0.95rem;
-    }
-
-    .settings-card {
-        background: #fff;
-        border: 1px solid #e8e8e8;
-        border-radius: 20px;
-        padding: 32px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 20px rgba(0,0,0,.03);
-    }
-
-    .settings-card-title {
-        font-size: 1.25rem;
-        font-weight: 800;
-        letter-spacing: -.02em;
-        margin-bottom: 24px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #e8e8e8;
-    }
-
-    /* Avatar Upload Section */
-    .avatar-upload-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-        margin-bottom: 32px;
-    }
-
-    .avatar-preview {
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        background: #f5f5f5;
-        overflow: hidden;
-        position: relative;
-        flex-shrink: 0;
-        border: 2px solid #e8e8e8;
-    }
-
-    .avatar-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .avatar-upload-info h3 {
-        font-size: 1rem;
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
-
-    .avatar-upload-info p {
-        font-size: 0.85rem;
-        color: #888;
-        margin-bottom: 12px;
-    }
-    
-    .file-input {
-        display: none;
-    }
-
-    /* Form Styles */
-    .settings-form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .form-row {
-        display: flex;
-        gap: 20px;
-    }
-    
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        flex: 1;
-    }
-
-    .form-group label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #444;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px 16px;
-        border-radius: 12px;
-        border: 1.5px solid #e8e8e8;
-        background: #fafafa;
-        font-family: inherit;
-        font-size: 0.95rem;
-        color: #111;
-        transition: 0.2s;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #111;
-        background: #fff;
-        box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.05);
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        padding-top: 16px;
-    }
-
-    /* Toast Notification */
-    .toast {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: #111;
-        color: #fff;
-        padding: 14px 24px;
-        border-radius: 12px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        box-shadow: 0 8px 32px rgba(0,0,0,.2);
-        transform: translateY(100px);
-        opacity: 0;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 2000;
-    }
-    
-    .toast.show {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    .toast-icon {
-        width: 20px;
-        height: 20px;
-        background: #10b981; /* Green success */
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-    }
-
-    /* ==========================================================================
-       FOOTER (From Theme)
-       ========================================================================== */
-    footer{background:#111;color:#fff;padding:60px 24px 32px}
-    .footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:48px;margin-bottom:48px}
-    .footer-brand .logo{font-size:1.4rem;font-weight:900;letter-spacing:-.03em;margin-bottom:10px}
-    .footer-brand p{font-size:.85rem;color:#888;line-height:1.6}
-    .footer-links{display:flex;gap:48px}
-    .footer-col h5{font-size:.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
-    .footer-col a{display:block;font-size:.88rem;color:#aaa;margin-bottom:8px;transition:.15s}
-    .footer-col a:hover{color:#fff}
-    .footer-bottom{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid #222;font-size:.8rem;color:#555}
-    .footer-bottom a{color:#555;margin-left:20px;transition:.15s}
-    .footer-bottom a:hover{color:#fff}
-
-    body{position:relative}
-    footer{position:fixed;bottom:0;left:0;right:0;z-index:0}
-    .main-wrap{background:#fff;border-radius:0 0 48px 48px;position:relative;z-index:1;margin-bottom:0;box-shadow: 0 10px 40px rgba(0,0,0,0.1);}
-    
-    /* Spacer to push footer down correctly */
-    .footer-spacer{height:350px;} 
-
-    /* ==========================================================================
-       RESPONSIVE
-       ========================================================================== */
-    @media(max-width:900px){
-      .nav-links{display:none}
-      .footer-inner{grid-template-columns:1fr}
-      .footer-links{flex-wrap:wrap;gap:24px}
-    }
-    @media(max-width:600px){
-      .form-row { flex-direction: column; gap: 20px; }
-      .settings-card { padding: 24px 16px; }
-      .avatar-upload-wrapper { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .footer-spacer{height:600px;} /* Taller on mobile for stacked footer */
-    }
-
-    /* ==========================================================================
-       DARK MODE
-       ========================================================================== */
-    body.dark{background:#0a0a0a;color:#f0f0f0}
-    body.dark .main-wrap{background:#0a0a0a; box-shadow: 0 10px 40px rgba(0,0,0,0.8);}
-    body.dark .navbar{background:rgba(20,20,20,.65);border-color:rgba(255,255,255,.08);box-shadow:0 2px 16px rgba(0,0,0,.3),0 0 0 0.5px rgba(255,255,255,.04)}
-    body.dark .nav-brand{color:#f0f0f0}
-    body.dark .nav-brand .icon{background:#f0f0f0;color:#111}
-    body.dark .nav-links a{color:#888}
-    body.dark .nav-links a:hover, body.dark .nav-links a.active{color:#f0f0f0;background:#1e1e1e}
-    body.dark .btn-ghost{color:#888}
-    body.dark .btn-ghost:hover{color:#f0f0f0;background:#1e1e1e}
-    body.dark .btn-solid{background:#f0f0f0;color:#111}
-    body.dark .btn-solid:hover{background:#ccc}
-    body.dark .btn-outline{border-color:#333;color:#f0f0f0}
-    body.dark .btn-outline:hover{border-color:#888;background:#1e1e1e}
-    body.dark .theme-toggle{color:#888}
-    body.dark .theme-toggle:hover{color:#f0f0f0}
-
-    body.dark .settings-card {background: #141414; border-color: #2a2a2a;}
-    body.dark .settings-card-title {border-color: #2a2a2a;}
-    body.dark .avatar-preview {border-color: #2a2a2a; background: #1a1a1a;}
-    body.dark .form-group label {color: #aaa;}
-    body.dark .form-control {background: #1a1a1a; border-color: #2a2a2a; color: #f0f0f0;}
-    body.dark .form-control:focus {border-color: #888; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);}
-    
-    body.dark footer{background:#000}
-    body.dark .footer-bottom{border-color:#1a1a1a}
   </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100 transition-colors duration-300 min-h-screen flex flex-col font-sans">
 
-<div class="main-wrap">
+<!-- NAVBAR -->
+<header class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 rounded-full px-6 py-3 flex items-center justify-between shadow-lg shadow-slate-100/50 dark:shadow-none">
+  <a href="index.html" class="flex items-center gap-2 font-black text-lg tracking-tight hover:opacity-85 transition">
+    <div class="w-8 h-8 bg-brand-600 text-white rounded-xl flex items-center justify-center text-sm shadow-md shadow-brand-500/20">🎓</div>
+    <span class="bg-gradient-to-r from-brand-600 to-indigo-600 dark:from-brand-400 dark:to-indigo-400 bg-clip-text text-transparent">LearnLoop</span>
+  </a>
+  <nav class="hidden md:flex items-center gap-1">
+    <a href="index.html" class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition">Dashboard</a>
+    <a href="focusroom.html" class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition">Focus Rooms</a>
+    <a href="profile.html" class="px-4 py-1.5 bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 rounded-full text-sm font-bold transition">My Profile</a>
+  </nav>
+  <div class="flex items-center gap-3">
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800" aria-label="Toggle Theme">
+      <svg id="theme-icon-moon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+      <svg id="theme-icon-sun" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+    </button>
+    <!-- Log Out Button -->
+    <button id="nav-logout-btn" class="text-xs font-semibold px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-full hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 transition">Log Out</button>
+  </div>
+</header>
 
-  <!-- NAVBAR (Logged-in state) -->
-  <header class="navbar">
-    <a href="#" class="nav-brand">
-      <div class="icon">&#127891;</div>
-      <span>LearnLoop</span>
-    </a>
-    <nav class="nav-links">
-      <a href="index.html">Dashboard</a>
-      <a href="#">Focus Rooms</a>
-    </nav>
-    <div class="nav-actions">
-      <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
-      <!-- Profile chip -->
-      <a href="profile.html" id="nav-profile-btn" style="display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;border:1.5px solid #e8e8e8;font-size:.88rem;font-weight:600;color:#111;transition:.15s;text-decoration:none;">
-        <img id="nav-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=U&backgroundColor=111111&textColor=ffffff" alt="Avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;"/>
-        <span id="nav-username">Profile</span>
-      </a>
-      <button id="logout-btn" class="btn-outline" style="padding:6px 14px;font-size:.85rem;">Log out</button>
-    </div>
-  </header>
+<!-- MAIN WRAPPER -->
+<main class="flex-grow max-w-6xl w-full mx-auto px-4 pt-28 pb-20">
 
-  <!-- SETTINGS CONTENT -->
-  <main class="page-wrapper">
-    <div class="settings-container">
-      
-      <div class="settings-header">
-        <h1>Profile Settings</h1>
-        <p>Manage your account details, profile picture, and security preferences.</p>
+  <!-- PROFILE HEADER (COMBINED DUOLINGO + LINKEDIN AESTHETICS) -->
+  <div class="relative bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 md:p-8 shadow-sm mb-6 overflow-hidden">
+    <!-- Colorful Abstract Gradients -->
+    <div class="absolute -top-32 -right-32 w-80 h-80 bg-brand-500/10 dark:bg-brand-500/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+      <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+        <!-- Profile Picture Section -->
+        <div class="relative group">
+          <div class="w-28 h-28 rounded-2xl overflow-hidden border-4 border-white dark:border-zinc-850 shadow-xl bg-slate-100 dark:bg-zinc-800">
+            <img id="profile-avatar" src="https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=f5f5f5" alt="Learner Avatar"/>
+          </div>
+          <button onclick="toggleTab('settings')" class="absolute -bottom-2 -right-2 bg-brand-600 hover:bg-brand-700 text-white p-2 rounded-xl shadow-lg transition" title="Modify Avatar">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          </button>
+        </div>
+
+        <div>
+          <div class="flex flex-wrap items-center gap-2.5 justify-center md:justify-start">
+            <h1 id="profile-name" class="text-2xl md:text-3xl font-extrabold tracking-tight font-sans">John Smith</h1>
+            <span class="px-2.5 py-0.5 bg-brand-100 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 text-xs font-bold rounded-md">Pro Study Companion</span>
+          </div>
+          <p id="profile-headline" class="text-slate-600 dark:text-zinc-400 font-semibold mt-1">Computer Science Student</p>
+          <p id="profile-institution" class="text-slate-400 dark:text-zinc-500 text-sm flex items-center gap-1.5 justify-center md:justify-start mt-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            <span id="display-uni">University of Colombo</span>
+          </p>
+          
+          <!-- Key Indicators strip -->
+          <div class="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-zinc-800 text-indigo-700 dark:text-indigo-300 border border-indigo-100/60 dark:border-zinc-700">
+              🎓 Level: <span id="badge-level">Intermediate</span>
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/40">
+              🔥 Streak: <span id="badge-streak">14</span> Days
+            </span>
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
+              🎯 Focus Score: <span id="badge-focus">89%</span>
+            </span>
+          </div>
+        </div>
       </div>
 
-      <!-- CARD 1: PROFILE / NAME & PICTURE -->
-      <div class="settings-card">
-        <h2 class="settings-card-title">Personal Information</h2>
+      <div class="flex flex-col sm:flex-row gap-2.5 w-full lg:w-auto">
+        <button onclick="toggleTab('profile')" id="btn-tab-profile" class="px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-brand-600 text-white shadow-brand-500/10 hover:bg-brand-700">
+          Learner Hub View
+        </button>
+        <button onclick="toggleTab('settings')" id="btn-tab-settings" class="px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700">
+          Account Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1: WHO AM I AS A LEARNER? HUB -->
+  <div id="tab-content-profile" class="space-y-6">
+
+    <!-- TWO-COLUMN RESPONSIVE LAYOUT -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- LEFT COLUMN (LEARNING DASHBOARD & STATS & ACTIVITY) -->
+      <div class="space-y-6 lg:col-span-2">
         
-        <!-- Avatar Upload -->
-        <div class="avatar-upload-wrapper">
-          <div class="avatar-preview">
-            <img id="profile-img-preview" src="https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=f5f5f5" alt="Profile Picture">
+        <!-- SECTION 1 — LEARNING DASHBOARD (Duolingo style) -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2">
+              <span>⭐</span> Learning Dashboard
+            </h2>
+            <button onclick="logCustomStudyTime()" class="text-xs bg-brand-100 hover:bg-brand-200 dark:bg-brand-950/50 dark:hover:bg-brand-900 text-brand-700 dark:text-brand-300 px-3 py-1.5 rounded-xl font-bold transition">
+              ⚡ Log Session
+            </button>
           </div>
-          <div class="avatar-upload-info">
-            <h3>Profile Picture</h3>
-            <p>JPG, GIF or PNG. Max size of 5MB.</p>
-            <div style="display: flex; gap: 10px;">
-              <!-- Label acts as a button for the hidden file input -->
-              <label for="avatar-upload" class="btn-solid" style="display: inline-block; cursor: pointer; padding: 8px 16px; font-size: 0.85rem;">
-                Upload New
-              </label>
-              <input type="file" id="avatar-upload" class="file-input" accept="image/png, image/jpeg, image/gif">
-              <button type="button" class="btn-ghost" id="remove-avatar-btn">Remove</button>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-slate-50 dark:bg-zinc-800/40 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/60 text-center">
+              <span class="text-slate-400 dark:text-zinc-500 text-xs font-bold block mb-1">Total Study Hours</span>
+              <span id="stat-hours" class="text-2xl font-black text-brand-600 dark:text-brand-400">156 hrs</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-zinc-800/40 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/60 text-center">
+              <span class="text-slate-400 dark:text-zinc-500 text-xs font-bold block mb-1">Today's Progress</span>
+              <span id="stat-today" class="text-2xl font-black text-indigo-600 dark:text-indigo-400">2h 45m</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-zinc-800/40 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/60 text-center">
+              <span class="text-slate-400 dark:text-zinc-500 text-xs font-bold block mb-1">Current Streak</span>
+              <span id="stat-streak" class="text-2xl font-black text-orange-500">🔥 14 days</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-zinc-800/40 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/60 text-center">
+              <span class="text-slate-400 dark:text-zinc-500 text-xs font-bold block mb-1">Completed Goals</span>
+              <span id="stat-goals" class="text-2xl font-black text-emerald-500">18 Goals</span>
             </div>
           </div>
         </div>
 
-        <!-- Name Change Form -->
-        <form id="profile-form" class="settings-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="first-name">First Name</label>
-              <input type="text" id="first-name" class="form-control" value="Aisha" required>
-            </div>
-            <div class="form-group">
-              <label for="last-name">Last Name</label>
-              <input type="text" id="last-name" class="form-control" value="Rahman" required>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" class="form-control" value="aisha.rahman@example.com" disabled title="Contact support to change email">
-            <small style="color:#888; font-size:0.75rem; margin-top:4px;">Email cannot be changed directly. Contact support.</small>
+        <!-- SECTION 4 — CURRENT GOALS -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2">
+              <span>🎯</span> Current Goals
+            </h2>
+            <button onclick="openAddGoalModal()" class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline">+ Create Goal</button>
           </div>
 
-          <div class="form-group">
-            <label for="bio">Short Bio</label>
-            <textarea id="bio" class="form-control" rows="3" placeholder="Tell us a bit about yourself...">Computer Science student passionate about UI/UX and web development.</textarea>
+          <div id="goals-list" class="space-y-4">
+            <!-- Goals dynamic container -->
+          </div>
+        </div>
+
+        <!-- SECTION 3 — STUDY BUDDY MATCHING -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <div class="border-b border-slate-100 dark:border-zinc-800 pb-4 mb-4">
+            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2">
+              <span>🤝</span> Study Buddy Matchmaker
+            </h2>
+            <p class="text-slate-500 dark:text-zinc-400 text-sm mt-1">Configure subjects and availability. LearnLoop matches you in real-time with other active peers!</p>
           </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn-solid">Save Profile Changes</button>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-2 tracking-wider">Subjects of interest:</span>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer">
+                  <input type="checkbox" checked id="partner-db" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 accent-brand-600 dark:bg-zinc-800 dark:border-zinc-700"/>
+                  <span>Databases & SQL</span>
+                </label>
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer">
+                  <input type="checkbox" checked id="partner-react" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 accent-brand-600 dark:bg-zinc-800 dark:border-zinc-700"/>
+                  <span>React Framework</span>
+                </label>
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer">
+                  <input type="checkbox" id="partner-java" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 accent-brand-600 dark:bg-zinc-800 dark:border-zinc-700"/>
+                  <span>Java Development</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-2 tracking-wider">My Weekly Availability:</span>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer">
+                  <input type="checkbox" checked id="avail-weekdays" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 accent-brand-600 dark:bg-zinc-800 dark:border-zinc-700"/>
+                  <span>Weekdays (7pm - 10pm)</span>
+                </label>
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer">
+                  <input type="checkbox" checked id="avail-weekends" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 accent-brand-600 dark:bg-zinc-800 dark:border-zinc-700"/>
+                  <span>Weekends (All Day)</span>
+                </label>
+              </div>
+            </div>
           </div>
-        </form>
+
+          <div class="border-t border-slate-100 dark:border-zinc-800 pt-4">
+            <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-3 tracking-wider">Best Matching Buddies Online Now:</span>
+            <div id="matching-buddies-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 7 — RECENT ACTIVITY -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+            <span>🕒</span> Recent Activity Stream
+          </h2>
+          <div class="relative border-l-2 border-slate-100 dark:border-zinc-800 ml-3 pl-5 space-y-4" id="activity-stream">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
       </div>
 
-      <!-- CARD 2: SECURITY / PASSWORD -->
-      <div class="settings-card">
-        <h2 class="settings-card-title">Security & Password</h2>
+      <!-- RIGHT COLUMN / SIDEBAR -->
+      <div class="space-y-6">
+
+        <!-- SECTION 13 — AI LEARNING INSIGHTS -->
+        <div class="relative bg-gradient-to-br from-indigo-900 to-brand-950 text-white rounded-3xl p-6 shadow-lg overflow-hidden border border-brand-800/50">
+          <div class="absolute -bottom-10 -right-10 w-24 h-24 bg-brand-500/25 rounded-full blur-xl"></div>
+          
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-xs font-black flex items-center gap-1.5 uppercase tracking-wider">
+                <span>🤖</span> AI Learner Diagnostics
+              </h3>
+              <span class="px-2.5 py-0.5 bg-brand-600 text-white text-[9px] font-bold rounded-full animate-pulse">Gemini</span>
+            </div>
+
+            <div id="ai-insights-container" class="space-y-3">
+              <p class="text-indigo-200 text-xs leading-relaxed">
+                Scan your logged hours, subjects, and study frequency to formulate high-impact personal insights.
+              </p>
+              <button onclick="generateAIInsights()" id="btn-generate-ai" class="w-full bg-white text-indigo-950 font-extrabold text-xs py-2.5 rounded-xl hover:bg-brand-50 transition shadow-md">
+                Analyze Learner Profile
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 6 — ACHIEVEMENTS & BADGES -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+            <span>🏅</span> Badges & Achievements
+          </h2>
+          <div class="grid grid-cols-2 gap-3" id="achievements-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- SECTION 2 — SUBJECTS I STUDY -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold tracking-tight mb-3 flex items-center gap-2">
+            <span>📚</span> Subjects I Study
+          </h2>
+          <p class="text-xs text-slate-400 dark:text-zinc-500 mb-3">Pill list of your learning focus. Click to toggle.</p>
+          <div class="flex flex-wrap gap-2" id="subjects-container">
+            <!-- Managed by JS -->
+          </div>
+        </div>
+
+        <!-- SECTION 8 — FRIENDS / STUDY BUDDIES -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2">
+              <span>👥</span> Study Buddies
+            </h2>
+            <span class="text-xs font-semibold text-slate-400 dark:text-zinc-500">4 Active</span>
+          </div>
+          <div class="space-y-3" id="friends-list">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- SECTION 9 — SHARED RESOURCES -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2">
+              <span>📝</span> Shared Notes Portfolio
+            </h2>
+            <button onclick="triggerFileUpload()" class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline">+ Share PDF</button>
+            <input type="file" id="notes-file-input" class="hidden" accept=".pdf" onchange="simulateNotesUpload(event)"/>
+          </div>
+          <div id="notes-list" class="space-y-3">
+            <!-- Files listing managed via state -->
+          </div>
+        </div>
+
+        <!-- SECTION 12 — ADDITIONAL COMPREHENSIVE STATISTICS -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <h2 class="text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-4">Additional Statistics</h2>
+          <div class="grid grid-cols-2 gap-4 text-center">
+            <div class="bg-slate-50 dark:bg-zinc-800/20 p-3 rounded-xl border border-slate-100 dark:border-zinc-800">
+              <span class="text-lg font-black block" id="stat-questions">142</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Questions</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-zinc-800/20 p-3 rounded-xl border border-slate-100 dark:border-zinc-800">
+              <span class="text-lg font-black block" id="stat-sessions">84</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Sessions</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-zinc-800/20 p-3 rounded-xl border border-slate-100 dark:border-zinc-800">
+              <span class="text-lg font-black block" id="stat-quizzes">23</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Quizzes Done</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-zinc-800/20 p-3 rounded-xl border border-slate-100 dark:border-zinc-800">
+              <span class="text-lg font-black text-emerald-500 block" id="stat-reputation">482</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Reputation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 14 — MOTIVATION -->
+        <div class="p-4 bg-brand-50/50 dark:bg-brand-950/20 border border-brand-100/50 dark:border-brand-900/40 rounded-2xl">
+          <span class="text-[10px] uppercase font-bold text-brand-600 dark:text-brand-400 block mb-1 tracking-wider">Today's Motivation</span>
+          <p class="text-xs italic text-slate-600 dark:text-zinc-300">"The expert in anything was once a beginner."</p>
+          <span class="text-[10px] font-bold text-brand-500 mt-2 block">Keep pushing your 14-day streak!</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- TAB 2: ACCOUNT SETTINGS VIEW -->
+  <div id="tab-content-settings" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- LEFT FORMS COLUMN (PERSONAL INFO & ACCOUNT CONTROLS) -->
+      <div class="space-y-6 lg:col-span-2">
         
-        <form id="password-form" class="settings-form">
-          <div class="form-group">
-            <label for="current-password">Current Password</label>
-            <input type="password" id="current-password" class="form-control" placeholder="Enter current password" required>
-          </div>
+        <!-- SECTION 10 — PERSONAL LEARNER PROFILE / ACADEMICS -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+            <span>🏫</span> Academic Profile & Portfolio
+          </h2>
+          <form id="learner-info-form" class="space-y-4" onsubmit="saveLearnerInfo(event)">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Full Name</label>
+                <input type="text" id="info-name" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white" value="John Smith"/>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">University</label>
+                <input type="text" id="info-uni" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white" value="University of Colombo"/>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Faculty</label>
+                <input type="text" id="info-faculty" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white" value="Computing"/>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Academic Year</label>
+                <input type="text" id="info-year" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white" value="Year 2"/>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Country</label>
+                <input type="text" id="info-country" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white" value="Sri Lanka"/>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">LinkedIn URL</label>
+                <input type="text" id="info-linkedin" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white" value="linkedin.com/in/johnsmith"/>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Bio Description</label>
+              <textarea id="info-bio" rows="2" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white">Excited to match up with Java & React study groups!</textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">GitHub URL</label>
+              <input type="text" id="info-github" class="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white" value="github.com/johnsmith"/>
+            </div>
+
+            <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-3 rounded-xl transition">
+              Save Academic Details
+            </button>
+          </form>
+        </div>
+
+        <!-- SECTION 11 — ACCOUNT SECURITY & CONTROLS -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+            <span>⚙️</span> Preferences & Security
+          </h2>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label for="new-password">New Password</label>
-              <input type="password" id="new-password" class="form-control" placeholder="Must be at least 8 characters" minlength="8" required>
+          <div class="space-y-4">
+            <!-- Push Notification settings -->
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-zinc-800">
+              <div>
+                <p class="text-sm font-semibold">Real-time Companion Alerts</p>
+                <span class="text-[10px] text-slate-400">Get notified when study buddies match your subject focus</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="sr-only peer"/>
+                <div class="w-11 h-6 bg-slate-200 dark:bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+              </label>
             </div>
-            <div class="form-group">
-              <label for="confirm-password">Confirm New Password</label>
-              <input type="password" id="confirm-password" class="form-control" placeholder="Repeat new password" minlength="8" required>
+
+            <!-- Profile Privacy -->
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-zinc-800">
+              <div>
+                <p class="text-sm font-semibold">Public Matchmaking Profile</p>
+                <span class="text-[10px] text-slate-400">Allow other students to find you in the match list</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="sr-only peer"/>
+                <div class="w-11 h-6 bg-slate-200 dark:bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+              </label>
+            </div>
+
+            <!-- Change Pass details -->
+            <div class="pt-2">
+              <p class="text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Update Password</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="password" id="settings-new-pass" class="bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-xs focus:outline-none text-slate-900 dark:text-white" placeholder="New Secure Password"/>
+                <button onclick="updatePasswordSimulated()" class="bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-xs py-2 rounded-xl hover:opacity-90 transition">Update Pass</button>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn-solid">Update Password</button>
+      </div>
+
+      <!-- RIGHT AVATAR SELECT COLUMN -->
+      <div class="space-y-6">
+        <!-- Choose Avatar Box -->
+        <div class="bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-850 rounded-3xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+            <span>🎭</span> Choose Avatar
+          </h2>
+          <p class="text-xs text-slate-400 dark:text-zinc-500 mb-4">Select from premium presets or style your learner image.</p>
+          <div class="grid grid-cols-2 gap-3" id="avatars-selection-grid">
+            <!-- Dynamically populated presets -->
           </div>
-        </form>
+        </div>
       </div>
 
-    </div>
-  </main>
-
-</div><!-- /.main-wrap -->
-
-<!-- Invisible spacer to manage the fixed footer reveal -->
-<div class="footer-spacer"></div>
-
-<!-- SECTION: FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <div class="logo">&#127891; LearnLoop</div>
-      <p>Study better digital experiences<br/>with LearnLoop.</p>
-    </div>
-    <div class="footer-links">
-      <div class="footer-col">
-        <h5>Explore</h5>
-        <a href="#">Features</a>
-        <a href="#">Stats</a>
-        <a href="index.html">Dashboard</a>
-        <a href="#">Focus Rooms</a>
-        <a href="#">Analytics</a>
-      </div>
-      <div class="footer-col">
-        <h5>Account</h5>
-        <a href="#">Log in</a>
-        <a href="#">Sign up</a>
-        <a href="#">Profile</a>
-        <a href="#">Goals</a>
-      </div>
-      <div class="footer-col">
-        <h5>More</h5>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms</a>
-        <a href="#">Contact</a>
-        <a href="#">Blog</a>
-      </div>
     </div>
   </div>
-  <div class="footer-bottom">
-    <span>&copy; LearnLoop 2024 &ndash; 2026. All rights reserved</span>
-    <div>
-      <a href="#">Privacy policy</a>
-      <a href="#">Terms</a>
+
+</main>
+
+<!-- MODALS -->
+<!-- MODAL: CREATE GOAL -->
+<div id="goal-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 max-w-sm w-full rounded-3xl p-6 shadow-2xl relative">
+    <button onclick="closeAddGoalModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg">&times;</button>
+    <h3 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">Create New Goal</h3>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold mb-1 text-slate-600 dark:text-slate-400">Goal Name</label>
+        <input type="text" id="new-goal-title" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none text-slate-900 dark:text-white" placeholder="e.g. Master Binary Search Trees"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold mb-1 text-slate-600 dark:text-slate-400">Starting Progress (%)</label>
+        <input type="number" min="0" max="100" id="new-goal-progress" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none text-slate-900 dark:text-white" value="0"/>
+      </div>
+      <button onclick="addGoalSubmit()" class="w-full bg-brand-600 text-white font-bold py-2.5 rounded-xl hover:bg-brand-700 transition text-sm">Add Goal</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: CHAT WINDOW -->
+<div id="chat-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 max-w-md w-full rounded-3xl overflow-hidden shadow-2xl relative flex flex-col h-[500px]">
+    <!-- Header -->
+    <div class="bg-brand-600 p-4 text-white flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div id="chat-modal-avatar" class="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center font-bold text-sm">C</div>
+        <div>
+          <h4 id="chat-modal-title" class="font-bold text-sm">Chatting with Buddy</h4>
+          <span id="chat-modal-status" class="text-[10px] text-brand-200 block">Online</span>
+        </div>
+      </div>
+      <button onclick="closeChatModal()" class="text-white hover:text-slate-200 text-xl font-bold">&times;</button>
+    </div>
+    
+    <!-- Messages Feed -->
+    <div id="chat-messages-container" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 dark:bg-zinc-950/40 text-xs">
+      <!-- Chat bubbles populated dynamically -->
+    </div>
+
+    <!-- Message Input Footer -->
+    <div class="p-3 border-t border-slate-200 dark:border-zinc-800 flex gap-2 bg-white dark:bg-zinc-900">
+      <input type="text" id="chat-text-input" onkeydown="handleChatSubmit(event)" class="flex-grow bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3 py-2 text-xs focus:outline-none text-slate-900 dark:text-white" placeholder="Type a message..."/>
+      <button onclick="sendChatMessage()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2 rounded-xl transition text-xs">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING TOAST BAR -->
+<div id="toast" class="fixed bottom-6 right-6 bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 px-5 py-3 rounded-2xl shadow-xl font-bold text-xs transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+  <span id="toast-icon">✨</span> <span id="toast-text">Progress Saved!</span>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-zinc-950 text-white py-12 px-6 border-t border-zinc-900">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-500">
+    <div class="flex items-center gap-2 font-black text-white">
+      <span class="w-6 h-6 bg-brand-600 rounded-lg flex items-center justify-center text-xs text-white">🎓</span>
+      <span>LearnLoop</span>
+    </div>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-white transition">Privacy Policy</a>
+      <a href="#" class="hover:text-white transition">Terms of Service</a>
+      <a href="#" class="hover:text-white transition">Contact Coach</a>
+    </div>
+    <p>&copy; 2026 LearnLoop. All rights reserved.</p>
   </div>
 </footer>
 
-<!-- Toast Message Container -->
-<div class="toast" id="toastBox">
-  <div class="toast-icon">&#10003;</div>
-  <span id="toastMessage">Changes saved successfully!</span>
-</div>
-
+<!-- INTEGRATED UNIFIED SCRIPT (Handles both Firebase connectivity & offline states seamlessly) -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getAuth, onAuthStateChanged, signOut, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA",
@@ -466,104 +577,805 @@
     measurementId: "G-3SBVP21TE7"
   };
 
-  const app = initializeApp(firebaseConfig);
+  // Safe Firebase Initialization
+  let app;
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (e) {
+    app = initializeApp(firebaseConfig, 'profile-app');
+  }
+  
   const auth = getAuth(app);
+  const db = getFirestore(app);
 
-  // --- Auth state: populate profile with real user data ---
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      // Not logged in — redirect to login
-      window.location.href = 'login.html';
-      return;
+  window.userProfile = {
+    name: "John Smith",
+    headline: "Computer Science Student",
+    institution: "University of Colombo",
+    faculty: "Computing",
+    year: "Year 2",
+    country: "Sri Lanka",
+    bio: "Excited to match up with Java & React study groups!",
+    linkedin: "linkedin.com/in/johnsmith",
+    github: "github.com/johnsmith",
+    level: "Intermediate",
+    streak: 14,
+    focusScore: 89,
+    hours: 156,
+    todayProgress: "2h 45m",
+    goalsCompleted: 18,
+    avatar: "Aisha",
+    subjects: ["Java", "React", "Database"],
+    reputation: 482,
+    quizzes: 23,
+    sessions: 84,
+    questions: 142
+  };
+
+  const subjectsPool = ["Java", "React", "Database", "Networking", "Algorithms", "Machine Learning", "System Design"];
+  let selectedSubjects = ["Java", "React", "Database"];
+  const presetAvatars = ["Aisha", "David", "Emma", "Sarah", "Caleb", "Maya"];
+
+  const buddiesDatabase = [
+    { name: "Sanjaya", subjects: ["Database", "Networking"], avail: "weekdays", avatar: "S", status: "Online", desc: "Always looking for SQL query reviews!" },
+    { name: "Kavindi", subjects: ["React", "Algorithms"], avail: "weekends", avatar: "K", status: "Studying React", desc: "Working through hooks this morning." },
+    { name: "Imran", subjects: ["Java", "React"], avail: "weekdays", avatar: "I", status: "Available", desc: "Java developer learning responsive web design" },
+    { name: "Ruwan", subjects: ["Database", "Java"], avail: "weekends", avatar: "R", status: "Online", desc: "Prepping for database schema design midterm." },
+    { name: "Meena", subjects: ["Networking", "React"], avail: "weekdays", avatar: "M", status: "Offline", desc: "Mainly active on Tuesday focus lobbies." }
+  ];
+
+  let badgesList = [
+    { id: "streak-badge", title: "7 Day Streak", icon: "🔥", desc: "Maintained 7 active study days", state: "unlocked", threshold: 7, metric: "streak" },
+    { id: "goal-badge", title: "Goal Master", icon: "🎯", desc: "Completed 20 goals overall", state: "locked", threshold: 20, metric: "goalsCompleted" },
+    { id: "hours-badge", title: "100 Study Hours", icon: "📚", desc: "Crossed 100 study session marks", state: "unlocked", threshold: 100, metric: "hours" },
+    { id: "team-badge", title: "Reputation Pro", icon: "✨", desc: "Earned 500 reputation points", state: "locked", threshold: 500, metric: "reputation" },
+    { id: "notes-badge", title: "Contributor Portfolio", icon: "📝", desc: "Contributed shared note resources", state: "locked", threshold: 3, metric: "resourcesCount" },
+    { id: "focus-badge", title: "Focus Champion", icon: "⚡", desc: "Achieved a 95%+ focus score", state: "locked", threshold: 95, metric: "focusScore" }
+  ];
+
+  let goalsState = [
+    { id: 1, name: "Finish React Course", progress: 75 },
+    { id: 2, name: "Database Assignment", progress: 40 },
+    { id: 3, name: "Study 3 hours/day", progress: 80 }
+  ];
+
+  let recentActivities = [
+    { text: "Joined Focus Room 'Algorithms Session 1'", time: "2 hours ago" },
+    { text: "Completed Java Advanced Quiz with 90%", time: "Yesterday" },
+    { text: "Uploaded 'Networking Cheat Sheet.pdf'", time: "2 days ago" },
+    { text: "Studied 2.5 hours with companion Sarah", time: "3 days ago" }
+  ];
+
+  let sharedResources = [
+    { name: "Database Management Study notes.pdf", size: "2.4 MB", scope: "Shared with Buddies" },
+    { name: "React Cheatsheet (Hooks & State).pdf", size: "1.1 MB", scope: "Public" }
+  ];
+
+  let currentChattingBuddy = null;
+
+  const savedTheme = localStorage.getItem('ll_theme');
+  const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (savedTheme === 'dark' || (!savedTheme && isSystemDark)) {
+    document.documentElement.classList.add('dark');
+  }
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profileData', 'userSettings');
+      try {
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          window.userProfile = { ...window.userProfile, ...docSnap.data() };
+        } else {
+          await setDoc(docRef, window.userProfile);
+        }
+      } catch (err) {
+        console.warn("Firestore access error, falling back to secure local state.", err);
+      }
+      window.userProfile.name = user.displayName || window.userProfile.name;
     }
+    renderProfileUI();
+  });
 
-    // Navbar
-    const navAvatar   = document.getElementById('nav-avatar');
-    const navUsername = document.getElementById('nav-username');
-    const photoURL = user.photoURL
-      || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
-    navAvatar.src = photoURL;
-    const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
-    navUsername.textContent = firstName;
+  // Log out action
+  document.getElementById('nav-logout-btn').addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+    } catch(e) {}
+    showToast("Logged out from LearnLoop. Redirecting...");
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 1500);
+  });
 
-    // Profile card — avatar
-    const previewImg = document.getElementById('profile-img-preview');
-    previewImg.src = photoURL;
+  function renderProfileUI() {
+    if (!window.userProfile) return;
 
-    // Profile card — name fields
-    if (user.displayName) {
-      const parts = user.displayName.split(' ');
-      document.getElementById('first-name').value = parts[0] || '';
-      document.getElementById('last-name').value  = parts.slice(1).join(' ') || '';
+    // Display values
+    document.getElementById('profile-name').textContent = window.userProfile.name || 'John Smith';
+    document.getElementById('profile-headline').textContent = window.userProfile.headline || 'Computer Science Student';
+    document.getElementById('profile-institution').innerHTML = `
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      <span id="display-uni">${window.userProfile.institution || 'University of Colombo'}</span>
+    `;
+    
+    document.getElementById('profile-avatar').src = `https://api.dicebear.com/7.x/notionists/svg?seed=${window.userProfile.avatar}&backgroundColor=ede9fe`;
+
+    // Badges strip
+    document.getElementById('badge-level').textContent = window.userProfile.level;
+    document.getElementById('badge-streak').textContent = window.userProfile.streak;
+    document.getElementById('badge-focus').textContent = window.userProfile.focusScore + "%";
+
+    // Dashboard widgets
+    document.getElementById('stat-hours').textContent = window.userProfile.hours + " hrs";
+    document.getElementById('stat-today').textContent = window.userProfile.todayProgress;
+    document.getElementById('stat-streak').textContent = "🔥 " + window.userProfile.streak + " days";
+    document.getElementById('stat-goals').textContent = window.userProfile.goalsCompleted + " Goals";
+
+    // Quantitative metrics
+    document.getElementById('stat-questions').textContent = window.userProfile.questions;
+    document.getElementById('stat-sessions').textContent = window.userProfile.sessions;
+    document.getElementById('stat-quizzes').textContent = window.userProfile.quizzes;
+    document.getElementById('stat-reputation').textContent = window.userProfile.reputation;
+
+    // Fill Settings Input Forms dynamically so they never get out of sync
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val !== undefined ? val : '';
+    };
+
+    setVal('info-name', window.userProfile.name);
+    setVal('info-uni', window.userProfile.institution);
+    setVal('info-faculty', window.userProfile.faculty);
+    setVal('info-year', window.userProfile.year);
+    setVal('info-country', window.userProfile.country);
+    setVal('info-bio', window.userProfile.bio);
+    setVal('info-linkedin', window.userProfile.linkedin);
+    setVal('info-github', window.userProfile.github);
+
+    if (typeof window.filterBuddies === 'function') {
+      window.filterBuddies();
     }
-
-    // Profile card — email
-    document.getElementById('email').value = user.email || '';
-  });
-
-  // --- Logout ---
-  document.getElementById('logout-btn').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = 'index.html';
-  });
-
-  // --- Dark Mode Toggle ---
-  const themeToggle = document.getElementById('theme-toggle');
-  const saved = localStorage.getItem('ll_theme');
-  if (saved === 'dark') document.body.classList.add('dark');
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    localStorage.setItem('ll_theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-  });
-
-  // --- Avatar Upload Preview ---
-  const fileInput  = document.getElementById('avatar-upload');
-  const previewImg = document.getElementById('profile-img-preview');
-  const removeBtn  = document.getElementById('remove-avatar-btn');
-
-  fileInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) previewImg.src = URL.createObjectURL(file);
-  });
-
-  removeBtn.addEventListener('click', () => {
-    previewImg.src = `https://api.dicebear.com/7.x/initials/svg?seed=U&backgroundColor=111111&textColor=ffffff`;
-    fileInput.value = '';
-  });
-
-  // --- Toast helper ---
-  const toastBox     = document.getElementById('toastBox');
-  const toastMessage = document.getElementById('toastMessage');
-  let toastTimeout;
-
-  function showToast(message, isError = false) {
-    toastMessage.textContent = message;
-    const icon = document.querySelector('.toast-icon');
-    icon.innerHTML    = isError ? '&#33;' : '&#10003;';
-    icon.style.background = isError ? '#e53e3e' : '#10b981';
-    toastBox.classList.add('show');
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => toastBox.classList.remove('show'), 3000);
   }
 
-  // --- Profile form ---
-  document.getElementById('profile-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    showToast("Profile details updated successfully.");
-  });
+  window.saveLearnerInfo = async function(e) {
+    if (e) e.preventDefault();
+    
+    const inputName = document.getElementById('info-name').value.trim();
+    const inputUni = document.getElementById('info-uni').value.trim();
+    const inputFaculty = document.getElementById('info-faculty').value.trim();
+    const inputYear = document.getElementById('info-year').value.trim();
+    const inputCountry = document.getElementById('info-country').value.trim();
+    const inputBio = document.getElementById('info-bio').value.trim();
+    const inputLinkedin = document.getElementById('info-linkedin').value.trim();
+    const inputGithub = document.getElementById('info-github').value.trim();
 
-  // --- Password form ---
-  document.getElementById('password-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const newPass  = document.getElementById('new-password').value;
-    const confPass = document.getElementById('confirm-password').value;
-    if (newPass !== confPass) {
-      showToast("New passwords do not match.", true);
+    // Map to state
+    window.userProfile.name = inputName || window.userProfile.name;
+    window.userProfile.institution = inputUni || window.userProfile.institution;
+    window.userProfile.faculty = inputFaculty || window.userProfile.faculty;
+    window.userProfile.headline = `${inputFaculty || 'Computer Science'} Student`;
+    window.userProfile.year = inputYear || window.userProfile.year;
+    window.userProfile.country = inputCountry || window.userProfile.country;
+    window.userProfile.bio = inputBio || window.userProfile.bio;
+    window.userProfile.linkedin = inputLinkedin || window.userProfile.linkedin;
+    window.userProfile.github = inputGithub || window.userProfile.github;
+
+    // Direct UI Refresh
+    renderProfileUI();
+
+    showToast("Academic profile changes saved locally!");
+    addActivityToStream(`Saved academic portfolio changes: '${inputUni}'`);
+
+    // Synchronize to Firestore
+    const user = auth.currentUser;
+    if (user) {
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profileData', 'userSettings');
+      try {
+        await setDoc(docRef, window.userProfile, { merge: true });
+        showToast("Profile changes synced to LearnLoop Cloud!");
+      } catch (err) {
+        console.warn("Could not synchronize with cloud Firestore.", err);
+      }
+    }
+
+    // Toggle Back automatically
+    toggleTab('profile');
+  };
+
+  window.updateAvatarSelection = async function(seed) {
+    window.userProfile.avatar = seed;
+    document.getElementById('profile-avatar').src = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=ede9fe`;
+    showToast(`Avatar style updated to preset: ${seed}!`);
+    addActivityToStream(`Updated user avatar preset: '${seed}'`);
+    
+    if (auth.currentUser) {
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      const docRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profileData', 'userSettings');
+      try {
+        await updateDoc(docRef, { avatar: seed });
+      } catch (err) {
+        console.warn("Could not save avatar preset to Cloud.", err);
+      }
+    }
+  };
+
+  window.adjustGoal = function(id, value) {
+    const valEl = document.getElementById(`goal-val-${id}`);
+    const barEl = document.getElementById(`goal-bar-${id}`);
+    if (valEl) valEl.innerText = value + "%";
+    if (barEl) barEl.style.width = value + "%";
+    
+    const target = goalsState.find(g => g.id === id);
+    if (target) {
+      target.progress = parseInt(value);
+      if (target.progress === 100) {
+        accomplishGoal(id);
+      }
+    }
+  };
+
+  window.accomplishGoal = function(id) {
+    const target = goalsState.find(g => g.id === id);
+    if (target && target.progress < 100) {
+      target.progress = 100;
+      adjustGoal(id, 100);
+    }
+    
+    triggerConfettiBurst();
+    showToast("🎉 Spectacular! Goal checklist marked complete!");
+    addActivityToStream(`Completed learning target checklist: '${target ? target.name : 'Unknown'}'`);
+    
+    window.userProfile.goalsCompleted = parseInt(window.userProfile.goalsCompleted || 18) + 1;
+    evaluateAchievementsUnlocks();
+    renderProfileUI();
+  };
+
+  window.openAddGoalModal = function() {
+    document.getElementById('goal-modal')?.classList.remove('hidden');
+  };
+
+  window.closeAddGoalModal = function() {
+    document.getElementById('goal-modal')?.classList.add('hidden');
+  };
+
+  window.addGoalSubmit = function() {
+    const name = document.getElementById('new-goal-title')?.value.trim();
+    const starting = parseInt(document.getElementById('new-goal-progress')?.value) || 0;
+    if (!name) return showToast("Goal description cannot be empty", true);
+
+    const newId = goalsState.length + 1;
+    goalsState.push({ id: newId, name: name, progress: starting });
+    renderGoalTrackers();
+    closeAddGoalModal();
+    showToast("Custom learning goal target added!");
+    addActivityToStream(`Configured goal checklists target: '${name}'`);
+    
+    const titleIn = document.getElementById('new-goal-title');
+    if (titleIn) titleIn.value = '';
+  };
+
+  window.toggleSubjectSelected = function(subject) {
+    const index = selectedSubjects.indexOf(subject);
+    if (index > -1) {
+      selectedSubjects.splice(index, 1);
+      addActivityToStream(`Removed study focus tag: '${subject}'`);
+    } else {
+      selectedSubjects.push(subject);
+      addActivityToStream(`Added study focus tag: '${subject}'`);
+    }
+    renderSubjectsList();
+    filterBuddies();
+  };
+
+  window.openChatModal = function(buddyName) {
+    const buddy = buddiesDatabase.find(b => b.name === buddyName);
+    if (!buddy) return;
+    
+    currentChattingBuddy = buddy;
+    document.getElementById('chat-modal-title').innerText = `Chatting with ${buddy.name}`;
+    document.getElementById('chat-modal-status').innerText = buddy.status;
+    document.getElementById('chat-modal-avatar').innerText = buddy.avatar;
+    
+    const container = document.getElementById('chat-messages-container');
+    container.innerHTML = '';
+    
+    const welcomeHTML = `
+      <div class="flex flex-col">
+        <span class="text-brand-600 dark:text-brand-400 font-bold text-[10px] mb-0.5">${buddy.name}</span>
+        <div class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">
+          Hey ${window.userProfile.name}! ${buddy.desc} Interested in launching a joint session together?
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', welcomeHTML);
+    document.getElementById('chat-modal').classList.remove('hidden');
+  };
+
+  window.closeChatModal = function() {
+    document.getElementById('chat-modal').classList.add('hidden');
+    currentChattingBuddy = null;
+  };
+
+  window.handleChatSubmit = function(e) {
+    if (e.key === 'Enter') {
+      sendChatMessage();
+    }
+  };
+
+  window.sendChatMessage = function() {
+    const input = document.getElementById('chat-text-input');
+    const msgText = input.value.trim();
+    if (!msgText) return;
+
+    const container = document.getElementById('chat-messages-container');
+    const userHTML = `
+      <div class="flex flex-col items-end">
+        <span class="text-slate-400 text-[10px] mb-0.5">You</span>
+        <div class="bg-brand-600 text-white p-2.5 rounded-2xl rounded-tr-none inline-block max-w-[80%] text-right">
+          ${msgText}
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', userHTML);
+    input.value = '';
+    container.scrollTop = container.scrollHeight;
+
+    setTimeout(() => {
+      if (!currentChattingBuddy) return;
+      let reply = "Count me in! Let's get together in a Focus Room study space.";
+      if (currentChattingBuddy.name === "Sanjaya") {
+        reply = "Brilliant! I'm prepped for databases. Let me create a room with database diagrams.";
+      } else if (currentChattingBuddy.name === "Kavindi") {
+        reply = "Amazing! I am studying React render lifecycles. Aligns perfectly with your studies!";
+      }
+      
+      const replyHTML = `
+        <div class="flex flex-col">
+          <span class="text-brand-600 dark:text-brand-400 font-bold text-[10px] mb-0.5">${currentChattingBuddy.name}</span>
+          <div class="bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">
+            ${reply}
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', replyHTML);
+      container.scrollTop = container.scrollHeight;
+    }, 1200);
+  };
+
+  window.downloadResourceSimulated = function(name) {
+    showToast(`Downloading '${name}'... File download validated!`);
+  };
+
+  window.deleteResourceSimulated = function(index) {
+    const deleted = sharedResources[index];
+    sharedResources.splice(index, 1);
+    renderSharedResources();
+    evaluateAchievementsUnlocks();
+    showToast(`Deleted resource notes: '${deleted.name}'`);
+    addActivityToStream(`Removed notes attachment: '${deleted.name}'`);
+  };
+
+  window.triggerFileUpload = function() {
+    document.getElementById('notes-file-input')?.click();
+  };
+
+  window.simulateNotesUpload = function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      sharedResources.unshift({
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(1) + " MB",
+        scope: "Shared with Buddies"
+      });
+      renderSharedResources();
+      evaluateAchievementsUnlocks();
+      showToast("Uploaded new resource documentation!");
+      addActivityToStream(`Contributed shared note: '${file.name}'`);
+    }
+  };
+
+  window.logCustomStudyTime = function() {
+    window.userProfile.hours = parseInt(window.userProfile.hours || 156) + 2;
+    window.userProfile.reputation = parseInt(window.userProfile.reputation || 482) + 25;
+    window.userProfile.sessions = parseInt(window.userProfile.sessions || 84) + 1;
+    evaluateAchievementsUnlocks();
+    renderProfileUI();
+    showToast("⚡ Active companion session logged +2 hours!");
+    addActivityToStream("Finished custom Pomodoro milestone.");
+  };
+
+  window.toggleTab = function(tabName) {
+    const profileTab = document.getElementById('tab-content-profile');
+    const settingsTab = document.getElementById('tab-content-settings');
+
+    const btnProfile = document.getElementById('btn-tab-profile');
+    const btnSettings = document.getElementById('btn-tab-settings');
+
+    if (tabName === 'profile') {
+      profileTab?.classList.remove('hidden');
+      settingsTab?.classList.add('hidden');
+      if (btnProfile) btnProfile.className = "px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-brand-600 text-white shadow-brand-500/10 hover:bg-brand-700";
+      if (btnSettings) btnSettings.className = "px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700";
+    } else {
+      profileTab?.classList.add('hidden');
+      settingsTab?.classList.remove('hidden');
+      if (btnProfile) btnProfile.className = "px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700";
+      if (btnSettings) btnSettings.className = "px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-brand-600 text-white shadow-brand-500/10 hover:bg-brand-700";
+    }
+  };
+
+  window.showToast = function(message, isError = false) {
+    const box = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    const text = document.getElementById('toast-text');
+    if (!box || !icon || !text) return;
+
+    icon.innerText = isError ? "⚠️" : "✨";
+    text.innerText = message;
+    
+    box.className = "fixed bottom-6 right-6 bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300";
+    
+    setTimeout(() => {
+      box.className = "fixed bottom-6 right-6 bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none";
+    }, 2800);
+  };
+
+  window.generateAIInsights = async function() {
+    const container = document.getElementById('ai-insights-container');
+    const button = document.getElementById('btn-generate-ai');
+    if (!container || !button) return;
+    
+    button.disabled = true;
+    button.innerText = "Analyzing metrics with AI...";
+    
+    const streak = document.getElementById('badge-streak')?.innerText ?? "14";
+    const focus = document.getElementById('badge-focus')?.innerText ?? "89%";
+    const hrs = document.getElementById('stat-hours')?.innerText ?? "156 hrs";
+
+    const query = `
+      Perform analysis as a professional academic advisor for a university student.
+      Profile metrics:
+      - Subjects: ${selectedSubjects.join(', ')}
+      - Consistent Streak: ${streak} days
+      - Average Focus Accuracy: ${focus}
+      - Total Hours: ${hrs}
+
+      Identify 1 primary strength, 1 specific improvements area, and 2 prompt action items (quizzes or revisions suggested) formatted as clear list elements.
+      Keep the formatting very concise, friendly, and structured.
+    `;
+
+    const coachInstruction = "You are an encouraging, professional university mentor providing dynamic, direct feedback to active students.";
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: query }] }],
+          systemInstruction: { parts: [{ text: coachInstruction }] }
+        })
+      });
+
+      const parsed = await response.json();
+      const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (text) {
+        let structuredHTML = text
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-black">$1</strong>')
+          .replace(/\n/g, '<br/>');
+
+        container.innerHTML = `
+          <div class="text-[11px] leading-relaxed text-indigo-100 bg-brand-900/40 p-4 rounded-2xl border border-brand-800/40 max-h-[300px] overflow-y-auto animate-fade-in">
+            ${structuredHTML}
+          </div>
+          <button onclick="generateAIInsights()" class="w-full bg-white text-indigo-950 font-extrabold text-[10px] py-2 rounded-xl mt-3 hover:bg-slate-100 transition shadow">
+            Re-Analyze Analytics
+          </button>
+        `;
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
+      container.innerHTML = `
+        <div class="space-y-3 bg-brand-900/40 p-4 rounded-2xl border border-brand-800/40 text-[11px] animate-fade-in">
+          <p><strong class="text-emerald-400">🔥 Strongest Focus:</strong> ${selectedSubjects.join(' & ')}. Excellent session consistency over the past ${streak} days!</p>
+          <p><strong class="text-orange-400">⚠️ Needs Improvement:</strong> Database schemas and SQL joins require more active practical assignments.</p>
+          <p class="text-[10px] text-indigo-200 font-medium">💡 Recommended Action: Join a Databases focus room with Sanjaya or David this afternoon.</p>
+        </div>
+        <button onclick="generateAIInsights()" class="w-full bg-white text-indigo-950 font-extrabold text-[10px] py-2 rounded-xl mt-3 hover:bg-slate-100 transition">
+          Re-Analyze Profile
+        </button>
+      `;
+    } finally {
+      button.disabled = false;
+      button.innerText = "Analyze Learner Profile";
+    }
+  };
+
+  window.sendFocusCall = function(name) {
+    showToast(`Sent collaborative Focus Room lobby invite to ${name}!`);
+    addActivityToStream(`Sent focus call invitation key to companion '${name}'`);
+  };
+
+  window.updatePasswordSimulated = function() {
+    const value = document.getElementById('settings-new-pass').value;
+    if (value.length < 6) return showToast("Password must be at least 6 characters!", true);
+    showToast("Password changed successfully!");
+    addActivityToStream("Updated account credentials password.");
+    document.getElementById('settings-new-pass').value = '';
+  };
+
+  function renderGoalTrackers() {
+    const list = document.getElementById('goals-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    goalsState.forEach(goal => {
+      const card = `
+        <div class="bg-slate-50 dark:bg-zinc-850/40 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/60">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-sm text-slate-900 dark:text-zinc-100">${goal.name}</span>
+            <span class="text-xs text-brand-600 dark:text-brand-400 font-extrabold" id="goal-val-${goal.id}">${goal.progress}%</span>
+          </div>
+          <div class="w-full bg-slate-200 dark:bg-zinc-800 h-2.5 rounded-full overflow-hidden">
+            <div id="goal-bar-${goal.id}" class="bg-brand-500 h-full rounded-full transition-all duration-300" style="width: ${goal.progress}%"></div>
+          </div>
+          <div class="flex items-center justify-between mt-3">
+            <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal(${goal.id}, this.value)" class="w-3/4 accent-brand-600 cursor-pointer"/>
+            <button onclick="accomplishGoal(${goal.id})" class="text-xs font-bold text-slate-500 hover:text-emerald-500 dark:text-slate-400 transition">Mark Done</button>
+          </div>
+        </div>
+      `;
+      list.insertAdjacentHTML('beforeend', card);
+    });
+  }
+
+  function renderSubjectsList() {
+    const container = document.getElementById('subjects-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    subjectsPool.forEach(subject => {
+      const isSelected = selectedSubjects.includes(subject);
+      const tagClass = isSelected 
+        ? "px-3 py-1.5 rounded-full text-xs font-bold bg-brand-100 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-900 cursor-pointer transition hover:scale-105"
+        : "px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-zinc-800/60 text-slate-500 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700 cursor-pointer transition hover:scale-105";
+
+      const btn = document.createElement('button');
+      btn.className = tagClass;
+      btn.innerText = (isSelected ? "✓ " : "+ ") + subject;
+      btn.onclick = () => toggleSubjectSelected(subject);
+      container.appendChild(btn);
+    });
+  }
+
+  window.filterBuddies = function() {
+    const list = document.getElementById('matching-buddies-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const dbChecked = document.getElementById('partner-db')?.checked ?? true;
+    const reactChecked = document.getElementById('partner-react')?.checked ?? true;
+    const javaChecked = document.getElementById('partner-java')?.checked ?? false;
+
+    const weekdayChecked = document.getElementById('avail-weekdays')?.checked ?? true;
+    const weekendChecked = document.getElementById('avail-weekends')?.checked ?? true;
+
+    let searchSubjects = [];
+    if (dbChecked) searchSubjects.push("Database");
+    if (reactChecked) searchSubjects.push("React");
+    if (javaChecked) searchSubjects.push("Java");
+
+    const filtered = buddiesDatabase.filter(buddy => {
+      const matchSubj = buddy.subjects.some(s => searchSubjects.includes(s));
+      const matchAvail = (buddy.avail === 'weekdays' && weekdayChecked) || (buddy.avail === 'weekends' && weekendChecked);
+      return matchSubj && matchAvail;
+    });
+
+    if (filtered.length === 0) {
+      list.innerHTML = `
+        <div class="col-span-2 text-center py-4 text-xs text-slate-400 dark:text-zinc-500 italic">
+          No matches found matching these selections. Expand search tags!
+        </div>
+      `;
       return;
     }
-    showToast("Password changed successfully.");
-    document.getElementById('password-form').reset();
+
+    filtered.forEach(buddy => {
+      const element = `
+        <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 rounded-2xl">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-brand-500/15">${buddy.avatar}</div>
+            <div>
+              <p class="text-xs font-bold text-slate-900 dark:text-zinc-100">${buddy.name}</p>
+              <p class="text-[9px] text-brand-600 dark:text-brand-400 font-semibold">${buddy.subjects.join(', ')}</p>
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="openChatModal('${buddy.name}')" class="text-[10px] bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 px-2.5 py-1.5 rounded-lg hover:bg-brand-100 font-bold transition">
+              Message
+            </button>
+            <button onclick="sendFocusCall('${buddy.name}')" class="text-[10px] bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-750 font-bold shadow-sm transition">
+              Invite Focus
+            </button>
+          </div>
+        </div>
+      `;
+      list.insertAdjacentHTML('beforeend', element);
+    });
+  };
+
+  function renderAchievementsBadges() {
+    const grid = document.getElementById('achievements-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    badgesList.forEach(badge => {
+      const isUnlocked = badge.state === "unlocked";
+      const block = `
+        <div class="flex items-center gap-3 p-2.5 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800/60 ${isUnlocked ? '' : 'opacity-40'}">
+          <span class="text-2xl">${badge.icon}</span>
+          <div>
+            <p class="text-[11px] font-bold leading-tight">${badge.title}</p>
+            <span class="text-[9px] ${isUnlocked ? 'text-emerald-500 font-semibold' : 'text-slate-400'}">${isUnlocked ? 'Unlocked' : 'In Progress'}</span>
+          </div>
+        </div>
+      `;
+      grid.insertAdjacentHTML('beforeend', block);
+    });
+  }
+
+  function renderSharedResources() {
+    const list = document.getElementById('notes-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    sharedResources.forEach((res, index) => {
+      const item = `
+        <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-100 dark:border-zinc-800/60">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">📄</span>
+            <div>
+              <p class="text-xs font-bold leading-tight text-slate-800 dark:text-zinc-200">${res.name}</p>
+              <span class="text-[10px] text-slate-400">${res.size} • ${res.scope}</span>
+            </div>
+          </div>
+          <div class="flex gap-2 text-[10px] font-bold">
+            <button onclick="downloadResourceSimulated('${res.name}')" class="text-brand-600 dark:text-brand-400 hover:underline">Download</button>
+            <button onclick="deleteResourceSimulated(${index})" class="text-red-500 hover:underline">Delete</button>
+          </div>
+        </div>
+      `;
+      list.insertAdjacentHTML('beforeend', item);
+    });
+  }
+
+  function renderBuddiesSidebar() {
+    const container = document.getElementById('friends-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    buddiesDatabase.slice(0, 4).forEach(b => {
+      const isOnline = b.status !== "Offline";
+      const badgeColor = b.status === "Studying React" ? "bg-brand-500 animate-pulse" : (isOnline ? "bg-emerald-500" : "bg-slate-300");
+      const card = `
+        <div class="flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-800/30 p-1.5 rounded-xl transition" onclick="openChatModal('${b.name}')">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-brand-100 dark:bg-brand-950 flex items-center justify-center font-black text-brand-700 text-sm">${b.avatar}</div>
+            <div>
+              <p class="text-xs font-bold text-slate-900 dark:text-zinc-100">${b.name}</p>
+              <p class="text-[10px] text-slate-400">${b.status}</p>
+            </div>
+          </div>
+          <span class="w-2.5 h-2.5 rounded-full ${badgeColor}"></span>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', card);
+    });
+  }
+
+  function renderActivityTimeline() {
+    const container = document.getElementById('activity-stream');
+    if (!container) return;
+    container.innerHTML = '';
+
+    recentActivities.forEach(act => {
+      const element = `
+        <div class="relative">
+          <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-brand-500 border-2 border-white dark:border-zinc-900"></div>
+          <p class="text-xs font-bold text-slate-800 dark:text-zinc-200">${act.text}</p>
+          <span class="text-[10px] text-slate-400">${act.time}</span>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', element);
+    });
+  }
+
+  function addActivityToStream(text) {
+    recentActivities.unshift({
+      text: text,
+      time: "Just now"
+    });
+    renderActivityTimeline();
+  }
+
+  function renderAvatarSelections() {
+    const grid = document.getElementById('avatars-selection-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    presetAvatars.forEach(avatar => {
+      const card = `
+        <button onclick="updateAvatarSelection('${avatar}')" class="flex flex-col items-center p-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-brand-500 dark:hover:border-brand-400 rounded-2xl transition">
+          <img class="w-14 h-14 rounded-xl mb-1.5" src="https://api.dicebear.com/7.x/notionists/svg?seed=${avatar}&backgroundColor=ede9fe" alt="preset"/>
+          <span class="text-xs font-semibold text-slate-900 dark:text-zinc-100">${avatar}</span>
+        </button>
+      `;
+      grid.insertAdjacentHTML('beforeend', card);
+    });
+  }
+
+  function evaluateAchievementsUnlocks() {
+    badgesList.forEach(badge => {
+      if (badge.state === "locked") {
+        let valueToTest = 0;
+        if (badge.metric === "streak") valueToTest = window.userProfile.streak;
+        if (badge.metric === "goalsCompleted") valueToTest = window.userProfile.goalsCompleted;
+        if (badge.metric === "hours") valueToTest = window.userProfile.hours;
+        if (badge.metric === "reputation") valueToTest = window.userProfile.reputation;
+        if (badge.metric === "resourcesCount") valueToTest = sharedResources.length;
+        if (badge.metric === "focusScore") valueToTest = window.userProfile.focusScore;
+
+        if (valueToTest >= badge.threshold) {
+          badge.state = "unlocked";
+          showToast(`🔓 Unlocked Badge Achievement: ${badge.title}!`);
+          triggerConfettiBurst();
+          addActivityToStream(`Earned Achievement Medal: '${badge.title}'`);
+        }
+      }
+    });
+    renderAchievementsBadges();
+  }
+
+  function triggerConfettiBurst() {
+    if (typeof confetti === 'function') {
+      confetti({
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderGoalTrackers();
+    renderSubjectsList();
+    renderBuddiesSidebar();
+    renderSharedResources();
+    renderActivityTimeline();
+    renderAchievementsBadges();
+    renderAvatarSelections();
+    
+    // Bind listeners to matching checkboxes
+    const matchControls = ['partner-db', 'partner-react', 'partner-java', 'avail-weekdays', 'avail-weekends'];
+    matchControls.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', window.filterBuddies);
+    });
+
+    window.filterBuddies();
+    renderProfileUI();
   });
 </script>
+
 </body>
 </html>
