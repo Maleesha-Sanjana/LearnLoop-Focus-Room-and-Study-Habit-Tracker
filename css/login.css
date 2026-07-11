@@ -59,3 +59,5 @@
             z-index: 100;
         }
         .theme-toggle:hover { background: var(--border); transform: scale(1.1); }
+
+        #recaptcha-container { min-height: 1px; }
