@@ -60,11 +60,32 @@
             <h2 class="section-title">Learning Dashboard</h2>
             <button type="button" onclick="logCustomStudyTime()" class="btn-small">Log Session</button>
           </div>
-          <div class="stat-grid">
-            <div class="stat-box"><span class="stat-label">Total Study Hours</span><span id="stat-hours" class="stat-value">0 hrs</span></div>
-            <div class="stat-box"><span class="stat-label">Today's Progress</span><span id="stat-today" class="stat-value">0h 0m</span></div>
-            <div class="stat-box"><span class="stat-label">Current Streak</span><span id="stat-streak" class="stat-value">0 days</span></div>
-            <div class="stat-box"><span class="stat-label">Completed Goals</span><span id="stat-goals" class="stat-value">0 Goals</span></div>
+        </div>
+        <div class="ll-card border rounded-3xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold tracking-tight flex items-center gap-2"><span>🎯</span> Current Goals</h2><button onclick="openAddGoalModal()" class="text-xs font-bold text-[#111] dark:text-[#f0f0f0] hover:underline">+ Create Goal</button></div>
+          <div id="goals-list" class="space-y-4"></div>
+        </div>
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm">
+          <div class="border-b border-slate-100 dark:border-zinc-800 pb-4 mb-4">
+            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2"><span>🤝</span> Study Buddy Matchmaker</h2>
+            <p class="text-slate-500 dark:text-zinc-400 text-sm mt-1">Configure subjects and availability. LearnLoop matches you with active peers!</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-2 tracking-wider">Subjects of interest:</span>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer"><input type="checkbox" checked id="partner-db" class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]"/><span>Databases & SQL</span></label>
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer"><input type="checkbox" checked id="partner-react" class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]"/><span>React Framework</span></label>
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer"><input type="checkbox" id="partner-java" class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]"/><span>Java Development</span></label>
+              </div>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-2 tracking-wider">My Weekly Availability:</span>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer"><input type="checkbox" checked id="avail-weekdays" class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]"/><span>Weekdays (7pm - 10pm)</span></label>
+                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer"><input type="checkbox" checked id="avail-weekends" class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]"/><span>Weekends (All Day)</span></label>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -81,26 +102,21 @@
           <div class="activity-stream" id="activity-stream"></div>
         </section>
       </div>
-
-      <div class="profile-stack">
-        <section class="card">
-          <h2 class="section-title">Badges and Achievements</h2>
-          <div class="badge-grid" id="achievements-grid"></div>
-        </section>
-
-        <section class="card">
-          <h2 class="section-title">Subjects I Study</h2>
-          <p class="text-muted" style="margin-bottom: 12px;">Click to toggle your learning focus.</p>
-          <div class="subject-tags" id="subjects-container"></div>
-        </section>
-
-        <section class="card">
-          <h2 class="section-title text-small" style="text-transform: uppercase; letter-spacing: 0.05em; color: var(--ll-muted);">Additional Statistics</h2>
-          <div class="mini-stat-grid">
-            <div class="mini-stat-box"><span class="mini-stat-value" id="stat-questions">0</span><span class="mini-stat-label">Questions</span></div>
-            <div class="mini-stat-box"><span class="mini-stat-value" id="stat-sessions">0</span><span class="mini-stat-label">Sessions</span></div>
-            <div class="mini-stat-box"><span class="mini-stat-value" id="stat-quizzes">0</span><span class="mini-stat-label">Quizzes Done</span></div>
-            <div class="mini-stat-box"><span class="mini-stat-value" id="stat-reputation">0</span><span class="mini-stat-label">Reputation</span></div>
+      <div class="space-y-6">
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm"><h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2"><span>🏅</span> Badges & Achievements</h2><div class="grid grid-cols-2 gap-3" id="achievements-grid"></div></div>
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm"><h2 class="text-lg font-bold tracking-tight mb-3 flex items-center gap-2"><span>📚</span> Subjects I Study</h2><p class="text-xs text-slate-400 dark:text-zinc-500 mb-3">Click to toggle your learning focus.</p><div class="flex flex-wrap gap-2" id="subjects-container"></div></div>
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm"><div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold tracking-tight flex items-center gap-2"><span>👥</span> Study Buddies</h2><span class="text-xs font-semibold text-slate-400 dark:text-zinc-500">4 Active</span></div><div class="space-y-3" id="friends-list"></div></div>
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold tracking-tight flex items-center gap-2"><span>📝</span> Shared Notes Portfolio</h2><button onclick="triggerFileUpload()" class="text-xs font-bold text-[#111] dark:text-[#f0f0f0] hover:underline">+ Share PDF</button><input type="file" id="notes-file-input" class="hidden" accept=".pdf" onchange="simulateNotesUpload(event)"/></div>
+          <div id="notes-list" class="space-y-3"></div>
+        </div>
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm">
+          <h2 class="text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-4">Additional Statistics</h2>
+          <div class="grid grid-cols-2 gap-4 text-center">
+            <div class="ll-surface p-3 rounded-xl border border-[#e8e8e8] dark:border-[#2a2a2a]"><span class="text-lg font-black block" id="stat-questions">0</span><span class="text-[10px] text-[#888] block mt-0.5">Questions</span></div>
+            <div class="ll-surface p-3 rounded-xl border border-[#e8e8e8] dark:border-[#2a2a2a]"><span class="text-lg font-black block" id="stat-sessions">0</span><span class="text-[10px] text-[#888] block mt-0.5">Sessions</span></div>
+            <div class="ll-surface p-3 rounded-xl border border-[#e8e8e8] dark:border-[#2a2a2a]"><span class="text-lg font-black block" id="stat-quizzes">0</span><span class="text-[10px] text-[#888] block mt-0.5">Quizzes Done</span></div>
+            <div class="ll-surface p-3 rounded-xl border border-[#e8e8e8] dark:border-[#2a2a2a]"><span class="text-lg font-black block" id="stat-reputation">0</span><span class="text-[10px] text-[#888] block mt-0.5">Reputation</span></div>
           </div>
         </section>
 
@@ -134,16 +150,13 @@
             <div class="form-field"><label for="info-github">GitHub URL</label><input type="text" id="info-github" class="form-input" placeholder="github.com/username"/></div>
             <button type="submit" class="ll-btn-primary">Save Academic Details</button>
           </form>
-        </section>
-
-        <section class="card">
-          <h2 class="section-title">Security</h2>
-          <div class="form-stack">
-            <p class="text-muted">Available for email/password accounts. Enter your current password to confirm the change.</p>
-            <div class="form-field"><label for="settings-current-pass">Current Password</label><input type="password" id="settings-current-pass" autocomplete="current-password" class="form-input" placeholder="Current password"/></div>
-            <div class="form-field"><label for="settings-new-pass">New Password</label><input type="password" id="settings-new-pass" autocomplete="new-password" class="form-input" placeholder="New password (min. 6 characters)"/></div>
-            <div class="form-field"><label for="settings-confirm-pass">Confirm Password</label><input type="password" id="settings-confirm-pass" autocomplete="new-password" class="form-input" placeholder="Confirm new password"/></div>
-            <button type="button" onclick="updateAccountPassword()" id="settings-update-pass-btn" class="ll-btn-primary">Update Password</button>
+        </div>
+        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2"><span>⚙️</span> Preferences & Security</h2>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-zinc-800"><div><p class="text-sm font-semibold">Real-time Companion Alerts</p><span class="text-[10px] text-slate-400">Get notified when study buddies match your focus</span></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-slate-200 dark:bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#111] dark:peer-checked:bg-[#f0f0f0]"></div></label></div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-zinc-800"><div><p class="text-sm font-semibold">Public Matchmaking Profile</p><span class="text-[10px] text-slate-400">Allow other students to find you in the match list</span></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked class="sr-only peer"/><div class="w-11 h-6 bg-slate-200 dark:bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#111] dark:peer-checked:bg-[#f0f0f0]"></div></label></div>
+            <div class="pt-2"><p class="text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Update Password</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><input type="password" id="settings-new-pass" class="bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-xs focus:outline-none text-slate-900 dark:text-white" placeholder="New Secure Password"/><button type="button" onclick="updatePasswordSimulated()" class="ll-btn-primary font-bold text-xs py-2 rounded-xl transition">Update Pass</button></div></div>
           </div>
         </section>
       </div>
