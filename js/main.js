@@ -1,86 +1,102 @@
-// =============================================
-// main.js – LearnLoop One-Page Landing Site
-// =============================================
+// Home page UI
 
-// ── Navbar: glass effect stays consistent on scroll ──
 const navbar = document.querySelector('.navbar');
-window.addEventListener('scroll', () => {
-  const dark = document.body.classList.contains('dark');
+
+window.addEventListener('scroll', function () {
+  const isDarkMode = document.body.classList.contains('dark');
+
   if (window.scrollY > 40) {
-    navbar.style.boxShadow = dark
-      ? '0 4px 24px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.06)'
-      : '0 4px 24px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.05)';
-    navbar.style.background = dark ? 'rgba(20,20,20,0.80)' : 'rgba(255,255,255,0.85)';
+    if (isDarkMode) {
+      navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.06)';
+      navbar.style.background = 'rgba(20,20,20,0.80)';
+    } else {
+      navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.05)';
+      navbar.style.background = 'rgba(255,255,255,0.85)';
+    }
   } else {
-    navbar.style.boxShadow = dark
-      ? '0 2px 16px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.04)'
-      : '0 2px 16px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.04)';
-    navbar.style.background = dark ? 'rgba(20,20,20,0.65)' : 'rgba(255,255,255,0.75)';
+    if (isDarkMode) {
+      navbar.style.boxShadow = '0 2px 16px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.04)';
+      navbar.style.background = 'rgba(20,20,20,0.65)';
+    } else {
+      navbar.style.boxShadow = '0 2px 16px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.04)';
+      navbar.style.background = 'rgba(255,255,255,0.75)';
+    }
   }
 });
 
-// ── Smooth scroll for anchor links ──
-document.querySelectorAll('a[href^="#"]').forEach(link => {
-  link.addEventListener('click', (e) => {
-    const target = document.querySelector(link.getAttribute('href'));
+// Smooth scroll
+const anchorLinks = document.querySelectorAll('a[href^="#"]');
+
+for (let i = 0; i < anchorLinks.length; i++) {
+  anchorLinks[i].addEventListener('click', function (e) {
+    const href = anchorLinks[i].getAttribute('href');
+    const target = document.querySelector(href);
+
     if (target) {
       e.preventDefault();
       const offset = 80;
       const top = target.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: 'smooth' });
+      window.scrollTo({ top: top, behavior: 'smooth' });
     }
   });
-});
+}
 
-// ── Active nav link highlight on scroll ──
+// Active nav link
 const sections = document.querySelectorAll('section[id], div[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+const sectionObserver = new IntersectionObserver(function (entries) {
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
     if (entry.isIntersecting) {
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === '#' + entry.target.id) {
-          link.classList.add('active');
+      for (let j = 0; j < navLinks.length; j++) {
+        navLinks[j].classList.remove('active');
+        if (navLinks[j].getAttribute('href') === '#' + entry.target.id) {
+          navLinks[j].classList.add('active');
         }
-      });
+      }
     }
-  });
+  }
 }, { threshold: 0.4 });
 
-sections.forEach(s => observer.observe(s));
+for (let i = 0; i < sections.length; i++) {
+  sectionObserver.observe(sections[i]);
+}
 
-// ── Scroll-reveal animation ──
-const revealEls = document.querySelectorAll(
+// Scroll animations
+const revealElements = document.querySelectorAll(
   '.feat-card, .tcard, .flow-card, .extra-card, .preview-wrap, .stats-big, .lb-table, .lb-podium-card'
 );
 
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+const revealObserver = new IntersectionObserver(function (entries) {
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
     if (entry.isIntersecting) {
       entry.target.style.opacity = '1';
       entry.target.style.transform = 'translateY(0)';
       revealObserver.unobserve(entry.target);
     }
-  });
+  }
 }, { threshold: 0.1 });
 
-revealEls.forEach(el => {
-  el.style.opacity = '0';
-  el.style.transform = 'translateY(24px)';
-  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-  revealObserver.observe(el);
-});
+for (let i = 0; i < revealElements.length; i++) {
+  revealElements[i].style.opacity = '0';
+  revealElements[i].style.transform = 'translateY(24px)';
+  revealElements[i].style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  revealObserver.observe(revealElements[i]);
+}
 
-// ── Stats counter animation ──
-function animateCounter(el, target, suffix = '') {
+// Stats counter
+function animateCounter(element, target, suffix) {
   let current = 0;
   const step = Math.ceil(target / 60);
-  const interval = setInterval(() => {
+
+  const interval = setInterval(function () {
     current = Math.min(current + step, target);
-    el.textContent = current.toLocaleString() + suffix;
-    if (current >= target) clearInterval(interval);
+    element.textContent = current.toLocaleString() + suffix;
+    if (current >= target) {
+      clearInterval(interval);
+    }
   }, 24);
 }
 
@@ -90,42 +106,50 @@ let statsDataReady = false;
 
 function animateStatsFromDom() {
   if (statsAnimated || !statsDataReady) return;
+
   statsAnimated = true;
   const spans = document.querySelectorAll('.stats-big span');
   const suffixes = [' students', ' study sessions', ' goals completed'];
-  spans.forEach((span, i) => {
-    const target = parseInt(span.dataset.target || '0', 10);
-    animateCounter(span, target, suffixes[i] || '');
-  });
+
+  for (let i = 0; i < spans.length; i++) {
+    const target = parseInt(spans[i].dataset.target || '0', 10);
+    animateCounter(spans[i], target, suffixes[i] || '');
+  }
 }
 
-window.addEventListener('ll-stats-loaded', () => {
+window.addEventListener('ll-stats-loaded', function () {
   statsDataReady = true;
   if (statsSection) {
     const rect = statsSection.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.6) animateStatsFromDom();
+    if (rect.top < window.innerHeight * 0.6) {
+      animateStatsFromDom();
+    }
   }
 });
 
-const statsObserver = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) animateStatsFromDom();
+const statsObserver = new IntersectionObserver(function (entries) {
+  if (entries[0].isIntersecting) {
+    animateStatsFromDom();
+  }
 }, { threshold: 0.5 });
 
-if (statsSection) statsObserver.observe(statsSection);
+if (statsSection) {
+  statsObserver.observe(statsSection);
+}
 
-// ── Pause marquee on hover ──
+// Marquee pause
 const marqueeTrack = document.querySelector('.marquee-track');
+
 if (marqueeTrack) {
-  marqueeTrack.addEventListener('mouseenter', () => {
+  marqueeTrack.addEventListener('mouseenter', function () {
     marqueeTrack.style.animationPlayState = 'paused';
   });
-  marqueeTrack.addEventListener('mouseleave', () => {
+  marqueeTrack.addEventListener('mouseleave', function () {
     marqueeTrack.style.animationPlayState = 'running';
   });
 }
 
-
-// ── Light / Dark Theme Toggle ──
+// Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
 
 const SUN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -144,22 +168,22 @@ const MOON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
 </svg>`;
 
-function applyTheme(dark) {
-  document.body.classList.toggle('dark', dark);
-  themeToggle.innerHTML = dark ? SUN_SVG : MOON_SVG;
-  themeToggle.setAttribute('title', dark ? 'Switch to light mode' : 'Switch to dark mode');
-  themeToggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-  localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
+function applyTheme(isDark) {
+  document.body.classList.toggle('dark', isDark);
+  themeToggle.innerHTML = isDark ? SUN_SVG : MOON_SVG;
+  themeToggle.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
 }
 
 applyTheme(localStorage.getItem('ll_theme') === 'dark');
 
-themeToggle.addEventListener('click', () => {
-  applyTheme(!document.body.classList.contains('dark'));
+themeToggle.addEventListener('click', function () {
+  const isDark = document.body.classList.contains('dark');
+  applyTheme(!isDark);
 });
 
-
-// ── Footer reveal effect: set spacer height ──
+// Footer spacer
 function setFooterSpacer() {
   const footer = document.querySelector('footer');
   const spacer = document.getElementById('footer-spacer');
@@ -171,33 +195,34 @@ function setFooterSpacer() {
 setFooterSpacer();
 window.addEventListener('resize', setFooterSpacer);
 
-
-// ── Leaderboard tabs (Individual / Team) ──
+// Leaderboard tabs
 const lbTabs = document.querySelectorAll('.lb-tab');
 const lbPanels = document.querySelectorAll('.lb-panel');
 
-lbTabs.forEach(tab => {
-  tab.addEventListener('click', () => {
+for (let i = 0; i < lbTabs.length; i++) {
+  lbTabs[i].addEventListener('click', function () {
+    const tab = lbTabs[i];
     const target = tab.dataset.lbTab;
 
-    lbTabs.forEach(t => {
-      t.classList.toggle('active', t === tab);
-      t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-    });
+    for (let j = 0; j < lbTabs.length; j++) {
+      const isActive = lbTabs[j] === tab;
+      lbTabs[j].classList.toggle('active', isActive);
+      lbTabs[j].setAttribute('aria-selected', isActive ? 'true' : 'false');
+    }
 
-    lbPanels.forEach(panel => {
-      panel.classList.toggle('active', panel.id === `lb-${target}`);
-    });
+    for (let k = 0; k < lbPanels.length; k++) {
+      lbPanels[k].classList.toggle('active', lbPanels[k].id === 'lb-' + target);
+    }
   });
-});
+}
 
-// Scroll to leaderboard when arriving with #leaderboard hash
+// Open leaderboard from URL hash
 if (window.location.hash === '#leaderboard') {
   const lbSection = document.getElementById('leaderboard');
   if (lbSection) {
-    requestAnimationFrame(() => {
+    requestAnimationFrame(function () {
       const top = lbSection.getBoundingClientRect().top + window.scrollY - 80;
-      window.scrollTo({ top, behavior: 'smooth' });
+      window.scrollTo({ top: top, behavior: 'smooth' });
     });
   }
 }

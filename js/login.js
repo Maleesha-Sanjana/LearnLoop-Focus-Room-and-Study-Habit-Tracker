@@ -1,3 +1,5 @@
+// Login and signup
+
 import {
   getAuth,
   onAuthStateChanged,
@@ -12,6 +14,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { auth, upsertUserRecord } from './firebase.js';
 
+// Phone format (+94)
 function normalizePhone(raw) {
   const trimmed = raw.trim();
   let digits = trimmed.replace(/\D/g, '');
@@ -93,7 +96,7 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   applyTheme(!document.body.classList.contains('dark'));
 });
 
-// Must match Firebase Console → Authentication → Phone → test numbers
+// Firebase test phone numbers
 const TEST_PHONES = {
   '+94786360508': '123456',
 };

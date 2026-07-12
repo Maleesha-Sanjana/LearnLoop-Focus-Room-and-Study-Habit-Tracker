@@ -59,6 +59,7 @@
 
 <main class="flex-grow max-w-6xl w-full mx-auto px-4 pt-28 pb-20">
 
+  <!-- Profile header -->
   <div class="relative ll-card border rounded-3xl p-6 md:p-8 shadow-sm mb-6 overflow-hidden">
     <div class="absolute -top-32 -right-32 w-80 h-80 bg-[#111]/5 dark:bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-[#111]/5 dark:bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -96,6 +97,7 @@
     </div>
   </div>
 
+  <!-- Learner Hub -->
   <div id="tab-content-profile" class="space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="space-y-6 lg:col-span-2">
@@ -163,6 +165,7 @@
     </div>
   </div>
 
+  <!-- Settings -->
   <div id="tab-content-settings" class="hidden">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="space-y-6 lg:col-span-2">
@@ -209,6 +212,7 @@
   </div>
 </main>
 
+<!-- Goal modal -->
 <div id="goal-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
   <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 max-w-sm w-full rounded-3xl p-6 shadow-2xl relative">
     <button onclick="closeAddGoalModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg">&times;</button>
@@ -221,6 +225,7 @@
   </div>
 </div>
 
+<!-- Chat modal -->
 <div id="chat-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
   <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 max-w-md w-full rounded-3xl overflow-hidden shadow-2xl relative flex flex-col h-[500px]">
     <div class="ll-btn-primary p-4 flex items-center justify-between">

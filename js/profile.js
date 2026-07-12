@@ -1,3 +1,5 @@
+// Profile page
+
 import {
   onAuthStateChanged,
   signOut,
@@ -30,6 +32,8 @@ import {
   subscribeLearnerSettings
 } from './firebase.js';
 
+// State
+
 let selectedSubjects = [];
 let matchmakerSearchSubjects = [];
 let currentChatBuddy = null;
@@ -49,11 +53,13 @@ let unlockedBadges = new Set();
 
 window.userProfile = defaultProfile(null);
 
+// Auth
+
 function initTheme() {
   const isDark = localStorage.getItem('ll_theme') === 'dark';
   document.documentElement.classList.toggle('dark', isDark);
   document.body.classList.toggle('dark', isDark);
-  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  document.getElementById('theme-toggle')?.addEventListener('click', function () {
     const dark = !document.documentElement.classList.contains('dark');
     document.documentElement.classList.toggle('dark', dark);
     document.body.classList.toggle('dark', dark);
@@ -96,95 +102,40 @@ async function loadProfileForUser(user) {
 }
 
 function setupFirestoreListeners(uid) {
-  firestoreUnsubs.forEach(unsub => unsub());
+  firestoreUnsubs.forEach(function (unsub) { unsub(); });
   firestoreUnsubs.length = 0;
 
-  firestoreUnsubs.push(subscribeLearnerSettings(uid, data => {
+  firestoreUnsubs.push(subscribeLearnerSettings(uid, function (data) {
     window.userProfile = { ...window.userProfile, ...data };
     selectedSubjects = window.userProfile.subjects?.length ? [...window.userProfile.subjects] : selectedSubjects;
     renderProfileUI();
     renderSubjectsList();
   }));
 
-  firestoreUnsubs.push(subscribeGoals(uid, goals => {
+  firestoreUnsubs.push(subscribeGoals(uid, function (goals) {
     goalsState = goals;
     renderGoalTrackers();
   }));
 
-  firestoreUnsubs.push(subscribeActivities(uid, activities => {
+  firestoreUnsubs.push(subscribeActivities(uid, function (activities) {
     recentActivities = activities;
     renderActivityTimeline();
   }));
 
-  firestoreUnsubs.push(subscribeResources(uid, resources => {
+  firestoreUnsubs.push(subscribeResources(uid, function (resources) {
     sharedResources = resources;
     evaluateAchievementsUnlocks();
   }));
 
-  firestoreUnsubs.push(subscribeAchievements(uid, badges => {
+  firestoreUnsubs.push(subscribeAchievements(uid, function (badges) {
     unlockedBadges = badges;
     renderAchievementsBadges();
   }));
 }
 
-function applyPreferencesToUI() {
-  const p = window.userProfile;
-  const weekdays = document.getElementById('avail-weekdays');
-  const weekends = document.getElementById('avail-weekends');
-
-  if (weekdays) weekdays.checked = p.availWeekdays !== false;
-  if (weekends) weekends.checked = p.availWeekends !== false;
-
-  renderMatchmakerSubjects();
-}
-
-async function persistMatchmakerPreferences() {
-  if (!currentUid) return;
-
-  const prefs = {
-    matchmakerSearchSubjects: [...matchmakerSearchSubjects],
-    availWeekdays: document.getElementById('avail-weekdays')?.checked ?? true,
-    availWeekends: document.getElementById('avail-weekends')?.checked ?? true
-  };
-
-  window.userProfile = { ...window.userProfile, ...prefs };
-
-  try {
-    await saveMatchmakerPreferences(currentUid, prefs);
-  } catch (err) {
-    console.warn('Could not save matchmaker preferences.', err);
-  }
-}
-
-function renderMatchmakerSubjects() {
-  const container = document.getElementById('matchmaker-subjects');
-  if (!container) return;
-  container.innerHTML = '';
-
-  subjectsPool.forEach(subject => {
-    const checked = matchmakerSearchSubjects.includes(subject);
-    const label = document.createElement('label');
-    label.className = 'flex items-center gap-2.5 text-sm font-semibold cursor-pointer';
-    label.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]" data-subject="${subject}"/>
-      <span>${subject}</span>
-    `;
-    label.querySelector('input').addEventListener('change', async (e) => {
-      if (e.target.checked) {
-        if (!matchmakerSearchSubjects.includes(subject)) matchmakerSearchSubjects.push(subject);
-      } else {
-        matchmakerSearchSubjects = matchmakerSearchSubjects.filter(s => s !== subject);
-      }
-      await persistMatchmakerPreferences();
-      await filterBuddies();
-    });
-    container.appendChild(label);
-  });
-}
-
 async function initAuth() {
   await auth.authStateReady();
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, async function (user) {
     if (!user) {
       window.location.replace('login.html');
       return;
@@ -197,15 +148,28 @@ async function initAuth() {
   });
 }
 
-document.getElementById('nav-logout-btn')?.addEventListener('click', async () => {
+document.getElementById('nav-logout-btn')?.addEventListener('click', async function () {
   try {
     await signOut(auth);
   } catch (_) {}
   showToast('Logged out from LearnLoop. Redirecting...');
-  setTimeout(() => {
+  setTimeout(function () {
     window.location.href = 'index.html';
   }, 1200);
 });
+
+// UI
+
+function applyPreferencesToUI() {
+  const p = window.userProfile;
+  const weekdays = document.getElementById('avail-weekdays');
+  const weekends = document.getElementById('avail-weekends');
+
+  if (weekdays) weekdays.checked = p.availWeekdays !== false;
+  if (weekends) weekends.checked = p.availWeekends !== false;
+
+  renderMatchmakerSubjects();
+}
 
 function renderProfileUI() {
   if (!window.userProfile) return;
@@ -220,18 +184,18 @@ function renderProfileUI() {
     `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(p.avatar || 'User')}&backgroundColor=f5f5f5`;
 
   document.getElementById('badge-level').textContent = p.level || 'Beginner';
-  document.getElementById('badge-streak').textContent = p.streak ?? 0;
-  document.getElementById('badge-focus').textContent = (p.focusScore ?? 0) + '%';
+  document.getElementById('badge-streak').textContent = p.streak || 0;
+  document.getElementById('badge-focus').textContent = (p.focusScore || 0) + '%';
 
-  document.getElementById('stat-hours').textContent = (p.hours ?? 0) + ' hrs';
+  document.getElementById('stat-hours').textContent = (p.hours || 0) + ' hrs';
   document.getElementById('stat-today').textContent = p.todayProgress || '0h 0m';
-  document.getElementById('stat-streak').textContent = '🔥 ' + (p.streak ?? 0) + ' days';
-  document.getElementById('stat-goals').textContent = (p.goalsCompleted ?? 0) + ' Goals';
+  document.getElementById('stat-streak').textContent = '🔥 ' + (p.streak || 0) + ' days';
+  document.getElementById('stat-goals').textContent = (p.goalsCompleted || 0) + ' Goals';
 
-  document.getElementById('stat-questions').textContent = p.questions ?? 0;
-  document.getElementById('stat-sessions').textContent = p.sessions ?? 0;
-  document.getElementById('stat-quizzes').textContent = p.quizzes ?? 0;
-  document.getElementById('stat-reputation').textContent = p.reputation ?? 0;
+  document.getElementById('stat-questions').textContent = p.questions || 0;
+  document.getElementById('stat-sessions').textContent = p.sessions || 0;
+  document.getElementById('stat-quizzes').textContent = p.quizzes || 0;
+  document.getElementById('stat-reputation').textContent = p.reputation || 0;
 
   setVal('info-name', p.name);
   setVal('info-uni', p.institution);
@@ -245,52 +209,86 @@ function renderProfileUI() {
 
 function setVal(id, val) {
   const el = document.getElementById(id);
-  if (el) el.value = val ?? '';
+  if (el) {
+    el.value = (val !== null && val !== undefined) ? val : '';
+  }
 }
 
-window.saveLearnerInfo = async function (e) {
-  if (e) e.preventDefault();
+function renderSubjectsList() {
+  const container = document.getElementById('subjects-container');
+  if (!container) return;
+  container.innerHTML = '';
 
-  window.userProfile.name = document.getElementById('info-name').value.trim() || window.userProfile.name;
-  window.userProfile.institution = document.getElementById('info-uni').value.trim();
-  window.userProfile.faculty = document.getElementById('info-faculty').value.trim();
-  window.userProfile.headline = window.userProfile.faculty ? `${window.userProfile.faculty} Student` : 'Student';
-  window.userProfile.year = document.getElementById('info-year').value.trim();
-  window.userProfile.country = document.getElementById('info-country').value.trim();
-  window.userProfile.bio = document.getElementById('info-bio').value.trim();
-  window.userProfile.linkedin = document.getElementById('info-linkedin').value.trim();
-  window.userProfile.github = document.getElementById('info-github').value.trim();
-  window.userProfile.subjects = [...selectedSubjects];
+  subjectsPool.forEach(function (subject) {
+    const isSelected = selectedSubjects.includes(subject);
+    const tagClass = isSelected
+      ? 'px-3 py-1.5 rounded-full text-xs font-bold bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105'
+      : 'px-3 py-1.5 rounded-full text-xs font-semibold bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#888] dark:text-[#666] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105';
 
-  renderProfileUI();
-  showToast('Academic profile changes saved!');
+    const btn = document.createElement('button');
+    btn.className = tagClass;
+    btn.innerText = (isSelected ? '✓ ' : '+ ') + subject;
+    btn.onclick = function () { toggleSubjectSelected(subject); };
+    container.appendChild(btn);
+  });
+}
 
-  if (currentUid) {
-    try {
-      await saveLearnerSettings(currentUid, window.userProfile);
-      showToast('Profile synced to LearnLoop Cloud!');
-    } catch (err) {
-      console.warn('Could not sync profile to Firestore.', err);
-    }
+function renderAvatarSelections() {
+  const grid = document.getElementById('avatars-selection-grid');
+  if (!grid) return;
+  grid.innerHTML = presetAvatars.map(avatar => `
+    <button onclick="updateAvatarSelection('${avatar}')" class="flex flex-col items-center p-3 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] hover:border-[#111] dark:hover:border-[#f0f0f0] rounded-2xl transition">
+      <img class="w-14 h-14 rounded-xl mb-1.5" src="https://api.dicebear.com/7.x/notionists/svg?seed=${avatar}&backgroundColor=f5f5f5" alt="${avatar}"/>
+      <span class="text-xs font-semibold text-slate-900 dark:text-zinc-100">${avatar}</span>
+    </button>
+  `).join('');
+}
+
+function renderActivityTimeline() {
+  const container = document.getElementById('activity-stream');
+  if (!container) return;
+
+  if (!recentActivities.length) {
+    container.innerHTML = '<p class="text-xs text-[#888]">No activity yet. Start studying to build your timeline!</p>';
+    return;
   }
 
-  toggleTab('profile');
-};
+  container.innerHTML = recentActivities.map(act => `
+    <div class="relative">
+      <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-[#111] dark:bg-[#f0f0f0] border-2 border-white dark:border-[#0a0a0a]"></div>
+      <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${escapeHtml(act.text)}</p>
+      <span class="text-[10px] text-[#888]">${act.time}</span>
+    </div>
+  `).join('');
+}
 
-window.updateAvatarSelection = async function (seed) {
-  window.userProfile.avatar = seed;
-  document.getElementById('profile-avatar').src =
-    `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}&backgroundColor=f5f5f5`;
-  showToast(`Avatar updated to ${seed}!`);
+// Goals
 
-  if (currentUid) {
-    try {
-      await saveLearnerSettings(currentUid, { avatar: seed });
-    } catch (err) {
-      console.warn('Could not save avatar to cloud.', err);
-    }
+function renderGoalTrackers() {
+  const list = document.getElementById('goals-list');
+  if (!list) return;
+
+  if (!goalsState.length) {
+    list.innerHTML = '<p class="text-xs text-[#888] text-center py-4">No goals yet. Add your first learning goal!</p>';
+    return;
   }
-};
+
+  list.innerHTML = goalsState.map(goal => `
+    <div class="bg-[#f5f5f5] dark:bg-[#1a1a1a] p-4 rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a]">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-bold text-sm text-[#111] dark:text-[#f0f0f0]">${escapeHtml(goal.name)}</span>
+        <span class="text-xs text-[#111] dark:text-[#f0f0f0] font-extrabold" id="goal-val-${goal.id}">${goal.progress}%</span>
+      </div>
+      <div class="w-full bg-[#e8e8e8] dark:bg-[#2a2a2a] h-2.5 rounded-full overflow-hidden">
+        <div id="goal-bar-${goal.id}" class="bg-[#111] dark:bg-[#f0f0f0] h-full rounded-full transition-all duration-300" style="width: ${goal.progress}%"></div>
+      </div>
+      <div class="flex items-center justify-between mt-3">
+        <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal('${goal.id}', this.value)" class="w-3/4 accent-[#111] dark:accent-[#f0f0f0] cursor-pointer" ${goal.status === 'completed' ? 'disabled' : ''}/>
+        <button onclick="accomplishGoal('${goal.id}')" class="text-xs font-bold text-[#888] hover:text-[#111] dark:hover:text-[#f0f0f0] transition" ${goal.status === 'completed' ? 'disabled' : ''}>Mark Done</button>
+      </div>
+    </div>
+  `).join('');
+}
 
 window.adjustGoal = async function (id, value) {
   const progress = parseInt(value, 10);
@@ -368,24 +366,7 @@ window.addGoalSubmit = async function () {
   }
 };
 
-window.toggleSubjectSelected = async function (subject) {
-  const index = selectedSubjects.indexOf(subject);
-  if (index > -1) selectedSubjects.splice(index, 1);
-  else selectedSubjects.push(subject);
-
-  window.userProfile.subjects = [...selectedSubjects];
-  renderSubjectsList();
-
-  if (currentUid) {
-    try {
-      await saveLearnerSettings(currentUid, { subjects: selectedSubjects });
-    } catch (err) {
-      console.warn('Could not save subjects.', err);
-    }
-  }
-
-  await filterBuddies();
-};
+// Chat
 
 window.openChatModal = function (buddyUid) {
   const buddy = buddiesList.find(b => b.uid === buddyUid);
@@ -405,17 +386,23 @@ window.openChatModal = function (buddyUid) {
   container.innerHTML = '<p class="text-xs text-[#888] text-center py-4">Loading messages...</p>';
 
   const chatId = chatIdFor(currentUid, buddy.uid);
-  chatUnsubscribe = subscribeChatMessages(chatId, messages => {
+  chatUnsubscribe = subscribeChatMessages(chatId, function (messages) {
     if (!messages.length) {
       container.innerHTML = '<p class="text-xs text-[#888] text-center py-4">No messages yet. Say hello!</p>';
       return;
     }
-    container.innerHTML = messages.map(m => {
+
+    let html = '';
+    for (let i = 0; i < messages.length; i++) {
+      const m = messages[i];
       const isMe = m.senderUid === currentUid;
-      return isMe
-        ? `<div class="flex flex-col items-end"><span class="text-[#888] text-[10px] mb-0.5">You</span><div class="ll-btn-primary p-2.5 rounded-2xl rounded-tr-none inline-block max-w-[80%] text-right">${escapeHtml(m.text)}</div></div>`
-        : `<div class="flex flex-col"><span class="text-[#111] dark:text-[#f0f0f0] font-bold text-[10px] mb-0.5">${escapeHtml(m.senderName)}</span><div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">${escapeHtml(m.text)}</div></div>`;
-    }).join('');
+      if (isMe) {
+        html += `<div class="flex flex-col items-end"><span class="text-[#888] text-[10px] mb-0.5">You</span><div class="ll-btn-primary p-2.5 rounded-2xl rounded-tr-none inline-block max-w-[80%] text-right">${escapeHtml(m.text)}</div></div>`;
+      } else {
+        html += `<div class="flex flex-col"><span class="text-[#111] dark:text-[#f0f0f0] font-bold text-[10px] mb-0.5">${escapeHtml(m.senderName)}</span><div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">${escapeHtml(m.text)}</div></div>`;
+      }
+    }
+    container.innerHTML = html;
     container.scrollTop = container.scrollHeight;
   });
 
@@ -447,6 +434,230 @@ window.sendChatMessage = async function () {
   } catch (err) {
     showToast('Could not send message.', true);
     console.warn(err);
+  }
+};
+
+// Buddies
+
+async function persistMatchmakerPreferences() {
+  if (!currentUid) return;
+
+  const prefs = {
+    matchmakerSearchSubjects: [...matchmakerSearchSubjects],
+    availWeekdays: document.getElementById('avail-weekdays')?.checked ?? true,
+    availWeekends: document.getElementById('avail-weekends')?.checked ?? true
+  };
+
+  window.userProfile = { ...window.userProfile, ...prefs };
+
+  try {
+    await saveMatchmakerPreferences(currentUid, prefs);
+  } catch (err) {
+    console.warn('Could not save matchmaker preferences.', err);
+  }
+}
+
+function renderMatchmakerSubjects() {
+  const container = document.getElementById('matchmaker-subjects');
+  if (!container) return;
+  container.innerHTML = '';
+
+  subjectsPool.forEach(function (subject) {
+    const checked = matchmakerSearchSubjects.includes(subject);
+    const label = document.createElement('label');
+    label.className = 'flex items-center gap-2.5 text-sm font-semibold cursor-pointer';
+    label.innerHTML = `
+      <input type="checkbox" ${checked ? 'checked' : ''} class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]" data-subject="${subject}"/>
+      <span>${subject}</span>
+    `;
+    label.querySelector('input').addEventListener('change', async function (e) {
+      if (e.target.checked) {
+        if (!matchmakerSearchSubjects.includes(subject)) matchmakerSearchSubjects.push(subject);
+      } else {
+        matchmakerSearchSubjects = matchmakerSearchSubjects.filter(function (s) { return s !== subject; });
+      }
+      await persistMatchmakerPreferences();
+      await filterBuddies();
+    });
+    container.appendChild(label);
+  });
+}
+
+window.toggleSubjectSelected = async function (subject) {
+  const index = selectedSubjects.indexOf(subject);
+  if (index > -1) selectedSubjects.splice(index, 1);
+  else selectedSubjects.push(subject);
+
+  window.userProfile.subjects = [...selectedSubjects];
+  renderSubjectsList();
+
+  if (currentUid) {
+    try {
+      await saveLearnerSettings(currentUid, { subjects: selectedSubjects });
+    } catch (err) {
+      console.warn('Could not save subjects.', err);
+    }
+  }
+
+  await filterBuddies();
+};
+
+window.filterBuddies = async function () {
+  const list = document.getElementById('matching-buddies-list');
+  if (!list || !currentUid) return;
+  list.innerHTML = '<p class="col-span-2 text-center py-4 text-xs text-[#888]">Searching for study buddies...</p>';
+
+  const searchSubjects = [...matchmakerSearchSubjects];
+
+  try {
+    buddiesList = await findStudyBuddies(currentUid, searchSubjects);
+  } catch (err) {
+    buddiesList = [];
+    console.warn('Could not load buddies.', err);
+  }
+
+  list.innerHTML = '';
+  if (!buddiesList.length) {
+    list.innerHTML =
+      '<div class="col-span-2 text-center py-4 text-xs text-slate-400 dark:text-zinc-500 italic">No matches found yet. Invite friends to sign up!</div>';
+    return;
+  }
+
+  buddiesList.forEach(function (buddy) {
+    list.insertAdjacentHTML('beforeend', `
+      <div class="flex items-center justify-between p-3.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-[#111] dark:bg-[#f0f0f0] text-white dark:text-[#111] flex items-center justify-center font-bold text-xs">${buddy.avatar}</div>
+          <div>
+            <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${escapeHtml(buddy.name)}</p>
+            <p class="text-[9px] text-[#888] dark:text-[#666] font-semibold">${escapeHtml(buddy.subjects.join(', ') || 'General')}</p>
+          </div>
+        </div>
+        <div class="flex gap-1">
+          <button onclick="openChatModal('${buddy.uid}')" class="text-[10px] bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] px-2.5 py-1.5 rounded-lg hover:bg-[#e8e8e8] font-bold transition">Message</button>
+          <button onclick="sendFocusCall('${buddy.uid}')" class="text-[10px] bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] px-2.5 py-1.5 rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#1e1e1e] font-bold shadow-sm transition">Invite Focus</button>
+        </div>
+      </div>
+    `);
+  });
+};
+
+window.sendFocusCall = async function (buddyUid) {
+  const buddy = buddiesList.find(b => b.uid === buddyUid);
+  if (!buddy || !currentUid) return;
+
+  try {
+    await addNotification(buddy.uid, {
+      icon: '👥',
+      color: 'blue',
+      title: `${window.userProfile.name} invited you to a Focus Room session.`,
+      type: 'invite',
+      read: false
+    });
+    showToast(`Sent Focus Room invite to ${buddy.name}!`);
+  } catch (err) {
+    showToast('Could not send invite.', true);
+  }
+};
+
+// Achievements
+
+function renderAchievementsBadges() {
+  const grid = document.getElementById('achievements-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  badgeDefinitions.forEach(function (badge) {
+    const isUnlocked = unlockedBadges.has(badge.id);
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="flex items-center gap-3 p-2.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a] ${isUnlocked ? '' : 'opacity-40'}">
+        <span class="text-2xl">${badge.icon}</span>
+        <div>
+          <p class="text-[11px] font-bold leading-tight">${badge.title}</p>
+          <span class="text-[9px] ${isUnlocked ? 'text-[#111] dark:text-[#f0f0f0] font-semibold' : 'text-[#888]'}">${isUnlocked ? 'Unlocked' : 'In Progress'}</span>
+        </div>
+      </div>
+    `);
+  });
+}
+
+async function evaluateAchievementsUnlocks() {
+  if (!currentUid) return;
+
+  for (const badge of badgeDefinitions) {
+    if (unlockedBadges.has(badge.id)) continue;
+
+    let valueToTest = 0;
+    if (badge.metric === 'streak') valueToTest = window.userProfile.streak;
+    if (badge.metric === 'goalsCompleted') valueToTest = window.userProfile.goalsCompleted;
+    if (badge.metric === 'hours') valueToTest = window.userProfile.hours;
+    if (badge.metric === 'reputation') valueToTest = window.userProfile.reputation;
+    if (badge.metric === 'resourcesCount') valueToTest = sharedResources.length;
+    if (badge.metric === 'focusScore') valueToTest = window.userProfile.focusScore;
+
+    if (valueToTest >= badge.threshold) {
+      try {
+        await unlockAchievement(currentUid, badge.id, badge.title);
+        unlockedBadges.add(badge.id);
+        showToast(`🔓 Unlocked: ${badge.title}!`);
+        triggerConfettiBurst();
+      } catch (err) {
+        console.warn('Could not unlock achievement.', err);
+      }
+    }
+  }
+  renderAchievementsBadges();
+}
+
+function triggerConfettiBurst() {
+  if (typeof confetti === 'function') {
+    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+  }
+}
+
+// Settings
+
+window.saveLearnerInfo = async function (e) {
+  if (e) e.preventDefault();
+
+  window.userProfile.name = document.getElementById('info-name').value.trim() || window.userProfile.name;
+  window.userProfile.institution = document.getElementById('info-uni').value.trim();
+  window.userProfile.faculty = document.getElementById('info-faculty').value.trim();
+  window.userProfile.headline = window.userProfile.faculty ? `${window.userProfile.faculty} Student` : 'Student';
+  window.userProfile.year = document.getElementById('info-year').value.trim();
+  window.userProfile.country = document.getElementById('info-country').value.trim();
+  window.userProfile.bio = document.getElementById('info-bio').value.trim();
+  window.userProfile.linkedin = document.getElementById('info-linkedin').value.trim();
+  window.userProfile.github = document.getElementById('info-github').value.trim();
+  window.userProfile.subjects = [...selectedSubjects];
+
+  renderProfileUI();
+  showToast('Academic profile changes saved!');
+
+  if (currentUid) {
+    try {
+      await saveLearnerSettings(currentUid, window.userProfile);
+      showToast('Profile synced to LearnLoop Cloud!');
+    } catch (err) {
+      console.warn('Could not sync profile to Firestore.', err);
+    }
+  }
+
+  toggleTab('profile');
+};
+
+window.updateAvatarSelection = async function (seed) {
+  window.userProfile.avatar = seed;
+  document.getElementById('profile-avatar').src =
+    `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}&backgroundColor=f5f5f5`;
+  showToast(`Avatar updated to ${seed}!`);
+
+  if (currentUid) {
+    try {
+      await saveLearnerSettings(currentUid, { avatar: seed });
+    } catch (err) {
+      console.warn('Could not save avatar to cloud.', err);
+    }
   }
 };
 
@@ -499,28 +710,10 @@ window.showToast = function (message, isError = false) {
   box.className =
     'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300';
 
-  setTimeout(() => {
+  setTimeout(function () {
     box.className =
       'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none';
   }, 2800);
-};
-
-window.sendFocusCall = async function (buddyUid) {
-  const buddy = buddiesList.find(b => b.uid === buddyUid);
-  if (!buddy || !currentUid) return;
-
-  try {
-    await addNotification(buddy.uid, {
-      icon: '👥',
-      color: 'blue',
-      title: `${window.userProfile.name} invited you to a Focus Room session.`,
-      type: 'invite',
-      read: false
-    });
-    showToast(`Sent Focus Room invite to ${buddy.name}!`);
-  } catch (err) {
-    showToast('Could not send invite.', true);
-  }
 };
 
 window.updateAccountPassword = async function () {
@@ -574,173 +767,6 @@ window.updateAccountPassword = async function () {
   }
 };
 
-function renderGoalTrackers() {
-  const list = document.getElementById('goals-list');
-  if (!list) return;
-
-  if (!goalsState.length) {
-    list.innerHTML = '<p class="text-xs text-[#888] text-center py-4">No goals yet. Add your first learning goal!</p>';
-    return;
-  }
-
-  list.innerHTML = goalsState.map(goal => `
-    <div class="bg-[#f5f5f5] dark:bg-[#1a1a1a] p-4 rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a]">
-      <div class="flex items-center justify-between mb-2">
-        <span class="font-bold text-sm text-[#111] dark:text-[#f0f0f0]">${escapeHtml(goal.name)}</span>
-        <span class="text-xs text-[#111] dark:text-[#f0f0f0] font-extrabold" id="goal-val-${goal.id}">${goal.progress}%</span>
-      </div>
-      <div class="w-full bg-[#e8e8e8] dark:bg-[#2a2a2a] h-2.5 rounded-full overflow-hidden">
-        <div id="goal-bar-${goal.id}" class="bg-[#111] dark:bg-[#f0f0f0] h-full rounded-full transition-all duration-300" style="width: ${goal.progress}%"></div>
-      </div>
-      <div class="flex items-center justify-between mt-3">
-        <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal('${goal.id}', this.value)" class="w-3/4 accent-[#111] dark:accent-[#f0f0f0] cursor-pointer" ${goal.status === 'completed' ? 'disabled' : ''}/>
-        <button onclick="accomplishGoal('${goal.id}')" class="text-xs font-bold text-[#888] hover:text-[#111] dark:hover:text-[#f0f0f0] transition" ${goal.status === 'completed' ? 'disabled' : ''}>Mark Done</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderSubjectsList() {
-  const container = document.getElementById('subjects-container');
-  if (!container) return;
-  container.innerHTML = '';
-
-  subjectsPool.forEach(subject => {
-    const isSelected = selectedSubjects.includes(subject);
-    const tagClass = isSelected
-      ? 'px-3 py-1.5 rounded-full text-xs font-bold bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105'
-      : 'px-3 py-1.5 rounded-full text-xs font-semibold bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#888] dark:text-[#666] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105';
-
-    const btn = document.createElement('button');
-    btn.className = tagClass;
-    btn.innerText = (isSelected ? '✓ ' : '+ ') + subject;
-    btn.onclick = () => toggleSubjectSelected(subject);
-    container.appendChild(btn);
-  });
-}
-
-window.filterBuddies = async function () {
-  const list = document.getElementById('matching-buddies-list');
-  if (!list || !currentUid) return;
-  list.innerHTML = '<p class="col-span-2 text-center py-4 text-xs text-[#888]">Searching for study buddies...</p>';
-
-  const searchSubjects = [...matchmakerSearchSubjects];
-
-  try {
-    buddiesList = await findStudyBuddies(currentUid, searchSubjects);
-  } catch (err) {
-    buddiesList = [];
-    console.warn('Could not load buddies.', err);
-  }
-
-  list.innerHTML = '';
-  if (!buddiesList.length) {
-    list.innerHTML =
-      '<div class="col-span-2 text-center py-4 text-xs text-slate-400 dark:text-zinc-500 italic">No matches found yet. Invite friends to sign up!</div>';
-    return;
-  }
-
-  buddiesList.forEach(buddy => {
-    list.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center justify-between p-3.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-2xl">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-[#111] dark:bg-[#f0f0f0] text-white dark:text-[#111] flex items-center justify-center font-bold text-xs">${buddy.avatar}</div>
-          <div>
-            <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${escapeHtml(buddy.name)}</p>
-            <p class="text-[9px] text-[#888] dark:text-[#666] font-semibold">${escapeHtml(buddy.subjects.join(', ') || 'General')}</p>
-          </div>
-        </div>
-        <div class="flex gap-1">
-          <button onclick="openChatModal('${buddy.uid}')" class="text-[10px] bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] px-2.5 py-1.5 rounded-lg hover:bg-[#e8e8e8] font-bold transition">Message</button>
-          <button onclick="sendFocusCall('${buddy.uid}')" class="text-[10px] bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] px-2.5 py-1.5 rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#1e1e1e] font-bold shadow-sm transition">Invite Focus</button>
-        </div>
-      </div>
-    `);
-  });
-};
-
-function renderAchievementsBadges() {
-  const grid = document.getElementById('achievements-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  badgeDefinitions.forEach(badge => {
-    const isUnlocked = unlockedBadges.has(badge.id);
-    grid.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center gap-3 p-2.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a] ${isUnlocked ? '' : 'opacity-40'}">
-        <span class="text-2xl">${badge.icon}</span>
-        <div>
-          <p class="text-[11px] font-bold leading-tight">${badge.title}</p>
-          <span class="text-[9px] ${isUnlocked ? 'text-[#111] dark:text-[#f0f0f0] font-semibold' : 'text-[#888]'}">${isUnlocked ? 'Unlocked' : 'In Progress'}</span>
-        </div>
-      </div>
-    `);
-  });
-}
-
-function renderActivityTimeline() {
-  const container = document.getElementById('activity-stream');
-  if (!container) return;
-
-  if (!recentActivities.length) {
-    container.innerHTML = '<p class="text-xs text-[#888]">No activity yet. Start studying to build your timeline!</p>';
-    return;
-  }
-
-  container.innerHTML = recentActivities.map(act => `
-    <div class="relative">
-      <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-[#111] dark:bg-[#f0f0f0] border-2 border-white dark:border-[#0a0a0a]"></div>
-      <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${escapeHtml(act.text)}</p>
-      <span class="text-[10px] text-[#888]">${act.time}</span>
-    </div>
-  `).join('');
-}
-
-function renderAvatarSelections() {
-  const grid = document.getElementById('avatars-selection-grid');
-  if (!grid) return;
-  grid.innerHTML = presetAvatars.map(avatar => `
-    <button onclick="updateAvatarSelection('${avatar}')" class="flex flex-col items-center p-3 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] hover:border-[#111] dark:hover:border-[#f0f0f0] rounded-2xl transition">
-      <img class="w-14 h-14 rounded-xl mb-1.5" src="https://api.dicebear.com/7.x/notionists/svg?seed=${avatar}&backgroundColor=f5f5f5" alt="${avatar}"/>
-      <span class="text-xs font-semibold text-slate-900 dark:text-zinc-100">${avatar}</span>
-    </button>
-  `).join('');
-}
-
-async function evaluateAchievementsUnlocks() {
-  if (!currentUid) return;
-
-  for (const badge of badgeDefinitions) {
-    if (unlockedBadges.has(badge.id)) continue;
-
-    let valueToTest = 0;
-    if (badge.metric === 'streak') valueToTest = window.userProfile.streak;
-    if (badge.metric === 'goalsCompleted') valueToTest = window.userProfile.goalsCompleted;
-    if (badge.metric === 'hours') valueToTest = window.userProfile.hours;
-    if (badge.metric === 'reputation') valueToTest = window.userProfile.reputation;
-    if (badge.metric === 'resourcesCount') valueToTest = sharedResources.length;
-    if (badge.metric === 'focusScore') valueToTest = window.userProfile.focusScore;
-
-    if (valueToTest >= badge.threshold) {
-      try {
-        await unlockAchievement(currentUid, badge.id, badge.title);
-        unlockedBadges.add(badge.id);
-        showToast(`🔓 Unlocked: ${badge.title}!`);
-        triggerConfettiBurst();
-      } catch (err) {
-        console.warn('Could not unlock achievement.', err);
-      }
-    }
-  }
-  renderAchievementsBadges();
-}
-
-function triggerConfettiBurst() {
-  if (typeof confetti === 'function') {
-    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-  }
-}
-
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -750,8 +776,8 @@ function escapeHtml(str) {
 }
 
 function initPage() {
-  ['avail-weekdays', 'avail-weekends'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', async () => {
+  ['avail-weekdays', 'avail-weekends'].forEach(function (id) {
+    document.getElementById(id)?.addEventListener('change', async function () {
       await persistMatchmakerPreferences();
       await filterBuddies();
     });

@@ -16,22 +16,28 @@
 </head>
 <body>
 
-<!-- Theme toggle -->
+<!-- Back -->
+<a href="index.html" class="back-home" aria-label="Back to home">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    <span>Back</span>
+</a>
+
+<!-- Theme -->
 <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
     <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg id="theme-icon-sun" class="theme-icon-hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
 </button>
 
 <div class="auth-container">
     <a href="index.html" class="logo"><img src="assets/logo.png" alt="LearnLoop"/></a>
 
-    <!-- Header Text -->
+    <!-- Header -->
     <div id="auth-header">
         <h2 id="auth-title">Welcome back</h2>
         <p class="subtitle" id="auth-subtitle">Log in to continue your study journey.</p>
     </div>
 
-    <!-- Social Logins -->
+    <!-- Google -->
     <div class="social-grid">
         <button class="btn-social" id="google-login-btn">
             <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" width="18" height="18" alt="Google">  Google
@@ -40,7 +46,7 @@
 
     <div class="divider"><span>Or use email</span></div>
 
-    <!-- Main Auth Form -->
+    <!-- Email form -->
     <form id="main-auth-form">
         <div class="input-group hidden" id="name-group">
             <label for="userName">UserName</label>
@@ -61,22 +67,22 @@
         <button type="submit" class="btn-primary" id="submit-btn">Sign In</button>
     </form>
 
-    <!-- Phone Authentication Section (Optional/Alternative) -->
+    <!-- Phone OTP -->
     <div class="divider"><span>Or Mobile</span></div>
     <div id="phone-section">
         <input type="tel" placeholder="+94 78 636 0508" id="phone-number">
         <div id="recaptcha-container"></div>
-        <button class="btn-social" id="send-otp-btn" style="width:100%">Send OTP via SMS</button>
+        <button class="btn-social btn-full" id="send-otp-btn">Send OTP via SMS</button>
     </div>
 
     <div id="otp-section" class="hidden">
         <p class="subtitle" id="otp-sent-msg">Enter the 6-digit code sent to your phone.</p>
         <input type="text" placeholder="000000" maxlength="6" id="otp-code" inputmode="numeric" autocomplete="one-time-code">
         <button class="btn-primary" id="verify-otp-btn">Verify & Login</button>
-        <button type="button" class="btn-social" id="change-phone-btn" style="width:100%">Use a different number</button>
+        <button type="button" class="btn-social btn-full" id="change-phone-btn">Use a different number</button>
     </div>
 
-    <!-- Toggle between Login/Signup -->
+    <!-- Login / signup toggle -->
     <div class="toggle-link" id="toggle-text">
         Don't have an account? <span onclick="toggleAuth(true)">Sign up</span>
     </div>
@@ -92,7 +98,6 @@
   }
 </script>
 
-<!-- Firebase SDK -->
 <script type="module" src="js/login.js?v=4"></script>
 
 </body>
