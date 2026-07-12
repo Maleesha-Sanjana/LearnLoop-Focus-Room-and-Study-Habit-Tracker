@@ -80,19 +80,19 @@ function showError(msg) {
   setTimeout(() => { el.textContent = ''; }, 5000);
 }
 
-const SUN = document.getElementById('theme-icon-sun');
-const MOON = document.getElementById('theme-icon-moon');
+const themeToggle = document.getElementById('theme-toggle');
 
 function applyTheme(dark) {
   document.body.classList.toggle('dark', dark);
-  SUN.style.display = dark ? 'block' : 'none';
-  MOON.style.display = dark ? 'none' : 'block';
+  if (themeToggle) {
+    themeToggle.textContent = dark ? 'Light' : 'Dark';
+  }
   localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
 }
 
 applyTheme(localStorage.getItem('ll_theme') === 'dark');
 
-document.getElementById('theme-toggle').addEventListener('click', () => {
+themeToggle?.addEventListener('click', () => {
   applyTheme(!document.body.classList.contains('dark'));
 });
 

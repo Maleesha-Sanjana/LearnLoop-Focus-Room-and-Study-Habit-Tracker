@@ -46,15 +46,31 @@ window.userProfile = defaultProfile(null);
 // Auth
 
 function initTheme() {
+  const themeToggle = document.getElementById('theme-toggle');
   const isDark = localStorage.getItem('ll_theme') === 'dark';
   document.documentElement.classList.toggle('dark', isDark);
   document.body.classList.toggle('dark', isDark);
-  document.getElementById('theme-toggle')?.addEventListener('click', function () {
+  if (themeToggle) {
+    themeToggle.textContent = isDark ? 'Light' : 'Dark';
+  }
+  themeToggle?.addEventListener('click', function () {
     const dark = !document.documentElement.classList.contains('dark');
     document.documentElement.classList.toggle('dark', dark);
     document.body.classList.toggle('dark', dark);
+    if (themeToggle) {
+      themeToggle.textContent = dark ? 'Light' : 'Dark';
+    }
     localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
   });
+}
+
+function avatarInitial(seed) {
+  return String(seed || 'User').charAt(0).toUpperCase();
+}
+
+function setAvatarElement(el, seed) {
+  if (!el) return;
+  el.textContent = avatarInitial(seed);
 }
 
 async function loadProfileForUser(user) {
@@ -154,8 +170,7 @@ function renderProfileUI() {
   document.getElementById('profile-headline').textContent = p.headline || 'Student';
   document.getElementById('display-uni').textContent = p.institution || 'Add your university in settings';
 
-  document.getElementById('profile-avatar').src =
-    `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(p.avatar || 'User')}&backgroundColor=f5f5f5`;
+  setAvatarElement(document.getElementById('profile-avatar'), p.avatar || p.name);
 
   document.getElementById('badge-level').textContent = p.level || 'Beginner';
   document.getElementById('badge-streak').textContent = p.streak || 0;
@@ -163,7 +178,7 @@ function renderProfileUI() {
 
   document.getElementById('stat-hours').textContent = (p.hours || 0) + ' hrs';
   document.getElementById('stat-today').textContent = p.todayProgress || '0h 0m';
-  document.getElementById('stat-streak').textContent = '🔥 ' + (p.streak || 0) + ' days';
+  document.getElementById('stat-streak').textContent = (p.streak || 0) + ' days';
   document.getElementById('stat-goals').textContent = (p.goalsCompleted || 0) + ' Goals';
 
   document.getElementById('stat-questions').textContent = p.questions || 0;
@@ -195,13 +210,10 @@ function renderSubjectsList() {
 
   subjectsPool.forEach(function (subject) {
     const isSelected = selectedSubjects.includes(subject);
-    const tagClass = isSelected
-      ? 'px-3 py-1.5 rounded-full text-xs font-bold bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105'
-      : 'px-3 py-1.5 rounded-full text-xs font-semibold bg-[#f5f5f5] dark:bg-[#1a1a1a] text-[#888] dark:text-[#666] border border-[#e8e8e8] dark:border-[#2a2a2a] cursor-pointer transition hover:scale-105';
-
     const btn = document.createElement('button');
-    btn.className = tagClass;
-    btn.innerText = (isSelected ? '✓ ' : '+ ') + subject;
+    btn.type = 'button';
+    btn.className = 'subject-tag' + (isSelected ? ' is-selected' : '');
+    btn.innerText = (isSelected ? 'Selected: ' : 'Add ') + subject;
     btn.onclick = function () { toggleSubjectSelected(subject); };
     container.appendChild(btn);
   });
@@ -210,12 +222,15 @@ function renderSubjectsList() {
 function renderAvatarSelections() {
   const grid = document.getElementById('avatars-selection-grid');
   if (!grid) return;
-  grid.innerHTML = presetAvatars.map(avatar => `
-    <button onclick="updateAvatarSelection('${avatar}')" class="flex flex-col items-center p-3 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] hover:border-[#111] dark:hover:border-[#f0f0f0] rounded-2xl transition">
-      <img class="w-14 h-14 rounded-xl mb-1.5" src="https://api.dicebear.com/7.x/notionists/svg?seed=${avatar}&backgroundColor=f5f5f5" alt="${avatar}"/>
-      <span class="text-xs font-semibold text-slate-900 dark:text-zinc-100">${avatar}</span>
+  grid.innerHTML = presetAvatars.map(function (avatar) {
+    const letter = avatarInitial(avatar);
+    return `
+    <button type="button" onclick="updateAvatarSelection('${avatar}')" class="avatar-option">
+      <div class="avatar-circle small">${letter}</div>
+      <span>${avatar}</span>
     </button>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderActivityTimeline() {
@@ -223,17 +238,18 @@ function renderActivityTimeline() {
   if (!container) return;
 
   if (!recentActivities.length) {
-    container.innerHTML = '<p class="text-xs text-[#888]">No activity yet. Start studying to build your timeline!</p>';
+    container.innerHTML = '<p class="text-muted">No activity yet. Start studying to build your timeline!</p>';
     return;
   }
 
-  container.innerHTML = recentActivities.map(act => `
-    <div class="relative">
-      <div class="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-[#111] dark:bg-[#f0f0f0] border-2 border-white dark:border-[#0a0a0a]"></div>
-      <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${escapeHtml(act.text)}</p>
-      <span class="text-[10px] text-[#888]">${act.time}</span>
+  container.innerHTML = recentActivities.map(function (act) {
+    return `
+    <div class="activity-item">
+      <p class="activity-text">${escapeHtml(act.text)}</p>
+      <span class="activity-time">${act.time}</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // Goals
@@ -243,25 +259,27 @@ function renderGoalTrackers() {
   if (!list) return;
 
   if (!goalsState.length) {
-    list.innerHTML = '<p class="text-xs text-[#888] text-center py-4">No goals yet. Add your first learning goal!</p>';
+    list.innerHTML = '<p class="text-muted" style="text-align:center;padding:16px 0;">No goals yet. Add your first learning goal!</p>';
     return;
   }
 
-  list.innerHTML = goalsState.map(goal => `
-    <div class="bg-[#f5f5f5] dark:bg-[#1a1a1a] p-4 rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a]">
-      <div class="flex items-center justify-between mb-2">
-        <span class="font-bold text-sm text-[#111] dark:text-[#f0f0f0]">${escapeHtml(goal.name)}</span>
-        <span class="text-xs text-[#111] dark:text-[#f0f0f0] font-extrabold" id="goal-val-${goal.id}">${goal.progress}%</span>
+  list.innerHTML = goalsState.map(function (goal) {
+    return `
+    <div class="goal-item">
+      <div class="goal-top">
+        <span class="goal-name">${escapeHtml(goal.name)}</span>
+        <span class="goal-progress-text" id="goal-val-${goal.id}">${goal.progress}%</span>
       </div>
-      <div class="w-full bg-[#e8e8e8] dark:bg-[#2a2a2a] h-2.5 rounded-full overflow-hidden">
-        <div id="goal-bar-${goal.id}" class="bg-[#111] dark:bg-[#f0f0f0] h-full rounded-full transition-all duration-300" style="width: ${goal.progress}%"></div>
+      <div class="goal-bar-track">
+        <div id="goal-bar-${goal.id}" class="goal-bar-fill" style="width: ${goal.progress}%"></div>
       </div>
-      <div class="flex items-center justify-between mt-3">
-        <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal('${goal.id}', this.value)" class="w-3/4 accent-[#111] dark:accent-[#f0f0f0] cursor-pointer" ${goal.status === 'completed' ? 'disabled' : ''}/>
-        <button onclick="accomplishGoal('${goal.id}')" class="text-xs font-bold text-[#888] hover:text-[#111] dark:hover:text-[#f0f0f0] transition" ${goal.status === 'completed' ? 'disabled' : ''}>Mark Done</button>
+      <div class="goal-controls">
+        <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal('${goal.id}', this.value)" ${goal.status === 'completed' ? 'disabled' : ''}/>
+        <button type="button" onclick="accomplishGoal('${goal.id}')" class="link-btn" ${goal.status === 'completed' ? 'disabled' : ''}>Mark Done</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 window.adjustGoal = async function (id, value) {
@@ -298,7 +316,7 @@ window.accomplishGoal = async function (id) {
   if (barEl) barEl.style.width = '100%';
 
   triggerConfettiBurst();
-  showToast('🎉 Goal marked complete!');
+  showToast('Goal marked complete!');
 
   if (currentUid) {
     try {
@@ -367,11 +385,11 @@ function renderAchievementsBadges() {
   badgeDefinitions.forEach(function (badge) {
     const isUnlocked = unlockedBadges.has(badge.id);
     grid.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center gap-3 p-2.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] rounded-2xl border border-[#e8e8e8] dark:border-[#2a2a2a] ${isUnlocked ? '' : 'opacity-40'}">
-        <span class="text-2xl">${badge.icon}</span>
+      <div class="badge-item${isUnlocked ? '' : ' locked'}">
+        <span class="badge-icon">${badge.icon}</span>
         <div>
-          <p class="text-[11px] font-bold leading-tight">${badge.title}</p>
-          <span class="text-[9px] ${isUnlocked ? 'text-[#111] dark:text-[#f0f0f0] font-semibold' : 'text-[#888]'}">${isUnlocked ? 'Unlocked' : 'In Progress'}</span>
+          <p class="badge-title">${badge.title}</p>
+          <span class="badge-status${isUnlocked ? ' unlocked' : ''}">${isUnlocked ? 'Unlocked' : 'In Progress'}</span>
         </div>
       </div>
     `);
@@ -396,7 +414,7 @@ async function evaluateAchievementsUnlocks() {
       try {
         await unlockAchievement(currentUid, badge.id, badge.title);
         unlockedBadges.add(badge.id);
-        showToast(`🔓 Unlocked: ${badge.title}!`);
+        showToast('Unlocked: ' + badge.title + '!');
         triggerConfettiBurst();
       } catch (err) {
         console.warn('Could not unlock achievement.', err);
@@ -407,9 +425,7 @@ async function evaluateAchievementsUnlocks() {
 }
 
 function triggerConfettiBurst() {
-  if (typeof confetti === 'function') {
-    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-  }
+  // Simple local feedback only; no external animation library.
 }
 
 // Settings
@@ -445,8 +461,7 @@ window.saveLearnerInfo = async function (e) {
 
 window.updateAvatarSelection = async function (seed) {
   window.userProfile.avatar = seed;
-  document.getElementById('profile-avatar').src =
-    `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}&backgroundColor=f5f5f5`;
+  setAvatarElement(document.getElementById('profile-avatar'), seed);
   showToast(`Avatar updated to ${seed}!`);
 
   if (currentUid) {
@@ -468,7 +483,7 @@ window.logCustomStudyTime = async function () {
     window.userProfile.streak = result.streak;
     await evaluateAchievementsUnlocks();
     renderProfileUI();
-    showToast('⚡ Session logged +2 hours!');
+    showToast('Session logged (+2 hours)!');
   } catch (err) {
     showToast('Could not log session.', true);
   }
@@ -480,19 +495,16 @@ window.toggleTab = function (tabName) {
   const btnProfile = document.getElementById('btn-tab-profile');
   const btnSettings = document.getElementById('btn-tab-settings');
 
-  const activeClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition ll-btn-primary';
-  const inactiveClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] hover:bg-[#e8e8e8] dark:hover:bg-[#2a2a2a]';
-
   if (tabName === 'profile') {
     profileTab?.classList.remove('hidden');
     settingsTab?.classList.add('hidden');
-    if (btnProfile) btnProfile.className = activeClass;
-    if (btnSettings) btnSettings.className = inactiveClass;
+    btnProfile?.classList.add('is-active');
+    btnSettings?.classList.remove('is-active');
   } else {
     profileTab?.classList.add('hidden');
     settingsTab?.classList.remove('hidden');
-    if (btnProfile) btnProfile.className = inactiveClass;
-    if (btnSettings) btnSettings.className = activeClass;
+    btnProfile?.classList.remove('is-active');
+    btnSettings?.classList.add('is-active');
   }
 };
 
@@ -502,14 +514,12 @@ window.showToast = function (message, isError = false) {
   const text = document.getElementById('toast-text');
   if (!box || !icon || !text) return;
 
-  icon.innerText = isError ? '⚠️' : '✨';
+  icon.innerText = isError ? '!' : 'OK';
   text.innerText = message;
-  box.className =
-    'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300';
+  box.classList.add('show');
 
   setTimeout(function () {
-    box.className =
-      'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none';
+    box.classList.remove('show');
   }, 2800);
 };
 

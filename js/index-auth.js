@@ -21,16 +21,18 @@ function showLoggedOutNav() {
   document.getElementById('notif-wrapper').style.display = 'none';
 }
 
+function setNavAvatarInitial(name) {
+  if (!navAvatar) return;
+  navAvatar.textContent = String(name || 'U').charAt(0).toUpperCase();
+}
+
 function showLoggedInNav(user) {
   loginBtn.style.display = 'none';
   joinBtn.style.display = 'none';
   profileBtn.style.display = 'flex';
 
   const displayName = user.displayName || user.email || 'User';
-  const photoURL = user.photoURL
-    || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(displayName) + '&backgroundColor=111111&textColor=ffffff';
-
-  navAvatar.src = photoURL;
+  setNavAvatarInitial(displayName);
 
   if (user.displayName) {
     navUsername.textContent = user.displayName.split(' ')[0];

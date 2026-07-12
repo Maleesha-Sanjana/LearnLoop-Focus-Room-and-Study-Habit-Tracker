@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LearnLoop</title>
   <link rel="icon" href="assets/logo.png" type="image/png"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/index.css"/>
 </head>
 <body>
@@ -15,10 +13,7 @@
 
 <!-- Notifications -->
 <div class="notif-wrapper" id="notif-wrapper">
-  <button class="notif-btn" id="notif-btn" aria-label="Notifications">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    <span class="notif-badge" id="notif-badge"></span>
-  </button>
+  <button type="button" class="notif-btn" id="notif-btn">Alerts<span class="notif-badge" id="notif-badge"></span></button>
   <div class="notif-dropdown" id="notif-dropdown">
     <div class="notif-header">
       <h4>Notifications</h4>
@@ -44,11 +39,11 @@
     <a href="#reviews">Reviews</a>
   </nav>
   <div class="nav-actions">
-    <button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    <button type="button" class="theme-toggle" id="theme-toggle">Dark</button>
     <a href="login.html" class="btn-ghost" id="nav-login-btn">Log in</a>
     <a href="login.html#signup" class="btn-solid" id="nav-join-btn">Join for free</a>
     <a href="profile.html" id="nav-profile-btn" class="nav-profile-btn">
-      <img id="nav-avatar" src="" alt="Profile"/>
+      <span id="nav-avatar" class="nav-avatar-initial">U</span>
       <span id="nav-username">Profile</span>
     </a>
   </div>
@@ -206,7 +201,7 @@
 <section class="extra-section">
   <div class="extra-grid">
     <div class="extra-card"><img src="assets/footer1.jpeg" alt="Extra Preview"/></div>
-    <div class="extra-card"><img src="assets/footer2.jpeg"Extra Preview"/></div>
+    <div class="extra-card"><img src="assets/footer2.jpeg" alt="Extra Preview"/></div>
   </div>
 </section>
 

@@ -16,11 +16,7 @@ html {
   scroll-margin-top: 96px;
 }
 body {
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #fff;
   color: #111;
   -webkit-font-smoothing: antialiased;
@@ -133,12 +129,17 @@ img {
   color: #111;
   transition: 0.15s;
 }
-.nav-profile-btn img {
+.nav-profile-btn .nav-avatar-initial {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  object-fit: cover;
   background: #f5f5f5;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
   flex-shrink: 0;
 }
 
@@ -901,22 +902,21 @@ body.dark .main-wrap {
 
 /* Theme toggle */
 .theme-toggle {
-  width: 32px;
-  height: 32px;
-  border: none;
+  padding: 6px 14px;
+  border: 1px solid #e8e8e8;
+  border-radius: 999px;
   background: transparent;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
   flex-shrink: 0;
   color: #888;
-  padding: 0;
+  transition: all 0.2s;
 }
 .theme-toggle:hover {
   color: #111;
-  transform: scale(1.15);
+  background: #f5f5f5;
 }
 
 /* Notifications */
@@ -928,9 +928,10 @@ body.dark .main-wrap {
   display: none;
 }
 .notif-btn {
-  width: 42px;
+  min-width: 42px;
   height: 42px;
-  border-radius: 50%;
+  padding: 0 14px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -941,6 +942,9 @@ body.dark .main-wrap {
   align-items: center;
   justify-content: center;
   color: #555;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: inherit;
   transition: 0.2s;
   position: relative;
   flex-shrink: 0;
@@ -1203,13 +1207,18 @@ body.dark .btn-solid:hover {
 }
 body.dark .theme-toggle {
   color: #888;
+  border-color: #333;
 }
 body.dark .theme-toggle:hover {
   color: #f0f0f0;
-  transform: scale(1.15);
+  background: #1e1e1e;
 }
 body.dark #nav-profile-btn {
   border-color: #333;
+  color: #f0f0f0;
+}
+body.dark .nav-profile-btn .nav-avatar-initial {
+  background: #1e1e1e;
   color: #f0f0f0;
 }
 body.dark #nav-profile-btn:hover {

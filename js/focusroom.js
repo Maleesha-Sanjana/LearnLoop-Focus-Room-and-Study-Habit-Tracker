@@ -26,18 +26,26 @@ let correctCount = 0;
 let timerInterval = null;
 
 // Theme
+const themeToggle = document.getElementById('theme-toggle');
 const savedTheme = localStorage.getItem('ll_theme');
 const isDarkTheme = savedTheme === 'dark';
 document.body.classList.toggle('dark', isDarkTheme);
-document.getElementById('theme-icon-sun').style.display = isDarkTheme ? 'block' : 'none';
-document.getElementById('theme-icon-moon').style.display = isDarkTheme ? 'none' : 'block';
+if (themeToggle) {
+  themeToggle.textContent = isDarkTheme ? 'Light' : 'Dark';
+}
 
-document.getElementById('theme-toggle').addEventListener('click', function () {
+themeToggle?.addEventListener('click', function () {
   const isDark = document.body.classList.toggle('dark');
-  document.getElementById('theme-icon-sun').style.display = isDark ? 'block' : 'none';
-  document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'block';
+  themeToggle.textContent = isDark ? 'Light' : 'Dark';
   localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
 });
+
+function setNavAvatarInitial(name) {
+  const el = document.getElementById('nav-avatar');
+  if (el) {
+    el.textContent = String(name || 'U').charAt(0).toUpperCase();
+  }
+}
 
 function hostName() {
   if (currentUser.displayName) return currentUser.displayName;
@@ -87,10 +95,7 @@ async function initAuth() {
 
     currentUser = user;
 
-    const photoURL = user.photoURL
-      || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.displayName || user.email) + '&backgroundColor=111111&textColor=ffffff';
-
-    document.getElementById('nav-avatar').src = photoURL;
+    setNavAvatarInitial(user.displayName || user.email || 'User');
 
     if (user.displayName) {
       document.getElementById('nav-username').textContent = user.displayName.split(' ')[0];

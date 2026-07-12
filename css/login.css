@@ -22,7 +22,7 @@ body.dark {
   padding: 0;
 }
 body {
-  font-family: "Inter", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--text);
   display: flex;
@@ -187,9 +187,6 @@ body.dark .btn-social:hover {
 .btn-full {
   width: 100%;
 }
-.theme-icon-hidden {
-  display: none;
-}
 
 /* OTP/Phone specifics */
 #phone-section,
@@ -227,22 +224,20 @@ body.dark .btn-social:hover {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 36px;
-  height: 36px;
+  padding: 8px 14px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
-  border-radius: 50%;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: 0.2s;
   z-index: 100;
 }
 .theme-toggle:hover {
   background: var(--border);
-  transform: scale(1.1);
 }
 
 #recaptcha-container {
