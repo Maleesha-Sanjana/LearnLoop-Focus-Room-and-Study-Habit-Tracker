@@ -173,10 +173,6 @@ export function notificationsCol(uid) {
   return collection(db, 'users', uid, 'notifications');
 }
 
-export function chatMessagesCol(chatId) {
-  return collection(db, 'chats', chatId, 'messages');
-}
-
 // Helpers
 export function formatTimeAgo(date) {
   if (!date) return '';
@@ -188,12 +184,6 @@ export function formatTimeAgo(date) {
   if (sec < 604800) return `${Math.floor(sec / 86400)} days ago`;
   return d.toLocaleDateString();
 }
-
-
-export function chatIdFor(uid1, uid2) {
-  return [uid1, uid2].sort().join('_');
-}
-
 
 export function defaultProfile(user) {
   const name = user?.displayName && !user.displayName.startsWith('+') ? user.displayName : '';
@@ -222,7 +212,6 @@ export function defaultProfile(user) {
     questions: 0,
     availWeekdays: true,
     availWeekends: true,
-    matchmakerSearchSubjects: ['Database', 'React'],
     companionAlerts: true,
     publicMatchmaking: true
   };
@@ -248,10 +237,6 @@ export async function loadAppConfig() {
 }
 
 // User profile
-
-export async function saveMatchmakerPreferences(uid, prefs) {
-  await saveLearnerSettings(uid, prefs);
-}
 
 export function subscribeLearnerSettings(uid, callback) {
   return onSnapshot(learnerSettingsRef(uid), snap => {
@@ -489,36 +474,6 @@ export async function markAllNotificationsRead(uid) {
   await Promise.all(updates);
 }
 
-// Study buddies
-
-export async function findStudyBuddies(currentUid, searchSubjects = []) {
-  const usersSnap = await getDocs(collection(db, 'users'));
-  const buddies = [];
-
-  for (const userDoc of usersSnap.docs) {
-    if (userDoc.id === currentUid) continue;
-    const base = userDoc.data();
-    const settingsSnap = await getDoc(learnerSettingsRef(userDoc.id));
-    const profile = settingsSnap.exists() ? settingsSnap.data() : {};
-    if (profile.publicMatchmaking === false) continue;
-
-    const subjects = profile.subjects || [];
-    if (searchSubjects.length && !subjects.some(s => searchSubjects.includes(s))) continue;
-
-    const name = profile.name || base.userName || base.email?.split('@')[0] || 'Learner';
-    buddies.push({
-      uid: userDoc.id,
-      name,
-      subjects,
-      avatar: (name.charAt(0) || 'U').toUpperCase(),
-      status: 'Available',
-      desc: profile.bio || 'Looking for study partners.',
-      email: base.email || ''
-    });
-  }
-  return buddies;
-}
-
 export async function lookupUserByEmail(email) {
   const normalized = email.trim().toLowerCase();
   const usersSnap = await getDocs(collection(db, 'users'));
@@ -680,25 +635,6 @@ export async function incrementPlatformStats(field) {
 export async function loadTestimonials() {
   const rows = await loadCollectionWithFallback('testimonials');
   return rows;
-}
-
-// Chat
-
-export function subscribeChatMessages(chatId, callback) {
-  const q = query(chatMessagesCol(chatId), orderBy('createdAt', 'asc'));
-  return onSnapshot(q, snap => {
-    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-  });
-}
-
-export async function sendChatMessage(chatId, senderUid, senderName, text) {
-  await setDoc(doc(db, 'chats', chatId), { updatedAt: serverTimestamp() }, { merge: true });
-  await addDoc(chatMessagesCol(chatId), {
-    senderUid,
-    senderName,
-    text,
-    createdAt: serverTimestamp()
-  });
 }
 
 // Study sessions
