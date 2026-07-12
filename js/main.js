@@ -149,6 +149,33 @@ if (marqueeTrack) {
   });
 }
 
+// Mobile nav menu
+const navMenuBtn = document.getElementById('nav-menu-btn');
+const navLinksPanel = document.getElementById('nav-links');
+
+function closeMobileNav() {
+  if (!navLinksPanel || !navMenuBtn) return;
+  navLinksPanel.classList.remove('is-open');
+  navMenuBtn.setAttribute('aria-expanded', 'false');
+  navMenuBtn.textContent = 'Menu';
+}
+
+navMenuBtn?.addEventListener('click', function () {
+  const isOpen = navLinksPanel.classList.toggle('is-open');
+  navMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  navMenuBtn.textContent = isOpen ? 'Close' : 'Menu';
+});
+
+for (let i = 0; i < navLinks.length; i++) {
+  navLinks[i].addEventListener('click', closeMobileNav);
+}
+
+document.addEventListener('click', function (e) {
+  if (!navLinksPanel?.classList.contains('is-open')) return;
+  if (navLinksPanel.contains(e.target) || navMenuBtn?.contains(e.target)) return;
+  closeMobileNav();
+});
+
 // Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
 

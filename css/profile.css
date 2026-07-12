@@ -30,6 +30,10 @@
   padding: 0;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--ll-bg);
@@ -54,6 +58,19 @@ textarea {
   display: none !important;
 }
 
+.nav-menu-btn {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid var(--ll-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ll-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 /* Navbar */
 .ll-navbar {
   position: fixed;
@@ -74,6 +91,7 @@ textarea {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  flex-wrap: wrap;
 }
 
 .dark .ll-navbar {
@@ -807,7 +825,122 @@ textarea {
 }
 
 @media (max-width: 767px) {
+  .ll-navbar {
+    width: calc(100% - 24px);
+    padding: 10px 14px;
+    border-radius: 20px;
+    gap: 8px;
+  }
+
+  .nav-brand {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nav-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+  }
+
   .nav-links {
     display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  .nav-links.is-open {
+    display: flex;
+  }
+
+  .nav-link {
+    text-align: center;
+    padding: 10px 14px;
+  }
+
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .theme-toggle,
+  .btn-outline {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .profile-main {
+    padding: 104px 14px 60px;
+  }
+
+  .card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .profile-name {
+    font-size: 1.5rem;
+  }
+
+  .avatar-circle {
+    width: 96px;
+    height: 96px;
+    font-size: 2rem;
+  }
+
+  .profile-tabs {
+    width: 100%;
+  }
+
+  .tab-btn {
+    width: 100%;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-value {
+    font-size: 1.2rem;
+  }
+
+  .footer-inner {
+    text-align: center;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .toast {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    justify-content: center;
+  }
+
+  .modal-card {
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-grid,
+  .mini-stat-grid,
+  .badge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .goal-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .goal-controls input[type="range"] {
+    width: 100%;
   }
 }
