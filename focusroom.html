@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Focus Room - LearnLoop</title>
   <link rel="icon" href="assets/logo.png" type="image/png"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/focusroom.css"/>
 </head>
 <body>
@@ -18,12 +16,9 @@
     <span>LearnLoop</span>
   </a>
   <div class="nav-actions">
-    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-      <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
+    <button type="button" class="theme-toggle" id="theme-toggle">Dark</button>
     <a href="profile.html" id="nav-profile-btn">
-      <img id="nav-avatar" src="" alt="Profile"/>
+      <span id="nav-avatar" class="nav-avatar-initial">U</span>
       <span id="nav-username">Profile</span>
     </a>
   </div>
@@ -31,7 +26,7 @@
 
 <div class="container">
 
-  <!-- SCREEN 1: Mode Selection -->
+  <!-- Mode select -->
   <div id="mode-selection-screen" class="mode-selection">
     <h1>Choose Your Focus Mode</h1>
     <p>Study alone or collaborate with your team</p>
@@ -49,24 +44,24 @@
     </div>
   </div>
 
-  <!-- SCREEN 2: Team Setup (name) -->
+  <!-- Team name -->
   <div id="team-setup-screen" class="team-lobby hidden">
     <h1>Create Your Team</h1>
-    <p class="subtitle">Enter a team name, then invite up to 4 teammates (5 players total including you)</p>
+    <p class="subtitle">Enter a team name, then share one link with up to 4 friends (5 players total including you)</p>
 
     <div class="lobby-card">
       <label class="field-label" for="team-name-input">Team Name</label>
       <input type="text" id="team-name-input" class="add-member-input" placeholder="e.g. Kottu Coders" maxlength="40"/>
-      <button class="btn btn-primary btn-full" id="create-team-btn" style="margin-top:12px">Continue to Invite Members</button>
+      <button class="btn btn-primary btn-full btn-spaced" id="create-team-btn">Create Team</button>
     </div>
 
     <button class="btn btn-secondary" id="back-from-setup-btn">← Back</button>
   </div>
 
-  <!-- SCREEN 3: Team Lobby -->
+  <!-- Team lobby -->
   <div id="team-lobby-screen" class="team-lobby hidden">
     <h1 id="lobby-team-title">Team Lobby</h1>
-    <p class="subtitle">Invite teammates by email. They will receive a join link via email.</p>
+    <p class="subtitle">Copy the join link and share it. Up to 4 friends can join (5 players max).</p>
 
     <div class="lobby-card">
       <div class="team-name-display" id="lobby-team-name">Team Name</div>
@@ -74,30 +69,25 @@
       <h3>Team Members (<span id="member-count">1</span>/5)</h3>
       <div class="member-list" id="member-list"></div>
 
-      <h3 class="section-gap">Pending Invites (<span id="pending-count">0</span>)</h3>
-      <div class="pending-list" id="pending-list">
-        <p class="empty-hint" id="pending-empty">No invites sent yet.</p>
-      </div>
-
-      <div class="invite-section" id="invite-section">
-        <label class="field-label" for="invite-email-input">Teammate email</label>
-        <input type="email" id="invite-email-input" class="add-member-input" placeholder="friend@email.com"/>
-        <button class="btn btn-secondary btn-full" id="send-invite-btn">Send Request</button>
-        <p class="invite-hint">You can invite up to 4 people. Each person gets an email with a join link.</p>
+      <div class="share-link-section" id="share-link-section">
+        <h3 class="section-gap">Join link</h3>
+        <p class="invite-hint">Friends must log in to LearnLoop, then open this link to join your team.</p>
+        <div class="share-link-row">
+          <input type="text" id="team-join-url" class="add-member-input" readonly/>
+          <button type="button" class="btn btn-secondary" id="copy-join-link-btn">Copy link</button>
+        </div>
       </div>
     </div>
 
     <div class="btn-group">
       <button class="btn btn-secondary" id="back-to-mode-btn">← Back</button>
-      <button class="btn btn-primary" id="start-quiz-btn" style="flex:1">Start Quiz</button>
+      <button class="btn btn-primary btn-grow" id="start-quiz-btn">Start Quiz</button>
     </div>
   </div>
 
-  <!-- SCREEN 4: Quiz -->
+  <!-- Quiz -->
   <div id="quiz-screen" class="quiz-screen hidden">
-    <div class="participants-bar" id="participants-bar">
-      <!-- Participant chips will be added here -->
-    </div>
+    <div class="participants-bar" id="participants-bar"></div>
 
     <div class="quiz-header">
       <h2>Question <span id="current-question-num">1</span> of <span id="total-questions">5</span></h2>
@@ -107,13 +97,11 @@
     <div class="question-card">
       <div class="question-number">Question <span id="q-num">1</span></div>
       <div class="question-text" id="question-text">Loading question...</div>
-      <div class="answers-grid" id="answers-grid">
-        <!-- Answer options will be added here -->
-      </div>
+      <div class="answers-grid" id="answers-grid"></div>
     </div>
 
-    <button class="btn btn-primary btn-full" id="next-question-btn" style="display:none">Next Question →</button>
-    <button class="btn btn-primary btn-full" id="finish-quiz-btn" style="display:none">Finish Quiz</button>
+    <button class="btn btn-primary btn-full hidden" id="next-question-btn">Next Question →</button>
+    <button class="btn btn-primary btn-full hidden" id="finish-quiz-btn">Finish Quiz</button>
   </div>
 
 </div>

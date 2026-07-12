@@ -80,14 +80,5 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isSignedIn();
     }
-
-    match /teamInvites/{inviteId} {
-      allow read, create, update: if isSignedIn();
-    }
-
-    match /mail/{mailId} {
-      allow create: if isSignedIn();
-      allow read, update, delete: if false;
-    }
   }
 }

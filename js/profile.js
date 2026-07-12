@@ -27,6 +27,8 @@ const buddiesDatabase = [
   { name: 'Meena', subjects: ['Networking', 'React'], avail: 'weekdays', avatar: 'M', status: 'Offline', desc: 'Mainly active on Tuesday focus lobbies.' }
 ];
 
+// State
+
 let selectedSubjects = [];
 let currentChattingBuddy = null;
 
@@ -124,105 +126,45 @@ function profileDocRef(uid) {
   }
 
   selectedSubjects = window.userProfile.subjects?.length ? [...window.userProfile.subjects] : [];
-  matchmakerSearchSubjects = window.userProfile.matchmakerSearchSubjects?.length
-    ? [...window.userProfile.matchmakerSearchSubjects]
-    : [...(defaultProfile(null).matchmakerSearchSubjects || [])];
 
-  applyPreferencesToUI();
   setupFirestoreListeners(user.uid);
-  await filterBuddies();
 }
 
 function setupFirestoreListeners(uid) {
-  firestoreUnsubs.forEach(unsub => unsub());
+  firestoreUnsubs.forEach(function (unsub) { unsub(); });
   firestoreUnsubs.length = 0;
 
-  firestoreUnsubs.push(subscribeLearnerSettings(uid, data => {
+  firestoreUnsubs.push(subscribeLearnerSettings(uid, function (data) {
     window.userProfile = { ...window.userProfile, ...data };
     selectedSubjects = window.userProfile.subjects?.length ? [...window.userProfile.subjects] : selectedSubjects;
     renderProfileUI();
     renderSubjectsList();
   }));
 
-  firestoreUnsubs.push(subscribeGoals(uid, goals => {
+  firestoreUnsubs.push(subscribeGoals(uid, function (goals) {
     goalsState = goals;
     renderGoalTrackers();
   }));
 
-  firestoreUnsubs.push(subscribeActivities(uid, activities => {
+  firestoreUnsubs.push(subscribeActivities(uid, function (activities) {
     recentActivities = activities;
     renderActivityTimeline();
   }));
 
-  firestoreUnsubs.push(subscribeResources(uid, resources => {
+  firestoreUnsubs.push(subscribeResources(uid, function (resources) {
     sharedResources = resources;
     evaluateAchievementsUnlocks();
   }));
 
-  firestoreUnsubs.push(subscribeAchievements(uid, badges => {
+  firestoreUnsubs.push(subscribeAchievements(uid, function (badges) {
     unlockedBadges = badges;
     renderAchievementsBadges();
   }));
 }
 
-function applyPreferencesToUI() {
-  const p = window.userProfile;
-  const weekdays = document.getElementById('avail-weekdays');
-  const weekends = document.getElementById('avail-weekends');
-
-  if (weekdays) weekdays.checked = p.availWeekdays !== false;
-  if (weekends) weekends.checked = p.availWeekends !== false;
-
-  renderMatchmakerSubjects();
-}
-
-async function persistMatchmakerPreferences() {
-  if (!currentUid) return;
-
-  const prefs = {
-    matchmakerSearchSubjects: [...matchmakerSearchSubjects],
-    availWeekdays: document.getElementById('avail-weekdays')?.checked ?? true,
-    availWeekends: document.getElementById('avail-weekends')?.checked ?? true
-  };
-
-  window.userProfile = { ...window.userProfile, ...prefs };
-
-  try {
-    await saveMatchmakerPreferences(currentUid, prefs);
-  } catch (err) {
-    console.warn('Could not save matchmaker preferences.', err);
-  }
-}
-
-function renderMatchmakerSubjects() {
-  const container = document.getElementById('matchmaker-subjects');
-  if (!container) return;
-  container.innerHTML = '';
-
-  subjectsPool.forEach(subject => {
-    const checked = matchmakerSearchSubjects.includes(subject);
-    const label = document.createElement('label');
-    label.className = 'flex items-center gap-2.5 text-sm font-semibold cursor-pointer';
-    label.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]" data-subject="${subject}"/>
-      <span>${subject}</span>
-    `;
-    label.querySelector('input').addEventListener('change', async (e) => {
-      if (e.target.checked) {
-        if (!matchmakerSearchSubjects.includes(subject)) matchmakerSearchSubjects.push(subject);
-      } else {
-        matchmakerSearchSubjects = matchmakerSearchSubjects.filter(s => s !== subject);
-      }
-      await persistMatchmakerPreferences();
-      await filterBuddies();
-    });
-    container.appendChild(label);
-  });
-}
-
 async function initAuth() {
   await auth.authStateReady();
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, async function (user) {
     if (!user) {
       window.location.replace('login.html');
       return;
@@ -235,15 +177,17 @@ async function initAuth() {
   });
 }
 
-document.getElementById('nav-logout-btn')?.addEventListener('click', async () => {
+document.getElementById('nav-logout-btn')?.addEventListener('click', async function () {
   try {
     await signOut(auth);
   } catch (_) {}
   showToast('Logged out from LearnLoop. Redirecting...');
-  setTimeout(() => {
+  setTimeout(function () {
     window.location.href = 'index.html';
   }, 1200);
 });
+
+// UI
 
 function renderProfileUI() {
   if (!window.userProfile) return;
@@ -258,18 +202,18 @@ function renderProfileUI() {
     `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(p.avatar || 'User')}&backgroundColor=ede9fe`;
 
   document.getElementById('badge-level').textContent = p.level || 'Beginner';
-  document.getElementById('badge-streak').textContent = p.streak ?? 0;
-  document.getElementById('badge-focus').textContent = (p.focusScore ?? 0) + '%';
+  document.getElementById('badge-streak').textContent = p.streak || 0;
+  document.getElementById('badge-focus').textContent = (p.focusScore || 0) + '%';
 
-  document.getElementById('stat-hours').textContent = (p.hours ?? 0) + ' hrs';
+  document.getElementById('stat-hours').textContent = (p.hours || 0) + ' hrs';
   document.getElementById('stat-today').textContent = p.todayProgress || '0h 0m';
-  document.getElementById('stat-streak').textContent = '🔥 ' + (p.streak ?? 0) + ' days';
-  document.getElementById('stat-goals').textContent = (p.goalsCompleted ?? 0) + ' Goals';
+  document.getElementById('stat-streak').textContent = (p.streak || 0) + ' days';
+  document.getElementById('stat-goals').textContent = (p.goalsCompleted || 0) + ' Goals';
 
-  document.getElementById('stat-questions').textContent = p.questions ?? 0;
-  document.getElementById('stat-sessions').textContent = p.sessions ?? 0;
-  document.getElementById('stat-quizzes').textContent = p.quizzes ?? 0;
-  document.getElementById('stat-reputation').textContent = p.reputation ?? 0;
+  document.getElementById('stat-questions').textContent = p.questions || 0;
+  document.getElementById('stat-sessions').textContent = p.sessions || 0;
+  document.getElementById('stat-quizzes').textContent = p.quizzes || 0;
+  document.getElementById('stat-reputation').textContent = p.reputation || 0;
 
   setVal('info-name', p.name);
   setVal('info-uni', p.institution);
@@ -285,11 +229,15 @@ function renderProfileUI() {
 
 function setVal(id, val) {
   const el = document.getElementById(id);
-  if (el) el.value = val ?? '';
+  if (el) {
+    el.value = (val !== null && val !== undefined) ? val : '';
+  }
 }
 
-window.saveLearnerInfo = async function (e) {
-  if (e) e.preventDefault();
+function renderSubjectsList() {
+  const container = document.getElementById('subjects-container');
+  if (!container) return;
+  container.innerHTML = '';
 
   const inputName = document.getElementById('info-name').value.trim();
   const inputUni = document.getElementById('info-uni').value.trim();
@@ -324,8 +272,15 @@ window.saveLearnerInfo = async function (e) {
     }
   }
 
-  toggleTab('profile');
-};
+  container.innerHTML = recentActivities.map(function (act) {
+    return `
+    <div class="activity-item">
+      <p class="activity-text">${escapeHtml(act.text)}</p>
+      <span class="activity-time">${act.time}</span>
+    </div>
+  `;
+  }).join('');
+}
 
 window.updateAvatarSelection = async function (seed) {
   window.userProfile.avatar = seed;
@@ -341,7 +296,25 @@ window.updateAvatarSelection = async function (seed) {
       console.warn('Could not save avatar to cloud.', err);
     }
   }
-};
+
+  list.innerHTML = goalsState.map(function (goal) {
+    return `
+    <div class="goal-item">
+      <div class="goal-top">
+        <span class="goal-name">${escapeHtml(goal.name)}</span>
+        <span class="goal-progress-text" id="goal-val-${goal.id}">${goal.progress}%</span>
+      </div>
+      <div class="goal-bar-track">
+        <div id="goal-bar-${goal.id}" class="goal-bar-fill" style="width: ${goal.progress}%"></div>
+      </div>
+      <div class="goal-controls">
+        <input type="range" min="0" max="100" value="${goal.progress}" oninput="adjustGoal('${goal.id}', this.value)" ${goal.status === 'completed' ? 'disabled' : ''}/>
+        <button type="button" onclick="accomplishGoal('${goal.id}')" class="link-btn" ${goal.status === 'completed' ? 'disabled' : ''}>Mark Done</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
 
 window.adjustGoal = function (id, value) {
   const valEl = document.getElementById(`goal-val-${id}`);
@@ -519,19 +492,16 @@ window.toggleTab = function (tabName) {
   const btnProfile = document.getElementById('btn-tab-profile');
   const btnSettings = document.getElementById('btn-tab-settings');
 
-  const activeClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition ll-btn-primary';
-  const inactiveClass = 'px-5 py-3 rounded-2xl text-sm font-bold shadow-sm transition bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] hover:bg-[#e8e8e8] dark:hover:bg-[#2a2a2a]';
-
   if (tabName === 'profile') {
     profileTab?.classList.remove('hidden');
     settingsTab?.classList.add('hidden');
-    if (btnProfile) btnProfile.className = activeClass;
-    if (btnSettings) btnSettings.className = inactiveClass;
+    btnProfile?.classList.add('is-active');
+    btnSettings?.classList.remove('is-active');
   } else {
     profileTab?.classList.add('hidden');
     settingsTab?.classList.remove('hidden');
-    if (btnProfile) btnProfile.className = inactiveClass;
-    if (btnSettings) btnSettings.className = activeClass;
+    btnProfile?.classList.remove('is-active');
+    btnSettings?.classList.add('is-active');
   }
 };
 
@@ -541,14 +511,12 @@ window.showToast = function (message, isError = false) {
   const text = document.getElementById('toast-text');
   if (!box || !icon || !text) return;
 
-  icon.innerText = isError ? '⚠️' : '✨';
+  icon.innerText = isError ? '!' : 'OK';
   text.innerText = message;
-  box.className =
-    'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300';
+  box.classList.add('show');
 
-  setTimeout(() => {
-    box.className =
-      'fixed bottom-6 right-6 bg-[#111] text-white dark:bg-[#f0f0f0] dark:text-[#111] px-5 py-3 rounded-2xl shadow-xl font-bold text-xs z-50 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none';
+  setTimeout(function () {
+    box.classList.remove('show');
   }, 2800);
 };
 
@@ -864,5 +832,4 @@ function initPage() {
 }
 
 initTheme();
-initPage();
 initAuth();

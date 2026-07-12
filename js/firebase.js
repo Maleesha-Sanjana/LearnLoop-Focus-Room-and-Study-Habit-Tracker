@@ -1,3 +1,5 @@
+// Firebase helpers
+
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import {
@@ -19,6 +21,8 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
+// Setup
+
 export const firebaseConfig = {
   apiKey: 'AIzaSyC0SlrLGv9luVqaogkW4lpYL3mwIxxvSdA',
   authDomain: 'learnloop-f89c2.firebaseapp.com',
@@ -34,6 +38,8 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
+// Constants
+
 export const SUBJECTS_POOL = ['Java', 'React', 'Database', 'Networking', 'Algorithms', 'Machine Learning', 'System Design'];
 export const PRESET_AVATARS = ['Aisha', 'David', 'Emma', 'Sarah', 'Caleb', 'Maya'];
 
@@ -45,6 +51,8 @@ export const BADGE_DEFINITIONS = [
   { id: 'notes-badge', title: 'Contributor Portfolio', icon: '📝', threshold: 3, metric: 'resourcesCount' },
   { id: 'focus-badge', title: 'Focus Champion', icon: '⚡', threshold: 95, metric: 'focusScore' }
 ];
+
+// Paths
 
 export function learnerSettingsRef(uid) {
   return doc(db, 'users', uid, 'profileData', 'learnerSettings');
@@ -78,6 +86,7 @@ export function chatMessagesCol(chatId) {
   return collection(db, 'chats', chatId, 'messages');
 }
 
+// Helpers
 export function formatTimeAgo(date) {
   if (!date) return '';
   const d = date?.toDate ? date.toDate() : new Date(date);
@@ -89,9 +98,11 @@ export function formatTimeAgo(date) {
   return d.toLocaleDateString();
 }
 
+
 export function chatIdFor(uid1, uid2) {
   return [uid1, uid2].sort().join('_');
 }
+
 
 export function defaultProfile(user) {
   const name = user?.displayName && !user.displayName.startsWith('+') ? user.displayName : '';
@@ -126,6 +137,8 @@ export function defaultProfile(user) {
   };
 }
 
+// App config
+
 export async function loadAppConfig() {
   try {
     const snap = await getDoc(doc(db, 'config', 'app'));
@@ -143,46 +156,10 @@ export async function loadAppConfig() {
   return { subjects: SUBJECTS_POOL, avatars: PRESET_AVATARS, badges: BADGE_DEFINITIONS };
 }
 
+// User profile
+
 export async function saveMatchmakerPreferences(uid, prefs) {
   await saveLearnerSettings(uid, prefs);
-}
-
-export function subscribeGoals(uid, callback) {
-  return onSnapshot(goalsCol(uid), snap => {
-    callback(snap.docs.map(d => ({
-      id: d.id,
-      name: d.data().name,
-      progress: d.data().progress ?? 0,
-      status: d.data().status ?? 'active'
-    })));
-  });
-}
-
-export function subscribeActivities(uid, callback, max = 20) {
-  const q = query(activitiesCol(uid), orderBy('createdAt', 'desc'), limit(max));
-  return onSnapshot(q, snap => {
-    callback(snap.docs.map(d => ({
-      id: d.id,
-      text: d.data().text,
-      time: formatTimeAgo(d.data().createdAt)
-    })));
-  });
-}
-
-export function subscribeResources(uid, callback) {
-  const q = query(resourcesCol(uid), orderBy('uploadedAt', 'desc'));
-  return onSnapshot(q, snap => {
-    callback(snap.docs.map(d => {
-      const data = d.data();
-      return { id: d.id, name: data.name, size: data.size, scope: data.scope, url: data.url || null };
-    }));
-  });
-}
-
-export function subscribeAchievements(uid, callback) {
-  return onSnapshot(achievementsCol(uid), snap => {
-    callback(new Set(snap.docs.map(d => d.id)));
-  });
 }
 
 export function subscribeLearnerSettings(uid, callback) {
@@ -200,18 +177,37 @@ export async function saveLearnerSettings(uid, data) {
   await setDoc(learnerSettingsRef(uid), data, { merge: true });
 }
 
-export async function logActivity(uid, text, type = 'general') {
-  await addDoc(activitiesCol(uid), { text, type, createdAt: serverTimestamp() });
+export async function upsertUserRecord(user, userName) {
+  await setDoc(userDocRef(user.uid), {
+    userName: userName || user.displayName || user.email?.split('@')[0] || 'User',
+    email: user.email || '',
+    phoneNumber: user.phoneNumber || null,
+    photoURL: user.photoURL || null,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  const settingsSnap = await getDoc(learnerSettingsRef(user.uid));
+  if (!settingsSnap.exists()) {
+    await setDoc(learnerSettingsRef(user.uid), defaultProfile(user), { merge: true });
+    await incrementPlatformStats('studentCount');
+  }
 }
 
-export async function loadActivities(uid, max = 20) {
-  const q = query(activitiesCol(uid), orderBy('createdAt', 'desc'), limit(max));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({
-    id: d.id,
-    text: d.data().text,
-    time: formatTimeAgo(d.data().createdAt)
-  }));
+export async function saveUserProfileOnSignup(user, userName) {
+  await upsertUserRecord(user, userName);
+}
+
+// Goals
+
+export function subscribeGoals(uid, callback) {
+  return onSnapshot(goalsCol(uid), snap => {
+    callback(snap.docs.map(d => ({
+      id: d.id,
+      name: d.data().name,
+      progress: d.data().progress || 0,
+      status: d.data().status ? d.data().status : 'active'
+    })));
+  });
 }
 
 export async function loadGoals(uid) {
@@ -219,8 +215,8 @@ export async function loadGoals(uid) {
   return snap.docs.map(d => ({
     id: d.id,
     name: d.data().name,
-    progress: d.data().progress ?? 0,
-    status: d.data().status ?? 'active'
+    progress: d.data().progress || 0,
+    status: d.data().status ? d.data().status : 'active'
   }));
 }
 
@@ -247,6 +243,45 @@ export async function completeGoal(uid, goalId, goalName) {
   await logActivity(uid, `Completed learning target: '${goalName}'`, 'goal');
   await incrementPlatformStats('goalsCompletedCount');
   return goalsCompleted;
+}
+
+// Activities
+
+export function subscribeActivities(uid, callback, max = 20) {
+  const q = query(activitiesCol(uid), orderBy('createdAt', 'desc'), limit(max));
+  return onSnapshot(q, snap => {
+    callback(snap.docs.map(d => ({
+      id: d.id,
+      text: d.data().text,
+      time: formatTimeAgo(d.data().createdAt)
+    })));
+  });
+}
+
+export async function logActivity(uid, text, type = 'general') {
+  await addDoc(activitiesCol(uid), { text, type, createdAt: serverTimestamp() });
+}
+
+export async function loadActivities(uid, max = 20) {
+  const q = query(activitiesCol(uid), orderBy('createdAt', 'desc'), limit(max));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({
+    id: d.id,
+    text: d.data().text,
+    time: formatTimeAgo(d.data().createdAt)
+  }));
+}
+
+// Resources
+
+export function subscribeResources(uid, callback) {
+  const q = query(resourcesCol(uid), orderBy('uploadedAt', 'desc'));
+  return onSnapshot(q, snap => {
+    callback(snap.docs.map(d => {
+      const data = d.data();
+      return { id: d.id, name: data.name, size: data.size, scope: data.scope, url: data.url || null };
+    }));
+  });
 }
 
 export async function uploadResourceFile(uid, file) {
@@ -284,6 +319,14 @@ export async function removeResource(uid, resourceId) {
   }
 }
 
+// Achievements
+
+export function subscribeAchievements(uid, callback) {
+  return onSnapshot(achievementsCol(uid), snap => {
+    callback(new Set(snap.docs.map(d => d.id)));
+  });
+}
+
 export async function loadUnlockedAchievements(uid) {
   const snap = await getDocs(achievementsCol(uid));
   return new Set(snap.docs.map(d => d.id));
@@ -304,6 +347,8 @@ export async function unlockAchievement(uid, badgeId, title) {
     read: false
   });
 }
+
+// Notifications
 
 export async function addNotification(uid, { icon, color, title, type, read = false }) {
   await addDoc(notificationsCol(uid), {
@@ -341,12 +386,19 @@ export async function markNotificationRead(uid, notifId) {
   await updateDoc(doc(db, 'users', uid, 'notifications', notifId), { read: true });
 }
 
+
 export async function markAllNotificationsRead(uid) {
   const snap = await getDocs(notificationsCol(uid));
-  await Promise.all(
-    snap.docs.filter(d => !d.data().read).map(d => updateDoc(d.ref, { read: true }))
-  );
+  const updates = [];
+  for (const d of snap.docs) {
+    if (!d.data().read) {
+      updates.push(updateDoc(d.ref, { read: true }));
+    }
+  }
+  await Promise.all(updates);
 }
+
+// Study buddies
 
 export async function findStudyBuddies(currentUid, searchSubjects = []) {
   const usersSnap = await getDocs(collection(db, 'users'));
@@ -375,6 +427,19 @@ export async function findStudyBuddies(currentUid, searchSubjects = []) {
   }
   return buddies;
 }
+
+export async function lookupUserByEmail(email) {
+  const normalized = email.trim().toLowerCase();
+  const usersSnap = await getDocs(collection(db, 'users'));
+  for (const d of usersSnap.docs) {
+    if ((d.data().email || '').toLowerCase() === normalized) {
+      return { uid: d.id, ...d.data() };
+    }
+  }
+  return null;
+}
+
+// Quiz
 
 export async function getQuizQuestions() {
   const snap = await getDoc(doc(db, 'quizSets', 'default'));
@@ -415,56 +480,63 @@ export async function saveQuizResult({ uid, userName, mode, sessionId, score, to
   await incrementPlatformStats('sessionCount');
 }
 
-export async function lookupUserByEmail(email) {
-  const normalized = email.trim().toLowerCase();
-  const usersSnap = await getDocs(collection(db, 'users'));
-  for (const d of usersSnap.docs) {
-    if ((d.data().email || '').toLowerCase() === normalized) {
-      return { uid: d.id, ...d.data() };
-    }
-  }
-  return null;
-}
-
+// Leaderboards
 export async function getIndividualLeaderboard(max = 10) {
   const snap = await getDocs(collection(db, 'quizResults'));
-  const byUser = new Map();
+  const byUser = {};
 
-  snap.docs.forEach(d => {
+  for (const d of snap.docs) {
     const r = d.data();
     const key = r.uid;
-    if (!key) return;
-    const cur = byUser.get(key) || { uid: key, name: r.userName || 'Learner', score: 0, quizzes: 0, totalPercent: 0 };
+    if (!key) continue;
+
+    if (!byUser[key]) {
+      byUser[key] = { uid: key, name: r.userName || 'Learner', score: 0, quizzes: 0, totalPercent: 0 };
+    }
+    const cur = byUser[key];
     cur.score += r.score || 0;
     cur.quizzes += 1;
     cur.totalPercent += r.avgPercent || 0;
     cur.name = r.userName || cur.name;
-    byUser.set(key, cur);
-  });
+  }
 
-  return [...byUser.values()]
-    .map(u => ({ ...u, avg: u.quizzes ? Math.round(u.totalPercent / u.quizzes) : 0 }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, max);
+  const users = [];
+  for (const uid in byUser) {
+    const u = byUser[uid];
+    const avg = u.quizzes ? Math.round(u.totalPercent / u.quizzes) : 0;
+    users.push({ uid: u.uid, name: u.name, score: u.score, quizzes: u.quizzes, totalPercent: u.totalPercent, avg });
+  }
+
+  users.sort((a, b) => b.score - a.score);
+  return users.slice(0, max);
 }
+
 
 export async function getTeamLeaderboard(max = 10) {
   const snap = await getDocs(collection(db, 'sessions'));
   const teams = [];
 
-  snap.docs.forEach(d => {
+  for (const d of snap.docs) {
     const s = d.data();
-    if (s.status !== 'finished' || !s.members?.length) return;
+    if (s.status !== 'finished' || !s.members?.length) continue;
+
+    let teamScore = 0;
+    for (const m of s.members) {
+      teamScore += m.score || 0;
+    }
+
     teams.push({
       name: s.teamName || `Team ${s.hostEmail?.split('@')[0] || 'Session'}`,
-      score: s.members.reduce((sum, m) => sum + (m.score || 0), 0),
+      score: teamScore,
       members: s.members.length,
       sessions: 1
     });
-  });
+  }
 
   return teams.sort((a, b) => b.score - a.score).slice(0, max);
 }
+
+// Platform stats
 
 export async function getPlatformStats() {
   const ref = doc(db, 'platformStats', 'global');
@@ -495,10 +567,14 @@ export async function incrementPlatformStats(field) {
   await updateDoc(ref, { [field]: increment(1), updatedAt: serverTimestamp() });
 }
 
+// Testimonials
+
 export async function loadTestimonials() {
   const snap = await getDocs(collection(db, 'testimonials'));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
+
+// Chat
 
 export function subscribeChatMessages(chatId, callback) {
   const q = query(chatMessagesCol(chatId), orderBy('createdAt', 'asc'));
@@ -516,6 +592,8 @@ export async function sendChatMessage(chatId, senderUid, senderName, text) {
     createdAt: serverTimestamp()
   });
 }
+
+// Study sessions
 
 export async function logStudySession(uid, hoursAdded = 2) {
   const settings = (await getDoc(learnerSettingsRef(uid))).data() || defaultProfile(null);
@@ -535,157 +613,55 @@ export async function logStudySession(uid, hoursAdded = 2) {
   return { hours, sessions, reputation, streak };
 }
 
-export async function upsertUserRecord(user, userName) {
-  await setDoc(userDocRef(user.uid), {
-    userName: userName || user.displayName || user.email?.split('@')[0] || 'User',
-    email: user.email || '',
-    phoneNumber: user.phoneNumber || null,
-    photoURL: user.photoURL || null,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-
-  const settingsSnap = await getDoc(learnerSettingsRef(user.uid));
-  if (!settingsSnap.exists()) {
-    await setDoc(learnerSettingsRef(user.uid), defaultProfile(user), { merge: true });
-    await incrementPlatformStats('studentCount');
-  }
-}
-
-export async function saveUserProfileOnSignup(user, userName) {
-  await upsertUserRecord(user, userName);
-}
+// Team invites
 
 export const FOCUS_ROOM_MAX_TEAM = 5;
 
-export function buildFocusRoomJoinUrl(sessionId, inviteId) {
+export function buildTeamJoinUrl(sessionId) {
   const base = typeof window !== 'undefined' ? window.location.origin : 'https://learnloop-f89c2.web.app';
-  return `${base}/focusroom.html?join=${encodeURIComponent(sessionId)}&invite=${encodeURIComponent(inviteId)}`;
+  return `${base}/focusroom.html?join=${encodeURIComponent(sessionId)}`;
 }
 
-export async function queueTeamInviteEmail({ to, teamName, hostName, joinUrl }) {
-  await addDoc(collection(db, 'mail'), {
-    to: [to.trim().toLowerCase()],
-    message: {
-      subject: `You're invited to join ${teamName} on LearnLoop`,
-      text: `${hostName} invited you to join the team "${teamName}" for a Focus Room quiz on LearnLoop.\n\nOpen this link to join: ${joinUrl}\n\nTeam size is limited to 5 players.`,
-      html: `
-        <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111;">
-          <h2 style="margin:0 0 12px;">You're invited to a team quiz 🎯</h2>
-          <p><strong>${hostName}</strong> invited you to join <strong>${teamName}</strong> on LearnLoop Focus Room.</p>
-          <p>Click below to join the team lobby (5 players max):</p>
-          <p><a href="${joinUrl}" style="display:inline-block;background:#111;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:700;">Join Team Game</a></p>
-          <p style="font-size:12px;color:#666;">If the button does not work, copy this link:<br/>${joinUrl}</p>
-        </div>
-      `
-    },
-    createdAt: serverTimestamp()
-  });
-}
-
-export async function sendTeamInviteRequest({
-  sessionId,
-  teamName,
-  inviteeEmail,
-  hostUid,
-  hostName,
-  pendingInvites = []
-}) {
-  const email = inviteeEmail.trim().toLowerCase();
-  if (!email || !email.includes('@')) {
-    throw new Error('Enter a valid email address.');
-  }
-
-  const alreadyPending = pendingInvites.some(i => (i.email || '').toLowerCase() === email);
-  if (alreadyPending) {
-    throw new Error('An invite was already sent to this email.');
-  }
-
-  const inviteRef = doc(collection(db, 'teamInvites'));
-  const joinUrl = buildFocusRoomJoinUrl(sessionId, inviteRef.id);
-
-  await setDoc(inviteRef, {
-    sessionId,
-    teamName,
-    inviteeEmail: email,
-    hostUid,
-    hostName,
-    status: 'pending',
-    joinUrl,
-    createdAt: serverTimestamp()
-  });
-
-  try {
-    await queueTeamInviteEmail({ to: email, teamName, hostName, joinUrl });
-  } catch (err) {
-    console.warn('Email queue failed (invite link still created):', err);
-  }
-
-  return { inviteId: inviteRef.id, email, joinUrl };
-}
-
-export async function acceptTeamInvite({ inviteId, sessionId, user }) {
-  const inviteRef = doc(db, 'teamInvites', inviteId);
-  const inviteSnap = await getDoc(inviteRef);
-  if (!inviteSnap.exists()) throw new Error('Invite not found or expired.');
-  const invite = inviteSnap.data();
-
-  if (invite.sessionId !== sessionId) throw new Error('Invalid invite link.');
-  if (invite.status === 'accepted') throw new Error('This invite was already accepted.');
-  if (invite.status !== 'pending') throw new Error('This invite is no longer valid.');
-
-  const userEmail = (user.email || '').toLowerCase();
-  if (userEmail !== (invite.inviteeEmail || '').toLowerCase()) {
-    throw new Error(`Please sign in with ${invite.inviteeEmail} to join this team.`);
-  }
-
+export async function joinTeamSession({ sessionId, user }) {
   const sessionRef = doc(db, 'sessions', sessionId);
   const sessionSnap = await getDoc(sessionRef);
-  if (!sessionSnap.exists()) throw new Error('Team session not found.');
+  if (!sessionSnap.exists()) throw new Error('Team session not found. Check the link and try again.');
   const session = sessionSnap.data();
 
   if (session.status !== 'lobby') throw new Error('This team game has already started.');
 
   const members = session.members || [];
   if (members.some(m => m.uid === user.uid)) {
-    await updateDoc(inviteRef, { status: 'accepted', acceptedAt: serverTimestamp(), acceptedBy: user.uid });
-    return session;
+    return { ...session, members, teamName: session.teamName };
   }
 
   if (members.length >= FOCUS_ROOM_MAX_TEAM) {
-    throw new Error('This team is already full (5/5).');
+    throw new Error('This team is full (5/5).');
   }
 
   const newMember = {
     uid: user.uid,
     email: user.email,
-    name: user.displayName || invite.inviteeEmail.split('@')[0],
+    name: user.displayName || user.email?.split('@')[0] || 'Player',
     photoURL: user.photoURL || null,
     score: 0,
     isHost: false
   };
 
-  const pendingInvites = (session.pendingInvites || []).filter(
-    i => (i.email || '').toLowerCase() !== userEmail
-  );
+  const updatedMembers = [...members, newMember];
+  await updateDoc(sessionRef, { members: updatedMembers });
 
-  await updateDoc(sessionRef, {
-    members: [...members, newMember],
-    pendingInvites
-  });
+  try {
+    await addNotification(user.uid, {
+      icon: '✅',
+      color: 'green',
+      title: `You joined "${session.teamName}" for the team quiz.`,
+      type: 'team_join',
+      read: false
+    });
+  } catch (err) {
+    console.warn('Could not add join notification.', err);
+  }
 
-  await updateDoc(inviteRef, {
-    status: 'accepted',
-    acceptedAt: serverTimestamp(),
-    acceptedBy: user.uid
-  });
-
-  await addNotification(user.uid, {
-    icon: '✅',
-    color: 'green',
-    title: `You joined "${session.teamName || invite.teamName}" for the team quiz.`,
-    type: 'team_join',
-    read: false
-  });
-
-  return { ...session, members: [...members, newMember], pendingInvites };
+  return { ...session, members: updatedMembers, teamName: session.teamName };
 }

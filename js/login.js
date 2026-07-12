@@ -1,3 +1,5 @@
+// Login and signup
+
 import {
   getAuth,
   onAuthStateChanged,
@@ -12,6 +14,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { auth, upsertUserRecord } from './firebase.js';
 
+// Phone format (+94)
 function normalizePhone(raw) {
   const trimmed = raw.trim();
   let digits = trimmed.replace(/\D/g, '');
@@ -77,23 +80,23 @@ function showError(msg) {
   setTimeout(() => { el.textContent = ''; }, 5000);
 }
 
-const SUN = document.getElementById('theme-icon-sun');
-const MOON = document.getElementById('theme-icon-moon');
+const themeToggle = document.getElementById('theme-toggle');
 
 function applyTheme(dark) {
   document.body.classList.toggle('dark', dark);
-  SUN.style.display = dark ? 'block' : 'none';
-  MOON.style.display = dark ? 'none' : 'block';
+  if (themeToggle) {
+    themeToggle.textContent = dark ? 'Light' : 'Dark';
+  }
   localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
 }
 
 applyTheme(localStorage.getItem('ll_theme') === 'dark');
 
-document.getElementById('theme-toggle').addEventListener('click', () => {
+themeToggle?.addEventListener('click', () => {
   applyTheme(!document.body.classList.contains('dark'));
 });
 
-// Must match Firebase Console → Authentication → Phone → test numbers
+// Firebase test phone numbers
 const TEST_PHONES = {
   '+94786360508': '123456',
 };

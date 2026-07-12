@@ -1,3 +1,5 @@
+// Focus room quiz
+
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { doc, setDoc, onSnapshot, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import {
@@ -5,89 +7,58 @@ import {
   db,
   getQuizQuestions,
   saveQuizResult,
-  sendTeamInviteRequest,
-  acceptTeamInvite,
-  FOCUS_ROOM_MAX_TEAM
+  joinTeamSession,
+  FOCUS_ROOM_MAX_TEAM,
+  buildTeamJoinUrl
 } from './firebase.js';
 
+// Page state
 let currentUser = null;
 let sessionId = null;
 let sessionUnsubscribe = null;
 let currentMode = null;
 let teamName = '';
 let teamMembers = [];
-let pendingInvites = [];
 let questions = [];
 let currentQuestionIndex = 0;
 let userScore = 0;
 let correctCount = 0;
 let timerInterval = null;
 
-const saved = localStorage.getItem('ll_theme');
-const isDark = saved === 'dark';
-document.body.classList.toggle('dark', isDark);
-document.getElementById('theme-icon-sun').style.display = isDark ? 'block' : 'none';
-document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'block';
-document.getElementById('theme-toggle').addEventListener('click', () => {
-  const dark = document.body.classList.toggle('dark');
-  document.getElementById('theme-icon-sun').style.display = dark ? 'block' : 'none';
-  document.getElementById('theme-icon-moon').style.display = dark ? 'none' : 'block';
-  localStorage.setItem('ll_theme', dark ? 'dark' : 'light');
+// Theme
+const themeToggle = document.getElementById('theme-toggle');
+const savedTheme = localStorage.getItem('ll_theme');
+const isDarkTheme = savedTheme === 'dark';
+document.body.classList.toggle('dark', isDarkTheme);
+if (themeToggle) {
+  themeToggle.textContent = isDarkTheme ? 'Light' : 'Dark';
+}
+
+themeToggle?.addEventListener('click', function () {
+  const isDark = document.body.classList.toggle('dark');
+  themeToggle.textContent = isDark ? 'Light' : 'Dark';
+  localStorage.setItem('ll_theme', isDark ? 'dark' : 'light');
 });
 
-function hostName() {
-  return currentUser.displayName || currentUser.email?.split('@')[0] || 'Host';
-}
-
-async function initAuth() {
-  await auth.authStateReady();
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = 'login.html';
-      return;
-    }
-    currentUser = user;
-    const photoURL = user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email)}&backgroundColor=111111&textColor=ffffff`;
-    document.getElementById('nav-avatar').src = photoURL;
-    document.getElementById('nav-username').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profile';
-
-    try {
-      await loadQuestionsFromDatabase();
-    } catch (err) {
-      console.warn('Could not load quiz questions from Firestore.', err);
-    }
-
-    await handleJoinFromUrl();
-  });
-}
-
-async function handleJoinFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const joinSession = params.get('join');
-  const inviteId = params.get('invite');
-  if (!joinSession || !inviteId) return;
-
-  try {
-    currentMode = 'team';
-    sessionId = joinSession;
-    const session = await acceptTeamInvite({
-      inviteId,
-      sessionId: joinSession,
-      user: currentUser
-    });
-
-    teamName = session.teamName || 'Team';
-    teamMembers = session.members || [];
-    pendingInvites = session.pendingInvites || [];
-
-    window.history.replaceState({}, '', 'focusroom.html');
-    subscribeToSession();
-    showScreen('team-lobby-screen');
-    alert(`You joined "${teamName}"! Waiting for the host to start the quiz.`);
-  } catch (err) {
-    alert(err.message || 'Could not join team from invite link.');
-    window.history.replaceState({}, '', 'focusroom.html');
+function setNavAvatarInitial(name) {
+  const el = document.getElementById('nav-avatar');
+  if (el) {
+    el.textContent = String(name || 'U').charAt(0).toUpperCase();
   }
+}
+
+function hostName() {
+  if (currentUser.displayName) return currentUser.displayName;
+  if (currentUser.email) return currentUser.email.split('@')[0];
+  return 'Host';
+}
+
+function showScreen(screenId) {
+  const screenIds = ['mode-selection-screen', 'team-setup-screen', 'team-lobby-screen', 'quiz-screen'];
+  for (let i = 0; i < screenIds.length; i++) {
+    document.getElementById(screenIds[i]).classList.add('hidden');
+  }
+  document.getElementById(screenId).classList.remove('hidden');
 }
 
 async function loadQuestionsFromDatabase() {
@@ -100,38 +71,122 @@ async function loadQuestionsFromDatabase() {
   return questions;
 }
 
-document.getElementById('individual-mode-btn').addEventListener('click', async () => {
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  const input = document.createElement('textarea');
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand('copy');
+  document.body.removeChild(input);
+  return Promise.resolve();
+}
+
+async function initAuth() {
+  await auth.authStateReady();
+
+  onAuthStateChanged(auth, async function (user) {
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    currentUser = user;
+
+    setNavAvatarInitial(user.displayName || user.email || 'User');
+
+    if (user.displayName) {
+      document.getElementById('nav-username').textContent = user.displayName.split(' ')[0];
+    } else {
+      document.getElementById('nav-username').textContent = 'Profile';
+    }
+
+    try {
+      await loadQuestionsFromDatabase();
+    } catch (err) {
+      console.warn('Could not load quiz questions from Firestore.', err);
+    }
+
+    await handleJoinFromUrl();
+  });
+}
+
+// Join from shared link
+async function handleJoinFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const joinSession = params.get('join');
+  if (!joinSession) return;
+
+  try {
+    currentMode = 'team';
+    sessionId = joinSession;
+
+    const session = await joinTeamSession({
+      sessionId: joinSession,
+      user: currentUser
+    });
+
+    teamName = session.teamName || 'Team';
+    teamMembers = session.members || [];
+
+    window.history.replaceState({}, '', 'focusroom.html');
+    subscribeToSession();
+    showScreen('team-lobby-screen');
+    alert('You joined "' + teamName + '"! Waiting for the host to start the quiz.');
+  } catch (err) {
+    alert(err.message || 'Could not join team.');
+    window.history.replaceState({}, '', 'focusroom.html');
+  }
+}
+
+// Mode buttons
+document.getElementById('individual-mode-btn').addEventListener('click', async function () {
   await loadQuestionsFromDatabase();
-  if (!questions.length) {
-    alert('No quiz questions in the database yet.\n\nLog in and open seed.html once to upload questions from data/quiz-questions.json to Firestore.');
+
+  if (questions.length === 0) {
+    alert('No quiz questions in the database yet.\n\nAsk your admin to add questions in Firebase Console (quizSets → default).');
     return;
   }
+
   currentMode = 'individual';
   startIndividualQuiz();
 });
 
-document.getElementById('team-mode-btn').addEventListener('click', async () => {
+document.getElementById('team-mode-btn').addEventListener('click', async function () {
   await loadQuestionsFromDatabase();
-  if (!questions.length) {
-    alert('No quiz questions in the database yet.\n\nLog in and open seed.html once to upload questions from data/quiz-questions.json to Firestore.');
+
+  if (questions.length === 0) {
+    alert('No quiz questions in the database yet.\n\nAsk your admin to add questions in Firebase Console (quizSets → default).');
     return;
   }
+
   currentMode = 'team';
   document.getElementById('team-name-input').value = '';
   showScreen('team-setup-screen');
 });
 
-document.getElementById('back-from-setup-btn').addEventListener('click', () => {
+document.getElementById('back-from-setup-btn').addEventListener('click', function () {
   showScreen('mode-selection-screen');
 });
 
-document.getElementById('create-team-btn').addEventListener('click', async () => {
+// Create team
+document.getElementById('create-team-btn').addEventListener('click', async function () {
   const name = document.getElementById('team-name-input').value.trim();
-  if (!name) return alert('Please enter a team name.');
-  if (name.length < 2) return alert('Team name must be at least 2 characters.');
+
+  if (!name) {
+    alert('Please enter a team name.');
+    return;
+  }
+  if (name.length < 2) {
+    alert('Team name must be at least 2 characters.');
+    return;
+  }
 
   teamName = name;
-  sessionId = `team_${Date.now()}_${currentUser.uid.slice(0, 6)}`;
+  sessionId = 'team_' + Date.now() + '_' + currentUser.uid.slice(0, 6);
+
   teamMembers = [{
     uid: currentUser.uid,
     email: currentUser.email,
@@ -140,15 +195,13 @@ document.getElementById('create-team-btn').addEventListener('click', async () =>
     score: 0,
     isHost: true
   }];
-  pendingInvites = [];
 
   try {
     await setDoc(doc(db, 'sessions', sessionId), {
-      teamName,
+      teamName: teamName,
       hostEmail: currentUser.email,
       hostUid: currentUser.uid,
       members: teamMembers,
-      pendingInvites: [],
       createdAt: serverTimestamp(),
       status: 'lobby'
     });
@@ -161,14 +214,16 @@ document.getElementById('create-team-btn').addEventListener('click', async () =>
   }
 });
 
+// Live session updates
 function subscribeToSession() {
   if (sessionUnsubscribe) sessionUnsubscribe();
-  sessionUnsubscribe = onSnapshot(doc(db, 'sessions', sessionId), (docSnap) => {
+
+  sessionUnsubscribe = onSnapshot(doc(db, 'sessions', sessionId), function (docSnap) {
     if (!docSnap.exists()) return;
+
     const data = docSnap.data();
     teamName = data.teamName || teamName;
     teamMembers = data.members || [];
-    pendingInvites = data.pendingInvites || [];
     renderTeamLobby();
 
     if (data.status === 'started') {
@@ -183,57 +238,56 @@ function showTeamLobby() {
   showScreen('team-lobby-screen');
 }
 
+// Render lobby
 function renderTeamLobby() {
   document.getElementById('lobby-team-name').textContent = teamName;
   document.getElementById('lobby-team-title').textContent = teamName;
 
   const list = document.getElementById('member-list');
   list.innerHTML = '';
-  teamMembers.forEach(member => {
+
+  for (let i = 0; i < teamMembers.length; i++) {
+    const member = teamMembers[i];
     const div = document.createElement('div');
     div.className = 'member-item';
+
     const initial = (member.name || '?').charAt(0).toUpperCase();
+    const emailHtml = member.email
+      ? '<span style="display:block;font-size:.72rem;color:var(--muted);font-weight:500;">' + member.email + '</span>'
+      : '';
+    const badgeHtml = member.isHost
+      ? '<span class="member-badge">Host</span>'
+      : '<span class="member-badge" style="background:#e8e8e8;color:#111;">Joined</span>';
+
     div.innerHTML = `
       <div class="member-avatar">${initial}</div>
-      <div class="member-name">${member.name}${member.email ? `<span style="display:block;font-size:.72rem;color:var(--muted);font-weight:500;">${member.email}</span>` : ''}</div>
-      ${member.isHost ? '<span class="member-badge">Host</span>' : '<span class="member-badge" style="background:#e8e8e8;color:#111;">Joined</span>'}
+      <div class="member-name">${member.name}${emailHtml}</div>
+      ${badgeHtml}
     `;
     list.appendChild(div);
-  });
+  }
+
   document.getElementById('member-count').textContent = teamMembers.length;
 
-  const pendingList = document.getElementById('pending-list');
-  const pendingEmpty = document.getElementById('pending-empty');
-  pendingList.querySelectorAll('.pending-item').forEach(el => el.remove());
-
-  if (!pendingInvites.length) {
-    pendingEmpty.style.display = 'block';
-  } else {
-    pendingEmpty.style.display = 'none';
-    pendingInvites.forEach(inv => {
-      const div = document.createElement('div');
-      div.className = 'pending-item';
-      div.innerHTML = `
-        <span>${inv.email}</span>
-        <span class="status">${inv.status === 'accepted' ? 'Joined' : 'Email sent'}</span>
-      `;
-      pendingList.appendChild(div);
-    });
+  const joinUrlInput = document.getElementById('team-join-url');
+  if (joinUrlInput && sessionId) {
+    joinUrlInput.value = buildTeamJoinUrl(sessionId);
   }
-  document.getElementById('pending-count').textContent = pendingInvites.length;
 
-  const slotsUsed = teamMembers.length + pendingInvites.filter(i => i.status !== 'accepted').length;
-  const canInvite = slotsUsed < FOCUS_ROOM_MAX_TEAM;
-  const inviteSection = document.getElementById('invite-section');
-  const emailInput = document.getElementById('invite-email-input');
-  const sendBtn = document.getElementById('send-invite-btn');
+  let isHost = false;
+  for (let m = 0; m < teamMembers.length; m++) {
+    if (teamMembers[m].uid === currentUser.uid && teamMembers[m].isHost) {
+      isHost = true;
+      break;
+    }
+  }
 
-  inviteSection.style.display = canInvite ? 'block' : 'none';
-  if (sendBtn) sendBtn.disabled = !canInvite;
-  if (emailInput) emailInput.disabled = !canInvite;
-
-  const isHost = teamMembers.some(m => m.uid === currentUser?.uid && m.isHost);
   document.getElementById('start-quiz-btn').style.display = isHost ? 'block' : 'none';
+
+  const shareSection = document.getElementById('share-link-section');
+  if (shareSection) {
+    shareSection.style.display = isHost ? 'block' : 'none';
+  }
 }
 
 function startIndividualQuiz() {
@@ -250,58 +304,21 @@ function startIndividualQuiz() {
   startQuiz();
 }
 
-document.getElementById('send-invite-btn').addEventListener('click', async () => {
-  const emailInput = document.getElementById('invite-email-input');
-  const email = emailInput.value.trim();
-  const btn = document.getElementById('send-invite-btn');
-
-  if (!email) return alert('Please enter an email address.');
-  if ((teamMembers.length + pendingInvites.length) >= FOCUS_ROOM_MAX_TEAM) {
-    return alert('Team is full. Maximum 5 members including you.');
-  }
-  if (email.toLowerCase() === (currentUser.email || '').toLowerCase()) {
-    return alert('You are already on the team as host.');
-  }
-  if (teamMembers.some(m => (m.email || '').toLowerCase() === email.toLowerCase())) {
-    return alert('This person is already on the team.');
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
+document.getElementById('copy-join-link-btn').addEventListener('click', async function () {
+  const btn = document.getElementById('copy-join-link-btn');
+  const url = document.getElementById('team-join-url').value;
+  if (!url) return;
 
   try {
-    const result = await sendTeamInviteRequest({
-      sessionId,
-      teamName,
-      inviteeEmail: email,
-      hostUid: currentUser.uid,
-      hostName: hostName(),
-      pendingInvites
-    });
-
-    pendingInvites = [
-      ...pendingInvites,
-      { email: result.email, inviteId: result.inviteId, status: 'pending', sentAt: Date.now() }
-    ];
-
-    await updateDoc(doc(db, 'sessions', sessionId), { pendingInvites });
-
-    emailInput.value = '';
-    alert(`Request sent! An email was sent to ${result.email} with a join link.`);
+    await copyText(url);
+    btn.textContent = 'Copied!';
+    setTimeout(function () { btn.textContent = 'Copy link'; }, 2000);
   } catch (err) {
-    const msg = err.code === 'permission-denied'
-      ? 'Permission denied. Deploy latest Firestore rules: firebase deploy --only firestore:rules'
-      : (err.message || 'Could not send invite.');
-    alert(msg);
-    console.error('Send invite failed:', err);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Send Request';
-    renderTeamLobby();
+    alert('Copy this link:\n\n' + url);
   }
 });
 
-document.getElementById('back-to-mode-btn').addEventListener('click', () => {
+document.getElementById('back-to-mode-btn').addEventListener('click', function () {
   if (sessionUnsubscribe) {
     sessionUnsubscribe();
     sessionUnsubscribe = null;
@@ -310,13 +327,24 @@ document.getElementById('back-to-mode-btn').addEventListener('click', () => {
   showScreen('mode-selection-screen');
 });
 
-document.getElementById('start-quiz-btn').addEventListener('click', async () => {
-  if (!teamMembers.some(m => m.uid === currentUser.uid && m.isHost)) {
-    return alert('Only the host can start the quiz.');
+document.getElementById('start-quiz-btn').addEventListener('click', async function () {
+  let isHost = false;
+  for (let i = 0; i < teamMembers.length; i++) {
+    if (teamMembers[i].uid === currentUser.uid && teamMembers[i].isHost) {
+      isHost = true;
+      break;
+    }
   }
+
+  if (!isHost) {
+    alert('Only the host can start the quiz.');
+    return;
+  }
+
   await updateDoc(doc(db, 'sessions', sessionId), { status: 'started' });
 });
 
+// Quiz
 function startQuiz() {
   currentQuestionIndex = 0;
   userScore = 0;
@@ -328,7 +356,9 @@ function startQuiz() {
 function renderParticipants() {
   const bar = document.getElementById('participants-bar');
   bar.innerHTML = '';
-  teamMembers.forEach(member => {
+
+  for (let i = 0; i < teamMembers.length; i++) {
+    const member = teamMembers[i];
     const chip = document.createElement('div');
     chip.className = 'participant-chip';
     chip.innerHTML = `
@@ -337,11 +367,12 @@ function renderParticipants() {
       <span class="score">${member.score}</span>
     `;
     bar.appendChild(chip);
-  });
+  }
 }
 
 function showQuestion() {
   const q = questions[currentQuestionIndex];
+
   document.getElementById('current-question-num').textContent = currentQuestionIndex + 1;
   document.getElementById('total-questions').textContent = questions.length;
   document.getElementById('q-num').textContent = currentQuestionIndex + 1;
@@ -349,51 +380,66 @@ function showQuestion() {
 
   const grid = document.getElementById('answers-grid');
   grid.innerHTML = '';
-  q.answers.forEach((answer, idx) => {
+
+  for (let i = 0; i < q.answers.length; i++) {
+    const answer = q.answers[i];
     const div = document.createElement('div');
     div.className = 'answer-option';
     div.textContent = answer;
-    div.addEventListener('click', () => selectAnswer(idx));
-    grid.appendChild(div);
-  });
 
-  document.getElementById('next-question-btn').style.display = 'none';
-  document.getElementById('finish-quiz-btn').style.display = 'none';
+    div.addEventListener('click', function () {
+      selectAnswer(i);
+    });
+
+    grid.appendChild(div);
+  }
+
+  document.getElementById('next-question-btn').classList.add('hidden');
+  document.getElementById('finish-quiz-btn').classList.add('hidden');
   startTimer();
 }
 
 function selectAnswer(selectedIdx) {
   clearInterval(timerInterval);
+
   const q = questions[currentQuestionIndex];
   const options = document.querySelectorAll('.answer-option');
 
-  options.forEach((opt, idx) => {
-    opt.style.pointerEvents = 'none';
-    if (idx === q.correct) opt.classList.add('correct');
-    else if (idx === selectedIdx) opt.classList.add('incorrect');
-  });
+  for (let i = 0; i < options.length; i++) {
+    options[i].style.pointerEvents = 'none';
+    if (i === q.correct) options[i].classList.add('correct');
+    else if (i === selectedIdx) options[i].classList.add('incorrect');
+  }
 
   if (selectedIdx === q.correct) {
     userScore += 10;
     correctCount += 1;
-    const member = teamMembers.find(m => m.uid === currentUser.uid);
-    if (member) member.score = userScore;
+
+    for (let j = 0; j < teamMembers.length; j++) {
+      if (teamMembers[j].uid === currentUser.uid) {
+        teamMembers[j].score = userScore;
+        break;
+      }
+    }
+
     renderParticipants();
   }
 
   if (currentQuestionIndex < questions.length - 1) {
-    document.getElementById('next-question-btn').style.display = 'block';
+    document.getElementById('next-question-btn').classList.remove('hidden');
   } else {
-    document.getElementById('finish-quiz-btn').style.display = 'block';
+    document.getElementById('finish-quiz-btn').classList.remove('hidden');
   }
 }
 
 function startTimer() {
   let time = 30;
   document.getElementById('quiz-timer').textContent = time;
-  timerInterval = setInterval(() => {
+
+  timerInterval = setInterval(function () {
     time--;
     document.getElementById('quiz-timer').textContent = time;
+
     if (time <= 0) {
       clearInterval(timerInterval);
       selectAnswer(-1);
@@ -401,33 +447,46 @@ function startTimer() {
   }, 1000);
 }
 
-document.getElementById('next-question-btn').addEventListener('click', () => {
+document.getElementById('next-question-btn').addEventListener('click', function () {
   currentQuestionIndex++;
   showQuestion();
 });
 
-document.getElementById('finish-quiz-btn').addEventListener('click', async () => {
+document.getElementById('finish-quiz-btn').addEventListener('click', async function () {
   const userName = hostName();
 
   try {
     await saveQuizResult({
       uid: currentUser.uid,
-      userName,
+      userName: userName,
       mode: currentMode,
-      sessionId,
+      sessionId: sessionId,
       score: userScore,
       totalQuestions: questions.length,
-      correctCount
+      correctCount: correctCount
     });
 
     if (currentMode === 'team' && sessionId) {
-      const updatedMembers = teamMembers.map(m =>
-        m.uid === currentUser.uid ? { ...m, score: userScore } : m
-      );
+      const updatedMembers = [];
+      for (let i = 0; i < teamMembers.length; i++) {
+        if (teamMembers[i].uid === currentUser.uid) {
+          updatedMembers.push({
+            uid: teamMembers[i].uid,
+            email: teamMembers[i].email,
+            name: teamMembers[i].name,
+            photoURL: teamMembers[i].photoURL,
+            score: userScore,
+            isHost: teamMembers[i].isHost
+          });
+        } else {
+          updatedMembers.push(teamMembers[i]);
+        }
+      }
+
       await updateDoc(doc(db, 'sessions', sessionId), {
         status: 'finished',
         members: updatedMembers,
-        teamName,
+        teamName: teamName,
         finishedAt: serverTimestamp()
       });
     }
@@ -435,15 +494,8 @@ document.getElementById('finish-quiz-btn').addEventListener('click', async () =>
     console.warn('Could not save quiz result.', err);
   }
 
-  alert(`Quiz completed! Your score: ${userScore}/${questions.length * 10}`);
+  alert('Quiz completed! Your score: ' + userScore + '/' + (questions.length * 10));
   window.location.href = 'index.html#leaderboard';
 });
-
-function showScreen(screenId) {
-  ['mode-selection-screen', 'team-setup-screen', 'team-lobby-screen', 'quiz-screen'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
-  document.getElementById(screenId).classList.remove('hidden');
-}
 
 initAuth();
