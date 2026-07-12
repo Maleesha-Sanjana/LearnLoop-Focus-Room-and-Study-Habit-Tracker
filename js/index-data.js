@@ -144,6 +144,16 @@ function renderTable(container, entries, startRank, isTeam) {
   `;
 }
 
+function showLeaderboardError(message) {
+  const targets = ['lb-individual-podium', 'lb-team-podium'];
+  for (let i = 0; i < targets.length; i++) {
+    const el = document.getElementById(targets[i]);
+    if (el && !el.innerHTML.trim()) {
+      el.innerHTML = `<p class="lb-empty">${message}</p>`;
+    }
+  }
+}
+
 export async function loadLeaderboards() {
   try {
     const individual = await getIndividualLeaderboard(10);
@@ -155,11 +165,20 @@ export async function loadLeaderboards() {
     const teamTable = document.getElementById('lb-team-table');
 
     if (indPodium) renderPodium(indPodium, individual, false);
-    if (indTable) renderTable(indTable, individual, 4, false);
+    if (indTable) {
+      renderTable(indTable, individual, 4, false);
+      indTable.style.opacity = '1';
+      indTable.style.transform = 'none';
+    }
     if (teamPodium) renderPodium(teamPodium, team, true);
-    if (teamTable) renderTable(teamTable, team, 4, true);
+    if (teamTable) {
+      renderTable(teamTable, team, 4, true);
+      teamTable.style.opacity = '1';
+      teamTable.style.transform = 'none';
+    }
   } catch (err) {
     console.warn('Could not load leaderboards', err);
+    showLeaderboardError('Could not load leaderboard data. Please refresh the page.');
   }
 }
 

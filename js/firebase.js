@@ -38,6 +38,97 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
+// Firestore REST fallback (works on GitHub Pages when the SDK is blocked)
+
+function parseRestValue(value) {
+  if (!value || typeof value !== 'object') return null;
+  if (value.stringValue !== undefined) return value.stringValue;
+  if (value.integerValue !== undefined) return parseInt(value.integerValue, 10);
+  if (value.doubleValue !== undefined) return parseFloat(value.doubleValue);
+  if (value.booleanValue !== undefined) return value.booleanValue;
+  if (value.timestampValue !== undefined) return value.timestampValue;
+  if (value.nullValue !== undefined) return null;
+  if (value.arrayValue) {
+    return (value.arrayValue.values || []).map(parseRestValue);
+  }
+  if (value.mapValue) {
+    const obj = {};
+    const fields = value.mapValue.fields || {};
+    for (const key in fields) {
+      obj[key] = parseRestValue(fields[key]);
+    }
+    return obj;
+  }
+  return null;
+}
+
+function parseRestDoc(doc) {
+  const data = {};
+  const fields = doc.fields || {};
+  for (const key in fields) {
+    data[key] = parseRestValue(fields[key]);
+  }
+  const parts = (doc.name || '').split('/');
+  return { id: parts[parts.length - 1], ...data };
+}
+
+async function restListCollection(collectionName) {
+  const docs = [];
+  let pageToken = '';
+
+  do {
+    const params = new URLSearchParams({ pageSize: '300' });
+    if (pageToken) params.set('pageToken', pageToken);
+
+    const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${collectionName}?${params}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`REST ${collectionName} failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (data.documents) {
+      for (let i = 0; i < data.documents.length; i++) {
+        docs.push(parseRestDoc(data.documents[i]));
+      }
+    }
+    pageToken = data.nextPageToken || '';
+  } while (pageToken);
+
+  return docs;
+}
+
+async function restGetDocument(collectionName, docId) {
+  const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${collectionName}/${docId}`;
+  const res = await fetch(url);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`REST ${collectionName}/${docId} failed: ${res.status}`);
+  }
+  return parseRestDoc(await res.json());
+}
+
+async function loadCollectionWithFallback(collectionName) {
+  try {
+    const snap = await getDocs(collection(db, collectionName));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (sdkErr) {
+    console.warn(`Firestore SDK read failed for ${collectionName}, using REST fallback.`, sdkErr);
+    return restListCollection(collectionName);
+  }
+}
+
+async function loadDocumentWithFallback(collectionName, docId) {
+  try {
+    const snap = await getDoc(doc(db, collectionName, docId));
+    if (snap.exists()) return snap.data();
+    return null;
+  } catch (sdkErr) {
+    console.warn(`Firestore SDK read failed for ${collectionName}/${docId}, using REST fallback.`, sdkErr);
+    return restGetDocument(collectionName, docId);
+  }
+}
+
 // Constants
 
 export const SUBJECTS_POOL = ['Java', 'React', 'Database', 'Networking', 'Algorithms', 'Machine Learning', 'System Design'];
@@ -482,11 +573,11 @@ export async function saveQuizResult({ uid, userName, mode, sessionId, score, to
 
 // Leaderboards
 export async function getIndividualLeaderboard(max = 10) {
-  const snap = await getDocs(collection(db, 'quizResults'));
+  const rows = await loadCollectionWithFallback('quizResults');
   const byUser = {};
 
-  for (const d of snap.docs) {
-    const r = d.data();
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
     const key = r.uid;
     if (!key) continue;
 
@@ -513,11 +604,25 @@ export async function getIndividualLeaderboard(max = 10) {
 
 
 export async function getTeamLeaderboard(max = 10) {
-  const snap = await getDocs(collection(db, 'sessions'));
+  let rows = [];
+
+  try {
+    const snap = await getDocs(collection(db, 'sessions'));
+    rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (sdkErr) {
+    console.warn('Firestore SDK read failed for sessions, using REST fallback.', sdkErr);
+    try {
+      rows = await restListCollection('sessions');
+    } catch (restErr) {
+      console.warn('Could not load team leaderboard.', restErr);
+      return [];
+    }
+  }
+
   const teams = [];
 
-  for (const d of snap.docs) {
-    const s = d.data();
+  for (let i = 0; i < rows.length; i++) {
+    const s = rows[i];
     if (s.status !== 'finished' || !s.members?.length) continue;
 
     let teamScore = 0;
@@ -539,9 +644,12 @@ export async function getTeamLeaderboard(max = 10) {
 // Platform stats
 
 export async function getPlatformStats() {
-  const ref = doc(db, 'platformStats', 'global');
-  const snap = await getDoc(ref);
-  if (snap.exists()) return snap.data();
+  const cached = await loadDocumentWithFallback('platformStats', 'global');
+  if (cached) return cached;
+
+  if (!auth.currentUser) {
+    return { studentCount: 0, sessionCount: 0, goalsCompletedCount: 0 };
+  }
 
   const usersSnap = await getDocs(collection(db, 'users'));
   let goalsCompleted = 0;
@@ -556,7 +664,7 @@ export async function getPlatformStats() {
   }
 
   const stats = { studentCount: usersSnap.size, sessionCount, goalsCompletedCount: goalsCompleted };
-  await setDoc(ref, { ...stats, updatedAt: serverTimestamp() });
+  await setDoc(doc(db, 'platformStats', 'global'), { ...stats, updatedAt: serverTimestamp() });
   return stats;
 }
 
@@ -570,8 +678,8 @@ export async function incrementPlatformStats(field) {
 // Testimonials
 
 export async function loadTestimonials() {
-  const snap = await getDocs(collection(db, 'testimonials'));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const rows = await loadCollectionWithFallback('testimonials');
+  return rows;
 }
 
 // Chat
