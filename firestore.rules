@@ -57,6 +57,7 @@ service cloud.firestore {
     }
 
     match /sessions/{sessionId} {
+      allow read: if resource.data.status == 'finished';
       allow read, write: if isSignedIn();
     }
 

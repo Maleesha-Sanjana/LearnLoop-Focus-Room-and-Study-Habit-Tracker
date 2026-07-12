@@ -65,7 +65,7 @@ for (let i = 0; i < sections.length; i++) {
 
 // Scroll animations
 const revealElements = document.querySelectorAll(
-  '.feat-card, .tcard, .flow-card, .extra-card, .preview-wrap, .stats-big, .lb-table, .lb-podium-card'
+  '.feat-card, .tcard, .flow-card, .extra-card, .preview-wrap, .stats-big, .lb-podium-card'
 );
 
 const revealObserver = new IntersectionObserver(function (entries) {
