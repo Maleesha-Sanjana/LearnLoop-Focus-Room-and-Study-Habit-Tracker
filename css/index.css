@@ -9,6 +9,12 @@
 html {
   scroll-behavior: smooth;
 }
+#stats,
+#features,
+#leaderboard,
+#reviews {
+  scroll-margin-top: 96px;
+}
 body {
   font-family:
     Inter,

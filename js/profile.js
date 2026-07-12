@@ -14,16 +14,10 @@ import {
   getLearnerSettings,
   saveLearnerSettings,
   loadAppConfig,
-  saveMatchmakerPreferences,
   createGoal,
   updateGoal,
   completeGoal,
   unlockAchievement,
-  findStudyBuddies,
-  addNotification,
-  subscribeChatMessages,
-  sendChatMessage as postChatMessage,
-  chatIdFor,
   logStudySession,
   subscribeGoals,
   subscribeActivities,
@@ -35,9 +29,6 @@ import {
 // State
 
 let selectedSubjects = [];
-let matchmakerSearchSubjects = [];
-let currentChatBuddy = null;
-let chatUnsubscribe = null;
 let currentUid = null;
 const firestoreUnsubs = [];
 
@@ -46,7 +37,6 @@ let presetAvatars = [];
 let badgeDefinitions = BADGE_DEFINITIONS;
 
 let goalsState = [];
-let buddiesList = [];
 let recentActivities = [];
 let sharedResources = [];
 let unlockedBadges = new Set();
@@ -92,13 +82,8 @@ async function loadProfileForUser(user) {
   }
 
   selectedSubjects = window.userProfile.subjects?.length ? [...window.userProfile.subjects] : [];
-  matchmakerSearchSubjects = window.userProfile.matchmakerSearchSubjects?.length
-    ? [...window.userProfile.matchmakerSearchSubjects]
-    : [...(defaultProfile(null).matchmakerSearchSubjects || [])];
 
-  applyPreferencesToUI();
   setupFirestoreListeners(user.uid);
-  await filterBuddies();
 }
 
 function setupFirestoreListeners(uid) {
@@ -159,17 +144,6 @@ document.getElementById('nav-logout-btn')?.addEventListener('click', async funct
 });
 
 // UI
-
-function applyPreferencesToUI() {
-  const p = window.userProfile;
-  const weekdays = document.getElementById('avail-weekdays');
-  const weekends = document.getElementById('avail-weekends');
-
-  if (weekdays) weekdays.checked = p.availWeekdays !== false;
-  if (weekends) weekends.checked = p.availWeekends !== false;
-
-  renderMatchmakerSubjects();
-}
 
 function renderProfileUI() {
   if (!window.userProfile) return;
@@ -366,123 +340,6 @@ window.addGoalSubmit = async function () {
   }
 };
 
-// Chat
-
-window.openChatModal = function (buddyUid) {
-  const buddy = buddiesList.find(b => b.uid === buddyUid);
-  if (!buddy || !currentUid) return;
-
-  if (chatUnsubscribe) {
-    chatUnsubscribe();
-    chatUnsubscribe = null;
-  }
-
-  currentChatBuddy = buddy;
-  document.getElementById('chat-modal-title').innerText = `Chatting with ${buddy.name}`;
-  document.getElementById('chat-modal-status').innerText = buddy.status;
-  document.getElementById('chat-modal-avatar').innerText = buddy.avatar;
-
-  const container = document.getElementById('chat-messages-container');
-  container.innerHTML = '<p class="text-xs text-[#888] text-center py-4">Loading messages...</p>';
-
-  const chatId = chatIdFor(currentUid, buddy.uid);
-  chatUnsubscribe = subscribeChatMessages(chatId, function (messages) {
-    if (!messages.length) {
-      container.innerHTML = '<p class="text-xs text-[#888] text-center py-4">No messages yet. Say hello!</p>';
-      return;
-    }
-
-    let html = '';
-    for (let i = 0; i < messages.length; i++) {
-      const m = messages[i];
-      const isMe = m.senderUid === currentUid;
-      if (isMe) {
-        html += `<div class="flex flex-col items-end"><span class="text-[#888] text-[10px] mb-0.5">You</span><div class="ll-btn-primary p-2.5 rounded-2xl rounded-tr-none inline-block max-w-[80%] text-right">${escapeHtml(m.text)}</div></div>`;
-      } else {
-        html += `<div class="flex flex-col"><span class="text-[#111] dark:text-[#f0f0f0] font-bold text-[10px] mb-0.5">${escapeHtml(m.senderName)}</span><div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] p-2.5 rounded-2xl rounded-tl-none inline-block max-w-[80%]">${escapeHtml(m.text)}</div></div>`;
-      }
-    }
-    container.innerHTML = html;
-    container.scrollTop = container.scrollHeight;
-  });
-
-  document.getElementById('chat-modal').classList.remove('hidden');
-};
-
-window.closeChatModal = function () {
-  document.getElementById('chat-modal').classList.add('hidden');
-  if (chatUnsubscribe) {
-    chatUnsubscribe();
-    chatUnsubscribe = null;
-  }
-  currentChatBuddy = null;
-};
-
-window.handleChatSubmit = function (e) {
-  if (e.key === 'Enter') window.sendChatMessage();
-};
-
-window.sendChatMessage = async function () {
-  const input = document.getElementById('chat-text-input');
-  const msgText = input.value.trim();
-  if (!msgText || !currentChatBuddy || !currentUid) return;
-
-  input.value = '';
-  try {
-    const chatId = chatIdFor(currentUid, currentChatBuddy.uid);
-    await postChatMessage(chatId, currentUid, window.userProfile.name, msgText);
-  } catch (err) {
-    showToast('Could not send message.', true);
-    console.warn(err);
-  }
-};
-
-// Buddies
-
-async function persistMatchmakerPreferences() {
-  if (!currentUid) return;
-
-  const prefs = {
-    matchmakerSearchSubjects: [...matchmakerSearchSubjects],
-    availWeekdays: document.getElementById('avail-weekdays')?.checked ?? true,
-    availWeekends: document.getElementById('avail-weekends')?.checked ?? true
-  };
-
-  window.userProfile = { ...window.userProfile, ...prefs };
-
-  try {
-    await saveMatchmakerPreferences(currentUid, prefs);
-  } catch (err) {
-    console.warn('Could not save matchmaker preferences.', err);
-  }
-}
-
-function renderMatchmakerSubjects() {
-  const container = document.getElementById('matchmaker-subjects');
-  if (!container) return;
-  container.innerHTML = '';
-
-  subjectsPool.forEach(function (subject) {
-    const checked = matchmakerSearchSubjects.includes(subject);
-    const label = document.createElement('label');
-    label.className = 'flex items-center gap-2.5 text-sm font-semibold cursor-pointer';
-    label.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]" data-subject="${subject}"/>
-      <span>${subject}</span>
-    `;
-    label.querySelector('input').addEventListener('change', async function (e) {
-      if (e.target.checked) {
-        if (!matchmakerSearchSubjects.includes(subject)) matchmakerSearchSubjects.push(subject);
-      } else {
-        matchmakerSearchSubjects = matchmakerSearchSubjects.filter(function (s) { return s !== subject; });
-      }
-      await persistMatchmakerPreferences();
-      await filterBuddies();
-    });
-    container.appendChild(label);
-  });
-}
-
 window.toggleSubjectSelected = async function (subject) {
   const index = selectedSubjects.indexOf(subject);
   if (index > -1) selectedSubjects.splice(index, 1);
@@ -497,66 +354,6 @@ window.toggleSubjectSelected = async function (subject) {
     } catch (err) {
       console.warn('Could not save subjects.', err);
     }
-  }
-
-  await filterBuddies();
-};
-
-window.filterBuddies = async function () {
-  const list = document.getElementById('matching-buddies-list');
-  if (!list || !currentUid) return;
-  list.innerHTML = '<p class="col-span-2 text-center py-4 text-xs text-[#888]">Searching for study buddies...</p>';
-
-  const searchSubjects = [...matchmakerSearchSubjects];
-
-  try {
-    buddiesList = await findStudyBuddies(currentUid, searchSubjects);
-  } catch (err) {
-    buddiesList = [];
-    console.warn('Could not load buddies.', err);
-  }
-
-  list.innerHTML = '';
-  if (!buddiesList.length) {
-    list.innerHTML =
-      '<div class="col-span-2 text-center py-4 text-xs text-slate-400 dark:text-zinc-500 italic">No matches found yet. Invite friends to sign up!</div>';
-    return;
-  }
-
-  buddiesList.forEach(function (buddy) {
-    list.insertAdjacentHTML('beforeend', `
-      <div class="flex items-center justify-between p-3.5 bg-[#f5f5f5] dark:bg-[#1a1a1a] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-2xl">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-[#111] dark:bg-[#f0f0f0] text-white dark:text-[#111] flex items-center justify-center font-bold text-xs">${buddy.avatar}</div>
-          <div>
-            <p class="text-xs font-bold text-[#111] dark:text-[#f0f0f0]">${escapeHtml(buddy.name)}</p>
-            <p class="text-[9px] text-[#888] dark:text-[#666] font-semibold">${escapeHtml(buddy.subjects.join(', ') || 'General')}</p>
-          </div>
-        </div>
-        <div class="flex gap-1">
-          <button onclick="openChatModal('${buddy.uid}')" class="text-[10px] bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] px-2.5 py-1.5 rounded-lg hover:bg-[#e8e8e8] font-bold transition">Message</button>
-          <button onclick="sendFocusCall('${buddy.uid}')" class="text-[10px] bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] px-2.5 py-1.5 rounded-lg hover:bg-[#f5f5f5] dark:hover:bg-[#1e1e1e] font-bold shadow-sm transition">Invite Focus</button>
-        </div>
-      </div>
-    `);
-  });
-};
-
-window.sendFocusCall = async function (buddyUid) {
-  const buddy = buddiesList.find(b => b.uid === buddyUid);
-  if (!buddy || !currentUid) return;
-
-  try {
-    await addNotification(buddy.uid, {
-      icon: '👥',
-      color: 'blue',
-      title: `${window.userProfile.name} invited you to a Focus Room session.`,
-      type: 'invite',
-      read: false
-    });
-    showToast(`Sent Focus Room invite to ${buddy.name}!`);
-  } catch (err) {
-    showToast('Could not send invite.', true);
   }
 };
 
@@ -775,15 +572,5 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-function initPage() {
-  ['avail-weekdays', 'avail-weekends'].forEach(function (id) {
-    document.getElementById(id)?.addEventListener('change', async function () {
-      await persistMatchmakerPreferences();
-      await filterBuddies();
-    });
-  });
-}
-
 initTheme();
-initPage();
 initAuth();

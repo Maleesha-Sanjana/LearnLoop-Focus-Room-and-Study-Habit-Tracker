@@ -76,7 +76,6 @@
         <div>
           <div class="flex flex-wrap items-center gap-2.5 justify-center md:justify-start">
             <h1 id="profile-name" class="text-2xl md:text-3xl font-extrabold tracking-tight">Learner</h1>
-            <span class="px-2.5 py-0.5 bg-[#f5f5f5] dark:bg-[#1e1e1e] text-[#111] dark:text-[#f0f0f0] text-xs font-bold rounded-md">Pro Study Companion</span>
           </div>
           <p id="profile-headline" class="text-[#888] dark:text-[#666] font-semibold mt-1">Student</p>
           <p id="profile-institution" class="text-[#888] dark:text-[#555] text-sm flex items-center gap-1.5 justify-center md:justify-start mt-1">
@@ -116,29 +115,6 @@
         <div class="ll-card border rounded-3xl p-6 shadow-sm">
           <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold tracking-tight flex items-center gap-2"><span>🎯</span> Current Goals</h2><button onclick="openAddGoalModal()" class="text-xs font-bold text-[#111] dark:text-[#f0f0f0] hover:underline">+ Create Goal</button></div>
           <div id="goals-list" class="space-y-4"></div>
-        </div>
-        <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm">
-          <div class="border-b border-slate-100 dark:border-zinc-800 pb-4 mb-4">
-            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2"><span>🤝</span> Study Buddy Matchmaker</h2>
-            <p class="text-slate-500 dark:text-zinc-400 text-sm mt-1">Configure subjects and availability. LearnLoop matches you with active peers!</p>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-2 tracking-wider">Subjects of interest:</span>
-              <div class="space-y-2" id="matchmaker-subjects"></div>
-            </div>
-            <div>
-              <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-2 tracking-wider">My Weekly Availability:</span>
-              <div class="space-y-2">
-                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer"><input type="checkbox" checked id="avail-weekdays" class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]"/><span>Weekdays (7pm - 10pm)</span></label>
-                <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer"><input type="checkbox" checked id="avail-weekends" class="w-4 h-4 rounded accent-[#111] dark:accent-[#f0f0f0]"/><span>Weekends (All Day)</span></label>
-              </div>
-            </div>
-          </div>
-          <div class="border-t border-slate-100 dark:border-zinc-800 pt-4">
-            <span class="text-xs font-bold uppercase text-slate-400 dark:text-zinc-500 block mb-3 tracking-wider">Best Matching Buddies Online Now:</span>
-            <div id="matching-buddies-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-          </div>
         </div>
         <div class="bg-white dark:bg-[#141414] border border-[#e8e8e8] dark:border-[#2a2a2a] rounded-3xl p-6 shadow-sm">
           <h2 class="text-lg font-bold tracking-tight mb-4 flex items-center gap-2"><span>🕒</span> Recent Activity Stream</h2>
@@ -221,21 +197,6 @@
       <div><label class="block text-xs font-bold mb-1 text-slate-600 dark:text-slate-400">Goal Name</label><input type="text" id="new-goal-title" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none text-slate-900 dark:text-white" placeholder="e.g. Master Binary Search Trees"/></div>
       <div><label class="block text-xs font-bold mb-1 text-slate-600 dark:text-slate-400">Starting Progress (%)</label><input type="number" min="0" max="100" id="new-goal-progress" class="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none text-slate-900 dark:text-white" value="0"/></div>
       <button onclick="addGoalSubmit()" class="w-full ll-btn-primary font-bold py-2.5 rounded-xl transition text-sm">Add Goal</button>
-    </div>
-  </div>
-</div>
-
-<!-- Chat modal -->
-<div id="chat-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-  <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 max-w-md w-full rounded-3xl overflow-hidden shadow-2xl relative flex flex-col h-[500px]">
-    <div class="ll-btn-primary p-4 flex items-center justify-between">
-      <div class="flex items-center gap-3"><div id="chat-modal-avatar" class="w-10 h-10 rounded-full bg-[#333] dark:bg-[#f0f0f0] dark:text-[#111] flex items-center justify-center font-bold text-sm">C</div><div><h4 id="chat-modal-title" class="font-bold text-sm">Chatting with Buddy</h4><span id="chat-modal-status" class="text-[10px] opacity-70 block">Online</span></div></div>
-      <button onclick="closeChatModal()" class="text-white hover:text-slate-200 text-xl font-bold">&times;</button>
-    </div>
-    <div id="chat-messages-container" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 dark:bg-zinc-950/40 text-xs"></div>
-    <div class="p-3 border-t border-slate-200 dark:border-zinc-800 flex gap-2 bg-white dark:bg-zinc-900">
-      <input type="text" id="chat-text-input" onkeydown="handleChatSubmit(event)" class="flex-grow bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700 rounded-xl px-3 py-2 text-xs focus:outline-none text-slate-900 dark:text-white" placeholder="Type a message..."/>
-      <button onclick="sendChatMessage()" class="ll-btn-primary font-bold px-4 py-2 rounded-xl transition text-xs">Send</button>
     </div>
   </div>
 </div>

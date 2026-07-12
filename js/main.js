@@ -216,12 +216,15 @@ for (let i = 0; i < lbTabs.length; i++) {
   });
 }
 
-// Open leaderboard from URL hash
-if (window.location.hash === '#leaderboard') {
-  const lbSection = document.getElementById('leaderboard');
-  if (lbSection) {
+// Scroll to section from URL hash
+const navSectionIds = ['stats', 'features', 'leaderboard', 'reviews'];
+const initialHash = window.location.hash.replace('#', '');
+
+if (navSectionIds.includes(initialHash)) {
+  const targetSection = document.getElementById(initialHash);
+  if (targetSection) {
     requestAnimationFrame(function () {
-      const top = lbSection.getBoundingClientRect().top + window.scrollY - 80;
+      const top = targetSection.getBoundingClientRect().top + window.scrollY - 80;
       window.scrollTo({ top: top, behavior: 'smooth' });
     });
   }
